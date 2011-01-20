@@ -1,6 +1,13 @@
 #!/usr/bin/env python
-import sys, sqlite3, Tkinter, ttk, glob
+import sys, sqlite3, Tkinter, ttk, glob, os
 from Tkinter import *
+from datetime import datetime
+import hashlib
+
+import magic
+import binascii
+
+backup_path = "Backup/"
 
 def substWith(text, subst = "-"):
 	if (len(text) == 0):
@@ -37,7 +44,7 @@ def getstring(data, offset):
 def process_mbdb_file(filename):
 	"""Process a MBDB file"""
 	mbdb = {} # Map offset of info in this file => file info
-	data = open(filename).read()
+	data = open(backup_path + filename).read()
 	if data[0:4] != "mbdb": raise Exception("This does not look like an MBDB file")
 	offset = 4
 	offset = offset + 2 # value x05 x00, not sure what this is
@@ -70,7 +77,7 @@ def process_mbdb_file(filename):
 
 def process_mbdx_file(filename):
 	mbdx = {} # Map offset of info in the MBDB file => fileID string
-	data = open(filename).read()
+	data = open(backup_path + filename).read()
 	if data[0:4] != "mbdx": raise Exception("This does not look like an MBDX file")
 	offset = 4
 	offset = offset + 2 # value 0x02 0x00, not sure what this is
@@ -113,6 +120,22 @@ def fileinfo_str(f, verbose=False):
 	for name, value in f['properties'].items(): # extra properties
 		info = info + ' ' + name + '=' + repr(value)
 	return info
+	
+def md5(md5fileName, excludeLine="", includeLine=""):
+	"""Compute md5 hash of the specified file"""
+	m = hashlib.md5()
+	try:
+		fd = open(md5fileName,"rb")
+	except IOError:
+		return "<none>"
+	content = fd.readlines()
+	fd.close()
+	for eachLine in content:
+		if excludeLine and eachLine.startswith(excludeLine):
+			continue
+		m.update(eachLine)
+	m.update(includeLine)
+	return m.hexdigest()
 
 verbose = True
 if __name__ == '__main__':
@@ -190,7 +213,7 @@ if __name__ == '__main__':
 	print "new items: %i" %items
 	
 	root = Tkinter.Tk()
-	root.geometry("%dx%d%+d%+d" % (1000, 600, 0, 0))
+	root.geometry("%dx%d%+d%+d" % (1100, 600, 0, 0))
 	
 	vsb = ttk.Scrollbar(orient="vertical")
 	hsb = ttk.Scrollbar(orient="horizontal")
@@ -244,13 +267,26 @@ if __name__ == '__main__':
 					file_type = str(file[3])
 					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type,str(file_dim)+" b", file_id))
 			
+	def buttonBoxPress(event):
+		print event.widget
+		return "";
 	
-	textarea = Text(root, width=80)
+	buttonbox = Frame(root);
+	w = Button(buttonbox, text="OK", width=10, default=ACTIVE)
+	w.bind("<Button-1>", buttonBoxPress)
+	w.pack()
+	w = Button(buttonbox, text="Cancel", width=10)
+	w.bind("<Button-1>", buttonBoxPress)
+	w.pack()
+	buttonbox.grid(column = 3, row = 0, sticky="ns")
+	
+	textarea = Text(root, width=70)
 	textarea.grid(column=2, row=0, sticky="ns")
 		
 	tree.grid(column=0, row=0, sticky='nswe')
 	vsb.grid(column=1, row=0, sticky='ns')
 	hsb.grid(column=0, row=2, sticky='ew')
+	
 	root.grid_columnconfigure(0, weight=1)
 	root.grid_rowconfigure(0, weight=1)
 	
@@ -271,8 +307,72 @@ if __name__ == '__main__':
 		
 		textarea.delete(1.0, END)
 		textarea.insert(INSERT, "Selezionato elemento: " + item_text + " (id " + str(item_id) + ")")
-	
-	tree.bind("<Double-1>", OnClick)
+		
+		query = "SELECT * FROM indice WHERE id = %s" % item_id
+		cursor.execute(query)
+		data = cursor.fetchone()
+		
+		if (len(data) == 0): return
+		
+		item_permissions = str(data[2])
+		item_userid = str(data[3])
+		item_groupid = str(data[4])
+		item_mtime = str(datetime.fromtimestamp(int(data[6])))
+		item_atime = str(datetime.fromtimestamp(int(data[7])))
+		item_ctime = str(datetime.fromtimestamp(int(data[8])))
+		item_filecode = str(data[9])
+		
+		textarea.insert(INSERT, "\n\nElement type: " + item_type)
+		textarea.insert(INSERT, "\nPermissions: " + item_permissions)
+		textarea.insert(INSERT, "\nUser id: " + item_userid)
+		textarea.insert(INSERT, "\nGroup id: " + item_groupid)
+		textarea.insert(INSERT, "\nLast modify time: " + item_mtime)
+		textarea.insert(INSERT, "\nLast access Time: " + item_atime)
+		textarea.insert(INSERT, "\nCreation time: " + item_ctime)
+		textarea.insert(INSERT, "\nObfuscated file name: " + item_filecode)
+		
+		textarea.insert(INSERT, "\n\nAnalize file: ")
+		
+		item_realpath = backup_path + item_filecode
+		
+		# print File type (from magic numbers)
+		textarea.insert(INSERT, "\nFile tipe (from magic numbers): ")
+		if (os.path.exists(item_realpath)):
+			textarea.insert(INSERT, magic.file(item_realpath))
+		else:
+			textarea.insert(INSERT, "unable to analyze file")
+		
+		# print file MD5 hash
+		textarea.insert(INSERT, "\nFile MD5 hash: ")
+		textarea.insert(INSERT, md5(item_realpath))
+		
+		#print first 50 bytes from file
+		if (os.path.exists(item_realpath)):
+			fh = open(item_realpath, 'rb')
+			text = fh.read(40)
+			textarea.insert(INSERT, "\n\nFirst chars from file: ")
+			textarea.insert(INSERT, "\n" + binascii.b2a_uu(text))
+		
+		#if sqlite3, print tables list
+		if (os.path.exists(item_realpath)):
+			tempdb = sqlite3.connect(item_realpath) 
+			try:
+				tempcur = tempdb.cursor() 
+				tempcur.execute("SELECT name FROM sqlite_master WHERE type=\"table\"")
+				tables_list = tempcur.fetchall();
+				textarea.insert(INSERT, "\n\nTables in database: ")
+				for i in tables_list:
+					textarea.insert(INSERT, "\n- " + str(i[0]));
+				
+					tempcur.execute("SELECT count(*) FROM %s" % str(i[0]));
+					elem_count = tempcur.fetchone()
+					textarea.insert(INSERT, " (%i elements) " % int(elem_count[0]))
+				
+				tempdb.close()		
+			except:
+				tempdb.close()
+
+	tree.bind("<ButtonRelease-1>", OnClick)
 	
 	root.mainloop()
 	
