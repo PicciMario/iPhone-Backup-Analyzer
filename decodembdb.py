@@ -1,5 +1,21 @@
 #!/usr/bin/env python
-import sys, sqlite3
+import sys, sqlite3, Tkinter, ttk, glob
+from Tkinter import *
+
+def substWith(text, subst = "-"):
+	if (len(text) == 0):
+		return subst
+	else:
+		return text
+
+def autoscroll(sbar, first, last):
+    """Hide and show scrollbar as needed."""
+    first, last = float(first), float(last)
+    if first <= 0 and last >= 1:
+        sbar.grid_remove()
+    else:
+        sbar.grid()
+    sbar.set(first, last)
 
 def getint(data, offset, intsize):
 	"""Retrieve an integer (big-endian) and new offset from the current offset"""
@@ -170,6 +186,96 @@ if __name__ == '__main__':
 		items += 1;
 
 	database.commit() # Save our changes
-	database.close() # Close the connection to the database
 	
 	print "new items: %i" %items
+	
+	root = Tkinter.Tk()
+	root.geometry("%dx%d%+d%+d" % (1000, 600, 0, 0))
+	
+	vsb = ttk.Scrollbar(orient="vertical")
+	hsb = ttk.Scrollbar(orient="horizontal")
+	  
+	tree = ttk.Treeview(columns=("type", "size", "id"),
+	    displaycolumns=("size", "id"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
+	    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
+ 	 
+	vsb['command'] = tree.yview
+	hsb['command'] = tree.xview
+
+
+	tree.heading("#0", text="Element description", anchor='w')
+	tree.heading("size", text="File Size", anchor='w')
+	tree.heading("id", text="File ID", anchor='w')
+	tree.grid(column=0, row=0, sticky='nswe')
+	
+	cursor.execute("SELECT DISTINCT(domain_type) FROM indice");
+	domain_types = cursor.fetchall()
+	
+	for domain_type_u in domain_types:
+		domain_type = str(domain_type_u[0])
+		domain_type_index = tree.insert('', 'end', text=domain_type)
+		print "Domain type index: %s" %domain_type_index
+		
+		query = "SELECT DISTINCT(domain) FROM indice WHERE domain_type = \"%s\" ORDER BY domain" % domain_type
+		cursor.execute(query);
+		domain_names = cursor.fetchall()
+		
+		for domain_name_u in domain_names:
+			domain_name = str(domain_name_u[0])
+			
+			domain_name_index = tree.insert(domain_type_index, 'end', text=substWith(domain_name, "<no domain>"))
+			
+			query = "SELECT DISTINCT(file_path) FROM indice WHERE domain_type = \"%s\" AND domain = \"%s\" ORDER BY file_path" %(domain_type, domain_name)
+			cursor.execute(query)
+			paths = cursor.fetchall()
+			
+			for path_u in paths:
+				path = str(path_u[0])
+				path_index = tree.insert(domain_name_index, 'end', text=substWith(path, "/"))
+				
+				query = "SELECT file_name, filelen, id, type FROM indice WHERE domain_type = \"%s\" AND domain = \"%s\" AND file_path = \"%s\" ORDER BY file_name" %(domain_type, domain_name, path)
+				cursor.execute(query)
+				files = cursor.fetchall()
+				
+				for file in files:
+					file_name = str(file[0])
+					file_dim = str(file[1])
+					file_id = int(file[2])
+					file_type = str(file[3])
+					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type,str(file_dim)+" b", file_id))
+			
+	
+	textarea = Text(root, width=80)
+	textarea.grid(column=2, row=0, sticky="ns")
+		
+	tree.grid(column=0, row=0, sticky='nswe')
+	vsb.grid(column=1, row=0, sticky='ns')
+	hsb.grid(column=0, row=2, sticky='ew')
+	root.grid_columnconfigure(0, weight=1)
+	root.grid_rowconfigure(0, weight=1)
+	
+	tree.column("#0", width=300)
+	tree.column("size", width=25)
+	tree.column("id", width=25)	
+	
+	def OnClick(event):
+		if (len(tree.selection()) == 0): return;
+		
+		item = tree.selection()[0]
+		item_text = tree.item(item, "text")
+		item_type = tree.set(item, "type")
+		item_id = tree.set(item, "id")
+		
+		#skip "folders"
+		if (item_type == ""): return;
+		
+		textarea.delete(1.0, END)
+		textarea.insert(INSERT, "Selezionato elemento: " + item_text + " (id " + str(item_id) + ")")
+	
+	tree.bind("<Double-1>", OnClick)
+	
+	root.mainloop()
+	
+	database.close() # Close the connection to the database
+	
+	
