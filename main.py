@@ -133,7 +133,6 @@ if __name__ == '__main__':
 	vsb['command'] = tree.yview
 	hsb['command'] = tree.xview
 
-
 	tree.heading("#0", text="Element description", anchor='w')
 	tree.heading("size", text="File Size", anchor='w')
 	tree.heading("id", text="File ID", anchor='w')
@@ -188,6 +187,11 @@ if __name__ == '__main__':
 	w.pack()
 	buttonbox.grid(column = 3, row = 0, sticky="ns")
 	
+	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
+	tablestree.heading("#0", text="table")
+	tablestree.pack(fill=BOTH, expand=1)
+
+	
 	textarea = Text(root, width=70)
 	textarea.grid(column=2, row=0, sticky="ns")
 		
@@ -202,8 +206,55 @@ if __name__ == '__main__':
 	tree.column("size", width=25)
 	tree.column("id", width=25)	
 	
+	
+	def TablesTreeClick(event):
+	
+		if (len(tablestree.selection()) == 0): return;
+		
+		seltable = tablestree.selection()[0]
+		seltable_dbname = tablestree.set(seltable, "filename")
+		seltable_tablename = tablestree.set(seltable, "tablename")
+		
+		if (os.path.exists(seltable_dbname)):
+			seltabledb = sqlite3.connect(seltable_dbname) 
+			try:
+				seltablecur = seltabledb.cursor() 
+				
+				# clears main text field
+				textarea.delete(1.0, END)
+				
+				# read selected table indexes
+				seltablecur.execute("PRAGMA table_info(%s)" % seltable_tablename)
+				seltable_fields = seltablecur.fetchall();
+				
+				# append table fields to main textares
+				textarea.insert(INSERT, "Table Fields:")
+				for seltable_field in seltable_fields:
+						textarea.insert(INSERT, "\n- ")
+						textarea.insert(INSERT, "%i \"%s\" (%s)" %(seltable_field[0], seltable_field[1], seltable_field[2]))
+				
+				# read all fields from selected table
+				seltablecur.execute("SELECT * FROM %s" % seltable_tablename)
+				seltable_cont = seltablecur.fetchall();
+				
+				# appends records to main text field
+				textarea.insert(INSERT, "\n\nTable Records:")
+				for i in seltable_cont:
+					textarea.insert(INSERT, "\n- " + str(i))
+					
+				seltabledb.close()		
+			except:
+				seltabledb.close()
+
+
+	
 	def OnClick(event):
+	
 		if (len(tree.selection()) == 0): return;
+		
+		# remove everything from tables tree
+		for item in tablestree.get_children():
+			tablestree.delete(item)
 		
 		item = tree.selection()[0]
 		item_text = tree.item(item, "text")
@@ -269,18 +320,24 @@ if __name__ == '__main__':
 				tempcur.execute("SELECT name FROM sqlite_master WHERE type=\"table\"")
 				tables_list = tempcur.fetchall();
 				textarea.insert(INSERT, "\n\nTables in database: ")
-				for i in tables_list:
-					textarea.insert(INSERT, "\n- " + str(i[0]));
 				
-					tempcur.execute("SELECT count(*) FROM %s" % str(i[0]));
+				for i in tables_list:
+					table_name = str(i[0])
+					textarea.insert(INSERT, "\n- " + table_name);
+				
+					tempcur.execute("SELECT count(*) FROM %s" % table_name);
 					elem_count = tempcur.fetchone()
 					textarea.insert(INSERT, " (%i elements) " % int(elem_count[0]))
-				
+					
+					# inserts table into tables tree
+					tablestree.insert('', 'end', text=table_name, values=(item_realpath, table_name))	
+					
 				tempdb.close()		
 			except:
 				tempdb.close()
 
 	tree.bind("<ButtonRelease-1>", OnClick)
+	tablestree.bind("<ButtonRelease-1>", TablesTreeClick)
 	
 	root.mainloop()
 	
