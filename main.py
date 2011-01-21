@@ -54,7 +54,8 @@ if __name__ == '__main__':
 	mbdx = mbdbdecoding.process_mbdx_file(backup_path + "Manifest.mbdx")
 	
 	# prepares DB
-	database = sqlite3.connect('MyDatabase.db') # Create a database file
+	#database = sqlite3.connect('MyDatabase.db') # Create a database file
+	database = sqlite3.connect(':memory:') # Create a database file in memory
 	cursor = database.cursor() # Create a cursor
 	cursor.execute(
 		"CREATE TABLE indice (" + 
@@ -259,6 +260,7 @@ if __name__ == '__main__':
 			except:
 				seltabledb.close()
 
+
 	# Called when an element is clicked in the main tree frame ---------------------------------------------------
 	
 	def OnClick(event):
@@ -318,20 +320,40 @@ if __name__ == '__main__':
 		textarea.insert(INSERT, "\nFile MD5 hash: ")
 		textarea.insert(INSERT, md5(item_realpath))
 		
-		#print first 50 bytes from file
+		#print first 50 bytes from file (ASCII)
 		if (os.path.exists(item_realpath)):
 			fh = open(item_realpath, 'rb')
 			text = fh.read(40)
-			textarea.insert(INSERT, "\n\nFirst chars from file: ")
+			textarea.insert(INSERT, "\n\nFirst HEX values from file: ")
 			textarea.insert(INSERT, "\n" + binascii.b2a_uu(text))
+			fh.close()
+			
+		#print file content (if ASCII file) otherwise only first 50 chars
+		if (os.path.exists(item_realpath)):
+			if (magic.file(item_realpath) == "ASCII text"):
+				fh = open(item_realpath, 'rb')
+				textarea.insert(INSERT, "\nASCII content:\n\n")
+				while 1:
+					line = fh.readline()
+					if not line: break;
+					textarea.insert(INSERT, line)
+				fh.close()	
+			else:
+				fh = open(item_realpath, 'rb')
+				text = fh.read(40)
+				textarea.insert(INSERT, "\nFirst chars from file (string): ")
+				textarea.insert(INSERT, "\n" + str(text))
+				fh.close()						
 		
 		#if sqlite3, print tables list
 		if (os.path.exists(item_realpath)):
 			tempdb = sqlite3.connect(item_realpath) 
+			
 			try:
 				tempcur = tempdb.cursor() 
 				tempcur.execute("SELECT name FROM sqlite_master WHERE type=\"table\"")
 				tables_list = tempcur.fetchall();
+				
 				textarea.insert(INSERT, "\n\nTables in database: ")
 				
 				for i in tables_list:
@@ -346,8 +368,10 @@ if __name__ == '__main__':
 					tablestree.insert('', 'end', text=table_name, values=(item_realpath, table_name))	
 					
 				tempdb.close()		
+				
 			except:
 				tempdb.close()
+
 
 	tree.bind("<ButtonRelease-1>", OnClick)
 	tablestree.bind("<ButtonRelease-1>", TablesTreeClick)
