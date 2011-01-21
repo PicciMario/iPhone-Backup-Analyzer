@@ -11,7 +11,8 @@ import magic
 # mbdbdecoding.py - functions to decode iPhone backup manifest files
 import mbdbdecoding
 
-backup_path = "Backup/"
+# **** TODO: option to set this path from command line
+backup_path = "Backup/" 
 
 def substWith(text, subst = "-"):
 	if (len(text) == 0):
@@ -27,7 +28,6 @@ def autoscroll(sbar, first, last):
     else:
         sbar.grid()
     sbar.set(first, last)
-
 	
 def md5(md5fileName, excludeLine="", includeLine=""):
 	"""Compute md5 hash of the specified file"""
@@ -44,8 +44,11 @@ def md5(md5fileName, excludeLine="", includeLine=""):
 		m.update(eachLine)
 	m.update(includeLine)
 	return m.hexdigest()
+	
+def buttonBoxPress(event):
+	print event.widget
+	return "";
 
-verbose = True
 if __name__ == '__main__':
 	mbdb = mbdbdecoding.process_mbdb_file(backup_path + "Manifest.mbdb")
 	mbdx = mbdbdecoding.process_mbdx_file(backup_path + "Manifest.mbdx")
@@ -72,30 +75,32 @@ if __name__ == '__main__':
 		");"
 	)
 	
+	# count items parsed from Manifest file
 	items = 0;
 	
+	# populates database by parsing manifest file
 	for offset, fileinfo in mbdb.items():
 		if offset in mbdx:
 			fileinfo['fileID'] = mbdx[offset]
 		else:
 			fileinfo['fileID'] = "<nofileID>"
 			print >> sys.stderr, "No fileID found for %s" % fileinfo_str(fileinfo)
-		#print fileinfo_str(fileinfo, verbose)
 		
+		# decoding element type (symlink, file, directory)
 		if (fileinfo['mode'] & 0xE000) == 0xA000: type = 'l' # symlink
 		elif (fileinfo['mode'] & 0xE000) == 0x8000: type = '-' # file
 		elif (fileinfo['mode'] & 0xE000) == 0x4000: type = 'd' # dir
 		
-		#separates domain type (AppDomain, HomeDomain, ...) from domain name
+		# separates domain type (AppDomain, HomeDomain, ...) from domain name
 		[domaintype, sep, domain] = fileinfo['domain'].partition('-');
 		
-		#separates file name from file path
+		# separates file name from file path
 		[filepath, sep, filename] = fileinfo['filename'].rpartition('/')
 		if (type == 'd'):
 			filepath = fileinfo['filename']
 			filename = "";
 		
-		# Insert some people into the table
+		# Insert record in database
 		query = "INSERT INTO indice(type, permissions, userid, groupid, filelen, mtime, atime, ctime, fileid, domain_type, domain, file_path, file_name) VALUES(";
 		query += "'%s'," % type
 		query += "'%s'," % mbdbdecoding.modestr(fileinfo['mode']&0x0FFF)
@@ -111,21 +116,26 @@ if __name__ == '__main__':
 		query += "'%s'," % filepath.replace("'", " ")
 		query += "'%s'" % filename.replace("'", " ")
 		query += ");"
-		#print query
+
 		cursor.execute(query)
 		
 		items += 1;
 
-	database.commit() # Save our changes
-	
+	database.commit() 
+		
 	print "new items: %i" %items
 	
+	# Builds user interface ----------------------------------------------------------------------------------
+	
+	# root window
 	root = Tkinter.Tk()
 	root.geometry("%dx%d%+d%+d" % (1100, 600, 0, 0))
 	
+	# scrollbars for main tree view
 	vsb = ttk.Scrollbar(orient="vertical")
 	hsb = ttk.Scrollbar(orient="horizontal")
 	  
+	# main tree view definition
 	tree = ttk.Treeview(columns=("type", "size", "id"),
 	    displaycolumns=("size", "id"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
 	    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
@@ -138,6 +148,39 @@ if __name__ == '__main__':
 	tree.heading("id", text="File ID", anchor='w')
 	tree.grid(column=0, row=0, sticky='nswe')
 	
+	tree.grid(column=0, row=0, sticky='nswe')
+	vsb.grid(column=1, row=0, sticky='ns')
+	hsb.grid(column=0, row=2, sticky='ew')
+	
+	root.grid_columnconfigure(0, weight=1)
+	root.grid_rowconfigure(0, weight=1)
+	
+	tree.column("#0", width=300)
+	tree.column("size", width=25)
+	tree.column("id", width=25)	
+	
+	# right column
+	buttonbox = Frame(root);
+	w = Button(buttonbox, text="OK", width=10, default=ACTIVE)
+	w.bind("<Button-1>", buttonBoxPress)
+	w.pack()
+	w = Button(buttonbox, text="Cancel", width=10)
+	w.bind("<Button-1>", buttonBoxPress)
+	w.pack()
+	buttonbox.grid(column = 3, row = 0, sticky="ns")
+	
+	# tables tree (in right column)
+	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
+	tablestree.heading("#0", text="table")
+	tablestree.pack(fill=BOTH, expand=1)
+
+	# main textarea
+	textarea = Text(root, width=70)
+	textarea.grid(column=2, row=0, sticky="ns")
+	
+	
+	# populate the main tree frame ----------------------------------------------------------------------------
+		
 	cursor.execute("SELECT DISTINCT(domain_type) FROM indice");
 	domain_types = cursor.fetchall()
 	
@@ -174,38 +217,8 @@ if __name__ == '__main__':
 					file_type = str(file[3])
 					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type,str(file_dim)+" b", file_id))
 			
-	def buttonBoxPress(event):
-		print event.widget
-		return "";
-	
-	buttonbox = Frame(root);
-	w = Button(buttonbox, text="OK", width=10, default=ACTIVE)
-	w.bind("<Button-1>", buttonBoxPress)
-	w.pack()
-	w = Button(buttonbox, text="Cancel", width=10)
-	w.bind("<Button-1>", buttonBoxPress)
-	w.pack()
-	buttonbox.grid(column = 3, row = 0, sticky="ns")
-	
-	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
-	tablestree.heading("#0", text="table")
-	tablestree.pack(fill=BOTH, expand=1)
 
-	
-	textarea = Text(root, width=70)
-	textarea.grid(column=2, row=0, sticky="ns")
-		
-	tree.grid(column=0, row=0, sticky='nswe')
-	vsb.grid(column=1, row=0, sticky='ns')
-	hsb.grid(column=0, row=2, sticky='ew')
-	
-	root.grid_columnconfigure(0, weight=1)
-	root.grid_rowconfigure(0, weight=1)
-	
-	tree.column("#0", width=300)
-	tree.column("size", width=25)
-	tree.column("id", width=25)	
-	
+	# called when an element is clicked in the tables tree frame ------------------------------------------------
 	
 	def TablesTreeClick(event):
 	
@@ -246,7 +259,7 @@ if __name__ == '__main__':
 			except:
 				seltabledb.close()
 
-
+	# Called when an element is clicked in the main tree frame ---------------------------------------------------
 	
 	def OnClick(event):
 	
