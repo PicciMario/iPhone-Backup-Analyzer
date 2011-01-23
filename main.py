@@ -242,19 +242,42 @@ if __name__ == '__main__':
 				seltable_fields = seltablecur.fetchall();
 				
 				# append table fields to main textares
+				seltable_fieldslist = []
 				textarea.insert(INSERT, "Table Fields:")
-				for seltable_field in seltable_fields:
-						textarea.insert(INSERT, "\n- ")
-						textarea.insert(INSERT, "%i \"%s\" (%s)" %(seltable_field[0], seltable_field[1], seltable_field[2]))
+				#for seltable_field in seltable_fields:
+				for i in range(len(seltable_fields)):
+					seltable_field = seltable_fields[i]
+					textarea.insert(INSERT, "\n- ")
+					textarea.insert(INSERT, "%i \"%s\" (%s)" %(seltable_field[0], seltable_field[1], seltable_field[2]))
+					seltable_fieldslist.append(str(seltable_field[1]))
 				
 				# read all fields from selected table
 				seltablecur.execute("SELECT * FROM %s" % seltable_tablename)
 				seltable_cont = seltablecur.fetchall();
 				
-				# appends records to main text field
-				textarea.insert(INSERT, "\n\nTable Records:")
-				for i in seltable_cont:
-					textarea.insert(INSERT, "\n- " + str(i))
+				try:
+				
+					# appends records to main text field
+					textarea.insert(END, "\n\nTable Records:")
+					for seltable_record in seltable_cont:
+						textarea.insert(INSERT, "\n- " + str(seltable_record))
+						
+						for i in range(len(seltable_record)):	
+						
+							import unicodedata
+							try:
+								value = str(seltable_record[i])
+							except:
+								#value = seltable_record[i].encode("utf-8", "replace") + " (decoded unicode)"
+								value = "(wrong unicode string)"
+													
+							textarea.insert(END, "\n- " + seltable_fieldslist[i] + " : " 
+								+ value)
+						
+						textarea.insert(END, "\n---------------------------------------")
+				
+				except:
+					print "Unexpected error:", sys.exc_info()
 					
 				seltabledb.close()		
 			except:
@@ -375,6 +398,17 @@ if __name__ == '__main__':
 
 	tree.bind("<ButtonRelease-1>", OnClick)
 	tablestree.bind("<ButtonRelease-1>", TablesTreeClick)
+	
+	from xml.dom.minidom import *
+	manifest = parse("manifest.plist.txt")
+	document = manifest.getElementsByTagName("plist")
+	basedict = document[0].childNodes[1]
+	nodes = basedict.childNodes
+	for i in range(len(nodes)):
+		node = nodes[i]
+		if (node.nodeType == node.TEXT_NODE): continue
+		if (node.nodeName == "key"):
+			print node.firstChild.toxml()
 	
 	root.mainloop()
 	
