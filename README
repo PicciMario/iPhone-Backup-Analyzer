@@ -1,1 +1,7 @@
 iPhone Backup Decoder and Analyzer
+
+Required:
+
+Python Imaging Library
+download from http://www.pythonware.com/products/pil/
+python setup.py build

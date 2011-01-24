@@ -5,6 +5,8 @@ from datetime import datetime
 import hashlib
 import binascii
 
+photoImages = []
+
 # magic.py - identify file type using magic numbers
 import magic
 
@@ -269,7 +271,7 @@ if __name__ == '__main__':
 					textarea.insert(INSERT, "\n- ")
 					textarea.insert(INSERT, "%i \"%s\" (%s)" %(seltable_field[0], seltable_field[1], seltable_field[2]))
 					seltable_fieldslist.append(str(seltable_field[1]))
-				
+							
 				# read all fields from selected table
 				seltablecur.execute("SELECT * FROM %s" % seltable_tablename)
 				seltable_cont = seltablecur.fetchall();
@@ -278,20 +280,38 @@ if __name__ == '__main__':
 				
 					# appends records to main text field
 					textarea.insert(END, "\n\nTable Records:")
+					
+					del photoImages[:]
+					
 					for seltable_record in seltable_cont:
+
 						textarea.insert(INSERT, "\n- " + str(seltable_record))
 						
 						for i in range(len(seltable_record)):	
 						
-							import unicodedata
+							#import unicodedata
 							try:
 								value = str(seltable_record[i])
 							except:
 								#value = seltable_record[i].encode("utf-8", "replace") + " (decoded unicode)"
 								value = "(wrong unicode string)"
-													
-							textarea.insert(END, "\n- " + seltable_fieldslist[i] + " : " 
-								+ value)
+
+							#maybe an image?
+							if (seltable_fieldslist[i] == "data"):
+							
+								from PIL import Image, ImageTk
+								import StringIO				
+							
+								im = Image.open(StringIO.StringIO(value))
+								tkim = ImageTk.PhotoImage(im)
+								photoImages.append(tkim)
+								textarea.insert(END, "\n- Image data: \n ")
+								textarea.image_create(END, image=tkim)
+
+							else:
+			
+								textarea.insert(END, "\n- " + seltable_fieldslist[i] + " : " 
+									+ value)
 						
 						textarea.insert(END, "\n---------------------------------------")
 				
