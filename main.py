@@ -11,6 +11,9 @@ import magic
 # mbdbdecoding.py - functions to decode iPhone backup manifest files
 import mbdbdecoding
 
+# decodeManifestPlist.py - functions to decode Manifest.plist file
+import decodeManifestPlist
+
 # **** TODO: option to set this path from command line
 backup_path = "Backup/" 
 
@@ -45,9 +48,25 @@ def md5(md5fileName, excludeLine="", includeLine=""):
 	m.update(includeLine)
 	return m.hexdigest()
 	
+# Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
+
 def buttonBoxPress(event):
-	print event.widget
-	return "";
+	print event.widget['text']
+	
+	if (event.widget['text'] == "Manifest.plist"):
+		if (os.path.exists(backup_path + "Manifest.plist")):
+			manifest_tempfile = "temp01"
+			os.system("plutil -convert xml1 -o temp01 " + backup_path + "Manifest.plist")
+		
+			textarea.delete(1.0, END)
+			textarea.insert(END, "Decoding Manifest.plist:\n")
+			textarea.insert(END, decodeManifestPlist.decodeManifestPlist(manifest_tempfile))
+
+			os.remove(manifest_tempfile)		
+
+	return ""
+		
+# MAIN ----------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
 	mbdb = mbdbdecoding.process_mbdb_file(backup_path + "Manifest.mbdb")
@@ -162,7 +181,7 @@ if __name__ == '__main__':
 	
 	# right column
 	buttonbox = Frame(root);
-	w = Button(buttonbox, text="OK", width=10, default=ACTIVE)
+	w = Button(buttonbox, text="Manifest.plist", width=10, default=ACTIVE)
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
 	w = Button(buttonbox, text="Cancel", width=10)
@@ -395,21 +414,11 @@ if __name__ == '__main__':
 			except:
 				tempdb.close()
 
+	# Main ---------------------------------------------------------------------------------------------------
 
 	tree.bind("<ButtonRelease-1>", OnClick)
 	tablestree.bind("<ButtonRelease-1>", TablesTreeClick)
-	
-	from xml.dom.minidom import *
-	manifest = parse("manifest.plist.txt")
-	document = manifest.getElementsByTagName("plist")
-	basedict = document[0].childNodes[1]
-	nodes = basedict.childNodes
-	for i in range(len(nodes)):
-		node = nodes[i]
-		if (node.nodeType == node.TEXT_NODE): continue
-		if (node.nodeName == "key"):
-			print node.firstChild.toxml()
-	
+
 	root.mainloop()
 	
 	database.close() # Close the connection to the database
