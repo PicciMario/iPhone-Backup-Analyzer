@@ -298,15 +298,18 @@ if __name__ == '__main__':
 
 							#maybe an image?
 							if (seltable_fieldslist[i] == "data"):
+								dataMagic = magic.whatis(value)
+								textarea.insert(END, "\n- Binary data: (%s)" %dataMagic)
+								if (dataMagic.partition("/")[0] == "image"):
 							
-								from PIL import Image, ImageTk
-								import StringIO				
-							
-								im = Image.open(StringIO.StringIO(value))
-								tkim = ImageTk.PhotoImage(im)
-								photoImages.append(tkim)
-								textarea.insert(END, "\n- Image data: \n ")
-								textarea.image_create(END, image=tkim)
+									from PIL import Image, ImageTk
+									import StringIO				
+								
+									im = Image.open(StringIO.StringIO(value))
+									tkim = ImageTk.PhotoImage(im)
+									photoImages.append(tkim)
+									textarea.insert(END, "\n ")
+									textarea.image_create(END, image=tkim)
 
 							else:
 			
@@ -406,6 +409,19 @@ if __name__ == '__main__':
 				textarea.insert(INSERT, "\nFirst chars from file (string): ")
 				textarea.insert(INSERT, "\n" + str(text))
 				fh.close()						
+		
+		#if image file:
+		if (os.path.exists(item_realpath)):	
+			if (magic.file(item_realpath).partition("/")[0] == "image"):		
+				from PIL import Image, ImageTk
+				import StringIO				
+			
+				im = Image.open(item_realpath)
+				tkim = ImageTk.PhotoImage(im)
+				photoImages.append(tkim)
+				textarea.insert(END, "\n- Image data: \n ")
+				textarea.image_create(END, image=tkim)
+
 		
 		#if sqlite3, print tables list
 		if (os.path.exists(item_realpath)):
