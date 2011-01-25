@@ -74,23 +74,22 @@ def buttonBoxPress(event):
 		global pattern
 		global searchindex
 		
-		if (pattern != searchbox.get(1.0, END) or searchindex == ""):
+		if (pattern != searchbox.get(1.0, END).strip() or searchindex == ""):
 			searchindex = "1.0";
 		
-		pattern = searchbox.get("1.0", END)
-		if (len(str(pattern).strip()) == 0): return
+		pattern = searchbox.get("1.0", END).strip()
+		if (len(str(pattern)) == 0): return
 		
 		textarea.mark_set("searchLimit", textarea.index("end"))
 		
-		searchindex = textarea.search(pattern, "%s+1c"%(searchindex) , "searchLimit")
+		searchindex = textarea.search("%s"%pattern, "%s+1c"%(searchindex) , "searchLimit", regexp = True, nocase = True)
 		if (searchindex == ""): return
 		
 		textarea.tag_delete("yellow")
 		textarea.tag_configure("yellow",background="#FFFF00")
-		textarea.tag_add("yellow", searchindex, "%s+%sc-1c"%(searchindex, str(len(pattern))))
+		textarea.tag_add("yellow", searchindex, "%s+%sc"%(searchindex, str(len(pattern))))
 		
 		textarea.mark_set("current", searchindex)
-		
 		textarea.yview(searchindex)
 		
 		return
