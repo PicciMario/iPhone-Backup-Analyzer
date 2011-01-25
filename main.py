@@ -1,23 +1,48 @@
 #!/usr/bin/env python
-import sys, sqlite3, Tkinter, ttk, glob, os
+
+'''
+ Analyzer for iPhone backup made by Apple iTunes
+
+ (C)opyright 2010 Mario Piccinelli <mario.piccinelli@gmail.com>
+ Released under MIT licence
+
+'''
+
+# GENERIC IMPORTS --------------------------------------------------------------------------------------
+
+# sqlite3 support library
+import sqlite3
+# system libraries
+import sys, os
+# graphic libraries
 from Tkinter import *
+import Tkinter, ttk
+# datetime used to convert unix timestamps
 from datetime import datetime
+# hashlib used to build md5s of files
 import hashlib
+# binascci used to try to convert binary data in ASCII
 import binascii
 
-photoImages = []
+# APPLICATION FILES IMPORTS -------------------------------------------------------------------------
 
 # magic.py - identify file type using magic numbers
 import magic
-
 # mbdbdecoding.py - functions to decode iPhone backup manifest files
 import mbdbdecoding
-
 # decodeManifestPlist.py - functions to decode Manifest.plist file
 import decodeManifestPlist
 
+# GLOBALS -------------------------------------------------------------------------------------------
+
 # **** TODO: option to set this path from command line
 backup_path = "Backup/" 
+
+# saves references to images in textarea
+# (to keep them alive after callback end)
+photoImages = []
+
+# FUNCTIONS -------------------------------------------------------------------------------------------
 
 def substWith(text, subst = "-"):
 	if (len(text) == 0):
@@ -52,6 +77,7 @@ def md5(md5fileName, excludeLine="", includeLine=""):
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
+# search function globals
 pattern = ""
 searchindex = "1.0"
 
@@ -365,7 +391,6 @@ if __name__ == '__main__':
 				seltabledb.close()		
 			except:
 				seltabledb.close()
-
 
 	# Called when an element is clicked in the main tree frame ---------------------------------------------------
 	
