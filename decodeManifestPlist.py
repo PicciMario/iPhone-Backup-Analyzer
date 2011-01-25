@@ -22,6 +22,9 @@ def printXmlKey(element, level = 0):
 		elif (element.nodeName == "date" or element.nodeName == "string"):
 			text += "\n" + tab + "- " + element.firstChild.toxml()
 		
+		elif (element.nodeName == "integer" or element.nodeName == "real"):
+			text += "\n" + tab + element.firstChild.toxml()
+		
 		elif (element.nodeName == "dict"):
 			#print tab + "- Dictionary"
 			for o in range(len(element.childNodes)):
@@ -38,7 +41,7 @@ def printXmlKey(element, level = 0):
 				text += printXmlKey(child, level + 1)
 		
 		else:
-			text += "\n" + tab + "- unknown data type (%s)" %element.nodeName
+			text += "\n" + tab + "- unknown data type (%s)" %(element.nodeName)
 			
 	return text
 

@@ -23,7 +23,9 @@ import re, struct, string
 __version__ = '0.1'
 
 magic = [
-  [0L, 'string', '=', 'SQLite', 'sqlite file'],
+  [0L, 'string', '=', 'SQLite', 'data/sqlite'],
+  [0L, 'string', '=', 'bplist', 'data/binary_plist'],
+   
   [0L, 'leshort', '=', 1538L, 'application/x-alan-adventure-game'],
   [0L, 'string', '=', 'TADS', 'application/x-tads-game'],
   [0L, 'short', '=', 420L, 'application/x-executable-file'],

@@ -462,7 +462,17 @@ if __name__ == '__main__':
 				photoImages.append(tkim)
 				textarea.insert(END, "\n- Image data: \n ")
 				textarea.image_create(END, image=tkim)
-
+				
+		#if binary plist:
+		if (os.path.exists(item_realpath)):	
+			if (magic.file(item_realpath).partition("/")[2] == "binary_plist"):	
+				manifest_tempfile = "temp01"
+				os.system("plutil -convert xml1 -o temp01 " + item_realpath)
+				
+				textarea.insert(END, "\n\nDecoding Manifest.plist:\n")
+				textarea.insert(END, decodeManifestPlist.decodeManifestPlist(manifest_tempfile))
+	
+				os.remove(manifest_tempfile)	
 		
 		#if sqlite3, print tables list
 		if (os.path.exists(item_realpath)):
