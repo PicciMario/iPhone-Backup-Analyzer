@@ -164,7 +164,8 @@ if __name__ == '__main__':
 		"domain_type VARCHAR(100)," +
 		"domain VARCHAR(100)," +
 		"file_path VARCHAR(100)," +
-		"file_name VARCHAR(100)"
+		"file_name VARCHAR(100)," + 
+		"link_target VARCHAR(100)"
 		");"
 	)
 	
@@ -194,7 +195,7 @@ if __name__ == '__main__':
 			filename = "";
 		
 		# Insert record in database
-		query = "INSERT INTO indice(type, permissions, userid, groupid, filelen, mtime, atime, ctime, fileid, domain_type, domain, file_path, file_name) VALUES(";
+		query = "INSERT INTO indice(type, permissions, userid, groupid, filelen, mtime, atime, ctime, fileid, domain_type, domain, file_path, file_name, link_target) VALUES(";
 		query += "'%s'," % type
 		query += "'%s'," % mbdbdecoding.modestr(fileinfo['mode']&0x0FFF)
 		query += "'%08x'," % fileinfo['userid']
@@ -207,7 +208,8 @@ if __name__ == '__main__':
 		query += "'%s'," % domaintype.replace("'", " ")
 		query += "'%s'," % domain.replace("'", " ")
 		query += "'%s'," % filepath.replace("'", " ")
-		query += "'%s'" % filename.replace("'", " ")
+		query += "'%s'," % filename.replace("'", " ")
+		query += "'%s'" % fileinfo['linktarget']
 		query += ");"
 
 		cursor.execute(query)
@@ -443,6 +445,7 @@ if __name__ == '__main__':
 		item_atime = str(datetime.fromtimestamp(int(data[7])))
 		item_ctime = str(datetime.fromtimestamp(int(data[8])))
 		item_filecode = str(data[9])
+		item_link_target = str(data[14])
 		
 		textarea.insert(INSERT, "\n\nElement type: " + item_type)
 		textarea.insert(INSERT, "\nPermissions: " + item_permissions)
@@ -453,6 +456,17 @@ if __name__ == '__main__':
 		textarea.insert(INSERT, "\nCreation time: " + item_ctime)
 		textarea.insert(INSERT, "\nObfuscated file name: " + item_filecode)
 		
+		# treat sym links
+		if (item_type == "l"):
+			textarea.insert(INSERT, "\n\nThis item is a symbolic link to another file.")
+			textarea.insert(INSERT, "\nLink Target: " + item_link_target)
+			return
+			
+		# treat directories
+		if (item_type == "d"):
+			textarea.insert(INSERT, "\n\nThis item represents a directory.")
+			return
+			
 		textarea.insert(INSERT, "\n\nAnalize file: ")
 		
 		item_realpath = backup_path + item_filecode
@@ -511,7 +525,7 @@ if __name__ == '__main__':
 				manifest_tempfile = "temp01"
 				os.system("plutil -convert xml1 -o temp01 " + item_realpath)
 				
-				textarea.insert(END, "\n\nDecoding Manifest.plist:\n")
+				textarea.insert(END, "\nDecoding binary Plist file:\n")
 				textarea.insert(END, decodeManifestPlist.decodeManifestPlist(manifest_tempfile))
 	
 				os.remove(manifest_tempfile)	
