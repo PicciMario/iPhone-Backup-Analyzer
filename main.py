@@ -52,6 +52,9 @@ def md5(md5fileName, excludeLine="", includeLine=""):
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
+pattern = ""
+searchindex = "1.0"
+
 def buttonBoxPress(event):
 	print event.widget['text']
 	
@@ -65,6 +68,32 @@ def buttonBoxPress(event):
 			textarea.insert(END, decodeManifestPlist.decodeManifestPlist(manifest_tempfile))
 
 			os.remove(manifest_tempfile)		
+	
+	elif (event.widget['text'] == "Search"):
+		
+		global pattern
+		global searchindex
+		
+		if (pattern != searchbox.get(1.0, END) or searchindex == ""):
+			searchindex = "1.0";
+		
+		pattern = searchbox.get("1.0", END)
+		if (len(str(pattern).strip()) == 0): return
+		
+		textarea.mark_set("searchLimit", textarea.index("end"))
+		
+		searchindex = textarea.search(pattern, "%s+1c"%(searchindex) , "searchLimit")
+		if (searchindex == ""): return
+		
+		textarea.tag_delete("yellow")
+		textarea.tag_configure("yellow",background="#FFFF00")
+		textarea.tag_add("yellow", searchindex, "%s+%sc-1c"%(searchindex, str(len(pattern))))
+		
+		textarea.mark_set("current", searchindex)
+		
+		textarea.yview(searchindex)
+		
+		return
 
 	return ""
 		
@@ -183,13 +212,19 @@ if __name__ == '__main__':
 	
 	# right column
 	buttonbox = Frame(root);
-	w = Button(buttonbox, text="Manifest.plist", width=10, default=ACTIVE)
+	
+	w = Button(buttonbox, text="Manifest.plist", width=10)
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
-	w = Button(buttonbox, text="Cancel", width=10)
+	
+	searchbox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2)
+	searchbox.pack()
+	
+	w = Button(buttonbox, text="Search", width=10, default=ACTIVE)
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
-	buttonbox.grid(column = 3, row = 0, sticky="ns")
+	
+	buttonbox.grid(column = 4, row = 0, sticky="ns")
 	
 	# tables tree (in right column)
 	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
@@ -197,8 +232,15 @@ if __name__ == '__main__':
 	tablestree.pack(fill=BOTH, expand=1)
 
 	# main textarea
-	textarea = Text(root, width=70)
+	textarea = Text(root, width=70, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
+	    xscrollcommand=lambda f, l:autoscroll(thsb, f, l))
 	textarea.grid(column=2, row=0, sticky="ns")
+
+	# scrollbars for main tectarea
+	tvsb = ttk.Scrollbar(orient="vertical")
+	thsb = ttk.Scrollbar(orient="horizontal")
+	tvsb.grid(column=3, row=0, sticky='ns')
+	thsb.grid(column=2, row=2, sticky='ew')
 	
 	
 	# populate the main tree frame ----------------------------------------------------------------------------
