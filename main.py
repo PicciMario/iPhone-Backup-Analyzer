@@ -143,15 +143,27 @@ def buttonBoxPress(event):
 		textarea.yview(searchindex)
 
 	return ""
-	
+
+# Called when the "convert from unix timestamp" button is clicked  ------------------------------------
+
 def convertTimeStamp(event):
 	timestamp = timebox.get("1.0", END)
-	print("timestamp: %s"%timestamp)
-	timestamp = int(timestamp) + 978307200 #JAN 1 1970
+	if (timestamp.strip() == ""): return
+	
+	try:
+		timestamp = int(timestamp)
+	except:
+		timebox.config(background="IndianRed1")
+		return
+	
+	timestamp = timestamp + 978307200 #JAN 1 1970
 	convtimestamp = datetime.fromtimestamp(int(timestamp))
 	timebox.delete("1.0", END)
 	timebox.insert("1.0", convtimestamp)
-		
+
+def clearTimeBox(event):
+	timebox.config(background="white")
+	
 # MAIN ----------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
@@ -628,6 +640,8 @@ if __name__ == '__main__':
 
 	tree.bind("<ButtonRelease-1>", OnClick)
 	tablestree.bind("<ButtonRelease-1>", TablesTreeClick)
+	timebox.bind("<Key>", clearTimeBox)
+
 
 	root.mainloop()
 	
