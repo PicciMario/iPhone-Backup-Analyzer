@@ -143,6 +143,14 @@ def buttonBoxPress(event):
 		textarea.yview(searchindex)
 
 	return ""
+	
+def convertTimeStamp(event):
+	timestamp = timebox.get("1.0", END)
+	print("timestamp: %s"%timestamp)
+	timestamp = int(timestamp) + 978307200 #JAN 1 1970
+	convtimestamp = datetime.fromtimestamp(int(timestamp))
+	timebox.delete("1.0", END)
+	timebox.insert("1.0", convtimestamp)
 		
 # MAIN ----------------------------------------------------------------------------------------------------
 
@@ -297,6 +305,14 @@ if __name__ == '__main__':
 	w = Button(buttonbox, text="Search", width=10, default=ACTIVE)
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
+	
+	timebox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2)
+	timebox.pack()
+	
+	w = Button(buttonbox, text="Convert", width=10, default=ACTIVE)
+	w.bind("<Button-1>", convertTimeStamp)
+	w.pack()
+	
 	
 	buttonbox.grid(column = 4, row = 1, sticky="ns", padx=5, pady=5)
 	
