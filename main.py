@@ -41,6 +41,8 @@ from datetime import datetime
 import hashlib
 # binascci used to try to convert binary data in ASCII
 import binascii
+# getopt used to parse command line options
+import getopt
 
 # APPLICATION FILES IMPORTS -------------------------------------------------------------------------
 
@@ -54,7 +56,7 @@ import decodeManifestPlist
 # GLOBALS -------------------------------------------------------------------------------------------
 
 # **** TODO: option to set this path from command line
-backup_path = "Backup/" 
+backup_path = "Backup2/" 
 
 # saves references to images in textarea
 # (to keep them alive after callback end)
@@ -142,11 +144,36 @@ def buttonBoxPress(event):
 # MAIN ----------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
+
+	# input parameters
+	def usage():
+		print "iPBD - iPhone backup decoder."
+		print " -h              : this help";
+		print " -d <dir>        : backup dir (default: " + backup_path + ")";
+
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "hd:")
+	except getopt.GetoptError, err:
+		print str(err)
+		sys.exit(2)
+	
+	for o, a in opts:
+		if o in ("-h"):
+			usage()
+			sys.exit(0)
+		
+		if o in ("-d"):
+			backup_path = a;
+			if (backup_path.strip()[-1] != "/"):
+				backup_path = backup_path + "/"
+
+	
+	# decode Manifest files
 	mbdb = mbdbdecoding.process_mbdb_file(backup_path + "Manifest.mbdb")
 	mbdx = mbdbdecoding.process_mbdx_file(backup_path + "Manifest.mbdx")
 	
 	# prepares DB
-	#database = sqlite3.connect('MyDatabase.db') # Create a database file
+	# database = sqlite3.connect('MyDatabase.db') # Create a database file
 	database = sqlite3.connect(':memory:') # Create a database file in memory
 	cursor = database.cursor() # Create a cursor
 	cursor.execute(
