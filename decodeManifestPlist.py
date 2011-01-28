@@ -11,7 +11,7 @@ def printXmlKey(element, level = 0):
 	if (element.nodeType == Node.TEXT_NODE): return text
 	
 	if (element.nodeName == "key"):
-		text += "\n" + tab + element.firstChild.toxml()
+		text += "\n\n" + tab + element.firstChild.toxml()
 	else:
 		if (element.nodeName == "false"):
 			text += "\n" + tab + "- False"

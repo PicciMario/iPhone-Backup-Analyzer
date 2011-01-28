@@ -44,6 +44,9 @@ import binascii
 # getopt used to parse command line options
 import getopt
 
+from PIL import Image, ImageTk
+import StringIO	
+
 # APPLICATION FILES IMPORTS -------------------------------------------------------------------------
 
 # magic.py - identify file type using magic numbers
@@ -268,21 +271,21 @@ if __name__ == '__main__':
 	tree.heading("#0", text="Element description", anchor='w')
 	tree.heading("size", text="File Size", anchor='w')
 	tree.heading("id", text="File ID", anchor='w')
-	tree.grid(column=0, row=0, sticky='nswe')
+	tree.grid(column=0, row=1, sticky='nswe')
 	
-	tree.grid(column=0, row=0, sticky='nswe')
-	vsb.grid(column=1, row=0, sticky='ns')
-	hsb.grid(column=0, row=2, sticky='ew')
+	tree.grid(column=0, row=1, sticky='nswe')
+	vsb.grid(column=1, row=1, sticky='ns')
+	hsb.grid(column=0, row=3, sticky='ew')
 	
 	root.grid_columnconfigure(0, weight=1)
-	root.grid_rowconfigure(0, weight=1)
+	root.grid_rowconfigure(1, weight=1)
 	
 	tree.column("#0", width=300)
 	tree.column("size", width=25)
 	tree.column("id", width=25)	
 	
 	# right column
-	buttonbox = Frame(root);
+	buttonbox = Frame(root, bd=2, relief=RAISED);
 	
 	w = Button(buttonbox, text="Manifest.plist", width=10)
 	w.bind("<Button-1>", buttonBoxPress)
@@ -295,23 +298,45 @@ if __name__ == '__main__':
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
 	
-	buttonbox.grid(column = 4, row = 0, sticky="ns")
+	buttonbox.grid(column = 4, row = 1, sticky="ns", padx=5, pady=5)
+	
+	# header row
+	headerbox = Frame(root, bd=2, relief=RAISED);
+								
+	im = Image.open("iphone_icon.png")
+	photo = ImageTk.PhotoImage(im)	
+	w = Label(headerbox, image=photo)
+	w.photo = photo
+	w.pack(side=LEFT)	
+	
+	im = Image.open("iphone_icon.png")
+	photo = ImageTk.PhotoImage(im)	
+	w = Label(headerbox, image=photo)
+	w.photo = photo
+	w.pack(side=RIGHT)
+	
+	w = Label(headerbox, text="iPBD - iPhone Backup Decoder\nMario Piccinelli <mario.piccinelli@gmail.com>")
+	w.pack()
+	
+	headerbox.grid(column=0, row=0, sticky='ew', columnspan=6, padx=5, pady=5)
 	
 	# tables tree (in right column)
 	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
-	tablestree.heading("#0", text="table")
+	tablestree.heading("#0", text="Tables")
 	tablestree.pack(fill=BOTH, expand=1)
 
 	# main textarea
 	textarea = Text(root, width=70, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
-	    xscrollcommand=lambda f, l:autoscroll(thsb, f, l))
-	textarea.grid(column=2, row=0, sticky="ns")
+	    xscrollcommand=lambda f, l:autoscroll(thsb, f, l), bd=2, relief=SUNKEN)
+	textarea.grid(column=2, row=1, sticky="ns")
 
-	# scrollbars for main tectarea
+	# scrollbars for main textarea
 	tvsb = ttk.Scrollbar(orient="vertical")
 	thsb = ttk.Scrollbar(orient="horizontal")
-	tvsb.grid(column=3, row=0, sticky='ns')
-	thsb.grid(column=2, row=2, sticky='ew')
+	tvsb.grid(column=3, row=1, sticky='ns')
+	thsb.grid(column=2, row=3, sticky='ew')
+	tvsb['command'] = textarea.yview
+	thsb['command'] = textarea.xview
 	
 	
 	# populate the main tree frame ----------------------------------------------------------------------------
@@ -413,10 +438,7 @@ if __name__ == '__main__':
 							if (seltable_fieldslist[i] == "data"):
 								dataMagic = magic.whatis(value)
 								textarea.insert(END, "\n- Binary data: (%s)" %dataMagic)
-								if (dataMagic.partition("/")[0] == "image"):
-							
-									from PIL import Image, ImageTk
-									import StringIO				
+								if (dataMagic.partition("/")[0] == "image"):			
 								
 									im = Image.open(StringIO.StringIO(value))
 									tkim = ImageTk.PhotoImage(im)
