@@ -404,13 +404,16 @@ if __name__ == '__main__':
 		seltable_dbname = tablestree.set(seltable, "filename")
 		seltable_tablename = tablestree.set(seltable, "tablename")
 		
+		# clears main text field
+		textarea.delete(1.0, END)
+		
+		# table informations
+		textarea.insert(INSERT, "Dumping table: %s\nFrom file: %s"%(seltable_tablename, seltable_dbname))
+		
 		if (os.path.exists(seltable_dbname)):
-			seltabledb = sqlite3.connect(seltable_dbname) 
+			seltabledb = sqlite3.connect(seltable_dbname)
 			try:
 				seltablecur = seltabledb.cursor() 
-				
-				# clears main text field
-				textarea.delete(1.0, END)
 				
 				# read selected table indexes
 				seltablecur.execute("PRAGMA table_info(%s)" % seltable_tablename)
@@ -418,8 +421,7 @@ if __name__ == '__main__':
 				
 				# append table fields to main textares
 				seltable_fieldslist = []
-				textarea.insert(INSERT, "Table Fields:")
-				#for seltable_field in seltable_fields:
+				textarea.insert(INSERT, "\n\nTable Fields:")
 				for i in range(len(seltable_fields)):
 					seltable_field = seltable_fields[i]
 					textarea.insert(INSERT, "\n- ")
@@ -447,8 +449,8 @@ if __name__ == '__main__':
 							try:
 								value = str(seltable_record[i])
 							except:
-								#value = seltable_record[i].encode("utf-8", "replace") + " (decoded unicode)"
-								value = "(wrong unicode string)"
+								value = seltable_record[i].encode("ascii", "replace") + " (decoded unicode)"
+								#value = "(wrong unicode string)"
 
 							#maybe an image?
 							if (seltable_fieldslist[i] == "data"):
