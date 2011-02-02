@@ -47,6 +47,8 @@ import getopt
 from PIL import Image, ImageTk
 import StringIO	
 
+import tkFileDialog, tkMessageBox
+
 # APPLICATION FILES IMPORTS -------------------------------------------------------------------------
 
 # magic.py - identify file type using magic numbers
@@ -141,6 +143,17 @@ def buttonBoxPress(event):
 		
 		textarea.mark_set("current", searchindex)
 		textarea.yview(searchindex)
+	
+	elif (event.widget['text'] == "Write txt"):
+		print("mille")
+		outfile = tkFileDialog.asksaveasfile(mode='w', parent=root, initialdir='/home/', title='Select output text file')
+		if (outfile):
+			text = textarea.get("1.0", END)
+			outfile.write(text)
+			tkMessageBox.showwarning("Done", "Text saved\n")
+			outfile.close()
+		else:
+			tkMessageBox.showwarning("Error", "Text NON saved\n")
 
 	return ""
 
@@ -325,7 +338,10 @@ if __name__ == '__main__':
 	w.bind("<Button-1>", convertTimeStamp)
 	w.pack()
 	
-	
+	w = Button(buttonbox, text="Write txt", width=10, default=ACTIVE)
+	w.bind("<Button-1>", buttonBoxPress)
+	w.pack()
+		
 	buttonbox.grid(column = 4, row = 1, sticky="ns", padx=5, pady=5)
 	
 	# header row
