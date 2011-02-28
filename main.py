@@ -523,8 +523,7 @@ if __name__ == '__main__':
 							try:
 								value = str(seltable_record[i])
 							except:
-								value = seltable_record[i].encode("ascii", "replace") + " (decoded unicode)"
-								value = hex2string(seltable_record[i])
+								value = seltable_record[i].encode("utf8", "replace") + " (decoded unicode)"
 
 							#maybe an image?
 							if (seltable_fieldslist[i] == "data"):
