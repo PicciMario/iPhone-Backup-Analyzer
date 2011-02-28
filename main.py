@@ -99,6 +99,38 @@ def md5(md5fileName, excludeLine="", includeLine=""):
 		m.update(eachLine)
 	m.update(includeLine)
 	return m.hexdigest()
+
+FILTER=''.join([(len(repr(chr(x)))==3) and chr(x) or '.' for x in range(256)])
+
+def dump(src, length=8):
+    N=0; result=''
+    while src:
+       s,src = src[:length],src[length:]
+       hexa = ' '.join(["%02X"%ord(x) for x in s])
+       s = s.translate(FILTER)
+       result += "%04X   %-*s   %s\n" % (N, length*3, hexa, s)
+       N+=length
+    return result
+
+def hex2string(src, length=8):
+    N=0; result=''
+    while src:
+       s,src = src[:length],src[length:]
+       hexa = ' '.join(["%02X"%ord(x) for x in s])
+       s = s.translate(FILTER)
+       N+=length
+       result += s
+    return result	
+
+def hex2nums(src, length=8):
+    N=0; result=''
+    while src:
+       s,src = src[:length],src[length:]
+       hexa = ' '.join(["%02X"%ord(x) for x in s])
+       s = s.translate(FILTER)
+       N+=length
+       result += (hexa + " ")
+    return result
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
@@ -228,7 +260,8 @@ if __name__ == '__main__':
 		"domain VARCHAR(100)," +
 		"file_path VARCHAR(100)," +
 		"file_name VARCHAR(100)," + 
-		"link_target VARCHAR(100)"
+		"link_target VARCHAR(100)," + 
+		"datahash VARCHAR(100)" + 
 		");"
 	)
 	
@@ -256,9 +289,9 @@ if __name__ == '__main__':
 		if (type == 'd'):
 			filepath = fileinfo['filename']
 			filename = "";
-		
+
 		# Insert record in database
-		query = "INSERT INTO indice(type, permissions, userid, groupid, filelen, mtime, atime, ctime, fileid, domain_type, domain, file_path, file_name, link_target) VALUES(";
+		query = "INSERT INTO indice(type, permissions, userid, groupid, filelen, mtime, atime, ctime, fileid, domain_type, domain, file_path, file_name, link_target, datahash) VALUES(";
 		query += "'%s'," % type
 		query += "'%s'," % mbdbdecoding.modestr(fileinfo['mode']&0x0FFF)
 		query += "'%08x'," % fileinfo['userid']
@@ -272,8 +305,11 @@ if __name__ == '__main__':
 		query += "'%s'," % domain.replace("'", " ")
 		query += "'%s'," % filepath.replace("'", " ")
 		query += "'%s'," % filename.replace("'", " ")
-		query += "'%s'" % fileinfo['linktarget']
+		query += "'%s'," % fileinfo['linktarget']
+		query += "'%s'" % hex2nums(fileinfo['datahash']).replace("'", "''")
 		query += ");"
+		
+		print(query)
 
 		cursor.execute(query)
 		
@@ -295,7 +331,7 @@ if __name__ == '__main__':
 	  
 	# main tree view definition
 	tree = ttk.Treeview(columns=("type", "size", "id"),
-	    displaycolumns=("size", "id"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
+	    displaycolumns=("size"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
 	    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
  	 
 	vsb['command'] = tree.yview
@@ -303,7 +339,7 @@ if __name__ == '__main__':
 
 	tree.heading("#0", text="Element description", anchor='w')
 	tree.heading("size", text="File Size", anchor='w')
-	tree.heading("id", text="File ID", anchor='w')
+	#tree.heading("id", text="File ID", anchor='w')
 	tree.grid(column=0, row=1, sticky='nswe')
 	
 	tree.grid(column=0, row=1, sticky='nswe')
@@ -313,9 +349,8 @@ if __name__ == '__main__':
 	root.grid_columnconfigure(0, weight=1)
 	root.grid_rowconfigure(1, weight=1)
 	
-	tree.column("#0", width=300)
-	tree.column("size", width=25)
-	tree.column("id", width=25)	
+	tree.column("#0", width=250)
+	tree.column("size", width=40)
 	
 	# right column
 	buttonbox = Frame(root, bd=2, relief=RAISED);
@@ -416,10 +451,13 @@ if __name__ == '__main__':
 				
 				for file in files:
 					file_name = str(file[0])
-					file_dim = str(file[1])
+					if (file[1]) < 1024:
+						file_dim = str(file[1]) + " b"
+					else:
+						file_dim = str(file[1] / 1024) + " kb"
 					file_id = int(file[2])
 					file_type = str(file[3])
-					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type,str(file_dim)+" b", file_id))
+					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type, file_dim, file_id))
 			
 
 	# called when an element is clicked in the tables tree frame ------------------------------------------------
@@ -471,6 +509,8 @@ if __name__ == '__main__':
 
 						textarea.insert(INSERT, "\n- " + str(seltable_record))
 						
+						#textarea.insert(END, "\nlen: %i" %len(seltable_record))
+							
 						for i in range(len(seltable_record)):	
 						
 							#import unicodedata
@@ -491,11 +531,15 @@ if __name__ == '__main__':
 									photoImages.append(tkim)
 									textarea.insert(END, "\n ")
 									textarea.image_create(END, image=tkim)
-
+								else:
+									dataMagic = magic.whatis(value)
+									textarea.insert(END, "\n(format: " + dataMagic + ")")									
 							else:
-			
-								textarea.insert(END, "\n- " + seltable_fieldslist[i] + " : " 
-									+ value)
+								try:
+									textarea.insert(END, "\n- " + seltable_fieldslist[i] + " : " + value)
+								except:
+									dataMagic = magic.whatis(value)
+									textarea.insert(END, "\n- " + seltable_fieldslist[i] + "  (" + dataMagic + ")")
 						
 						textarea.insert(END, "\n---------------------------------------")
 				
@@ -504,6 +548,7 @@ if __name__ == '__main__':
 					
 				seltabledb.close()		
 			except:
+				print "Unexpected error:", sys.exc_info()
 				seltabledb.close()
 
 	# Called when an element is clicked in the main tree frame ---------------------------------------------------
@@ -525,7 +570,7 @@ if __name__ == '__main__':
 		if (item_type == ""): return;
 		
 		textarea.delete(1.0, END)
-		textarea.insert(INSERT, "Selezionato elemento: " + item_text + " (id " + str(item_id) + ")")
+		textarea.insert(INSERT, "Selected: " + item_text + " (id " + str(item_id) + ")")
 		
 		query = "SELECT * FROM indice WHERE id = %s" % item_id
 		cursor.execute(query)
@@ -541,9 +586,12 @@ if __name__ == '__main__':
 		item_ctime = str(datetime.fromtimestamp(int(data[8])))
 		item_filecode = str(data[9])
 		item_link_target = str(data[14])
+		item_datahash = str(data[15])
 		
 		textarea.insert(INSERT, "\n\nElement type: " + item_type)
 		textarea.insert(INSERT, "\nPermissions: " + item_permissions)
+		textarea.insert(INSERT, "\nData hash: ")
+		textarea.insert(INSERT, "\n " + item_datahash)
 		textarea.insert(INSERT, "\nUser id: " + item_userid)
 		textarea.insert(INSERT, "\nGroup id: " + item_groupid)
 		textarea.insert(INSERT, "\nLast modify time: " + item_mtime)
@@ -580,16 +628,16 @@ if __name__ == '__main__':
 		#print first 50 bytes from file (ASCII)
 		if (os.path.exists(item_realpath)):
 			fh = open(item_realpath, 'rb')
-			text = fh.read(40)
-			textarea.insert(INSERT, "\n\nFirst HEX values from file: ")
-			textarea.insert(INSERT, "\n" + binascii.b2a_uu(text))
+			text = fh.read(30)
+			textarea.insert(INSERT, "\n\nFirst 30 hex bytes from file: ")
+			textarea.insert(INSERT, "\n" + hex2nums(text))#binascii.b2a_uu(text))
 			fh.close()
 			
 		#print file content (if ASCII file) otherwise only first 50 chars
 		if (os.path.exists(item_realpath)):
 			if (magic.file(item_realpath) == "ASCII text"):
 				fh = open(item_realpath, 'rb')
-				textarea.insert(INSERT, "\nASCII content:\n\n")
+				textarea.insert(INSERT, "\n\nASCII content:\n\n")
 				while 1:
 					line = fh.readline()
 					if not line: break;
@@ -597,9 +645,9 @@ if __name__ == '__main__':
 				fh.close()	
 			else:
 				fh = open(item_realpath, 'rb')
-				text = fh.read(40)
-				textarea.insert(INSERT, "\nFirst chars from file (string): ")
-				textarea.insert(INSERT, "\n" + str(text))
+				text = fh.read(30)
+				textarea.insert(INSERT, "\n\nFirst 30 chars from file (string): ")
+				textarea.insert(INSERT, "\n" + hex2string(text))
 				fh.close()						
 		
 		#if image file:
@@ -611,7 +659,7 @@ if __name__ == '__main__':
 				im = Image.open(item_realpath)
 				tkim = ImageTk.PhotoImage(im)
 				photoImages.append(tkim)
-				textarea.insert(END, "\n- Image data: \n ")
+				textarea.insert(END, "\n\nImage data: \n ")
 				textarea.image_create(END, image=tkim)
 				
 		#if binary plist:
@@ -620,8 +668,16 @@ if __name__ == '__main__':
 				manifest_tempfile = "temp01"
 				os.system("plutil -convert xml1 -o temp01 " + item_realpath)
 				
-				textarea.insert(END, "\nDecoding binary Plist file:\n")
-				textarea.insert(END, decodeManifestPlist.decodeManifestPlist(manifest_tempfile))
+				textarea.insert(END, "\n\nDecoding binary Plist file:\n")
+				
+				fh = open(manifest_tempfile, 'rb')
+				while 1:
+					line = fh.readline()
+					if not line: break;
+					textarea.insert(INSERT, line)
+				fh.close()	
+				
+				#textarea.insert(END, decodeManifestPlist.decodeManifestPlist(manifest_tempfile))
 	
 				os.remove(manifest_tempfile)	
 		
