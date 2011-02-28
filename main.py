@@ -524,7 +524,7 @@ if __name__ == '__main__':
 								value = str(seltable_record[i])
 							except:
 								value = seltable_record[i].encode("ascii", "replace") + " (decoded unicode)"
-								#value = "(wrong unicode string)"
+								value = hex2string(seltable_record[i])
 
 							#maybe an image?
 							if (seltable_fieldslist[i] == "data"):
