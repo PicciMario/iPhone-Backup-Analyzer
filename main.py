@@ -574,14 +574,14 @@ if __name__ == '__main__':
 		#skip "folders"
 		if (item_type == ""): return;
 		
+		#clears textarea
 		textarea.delete(1.0, END)
-		textarea.insert(INSERT, "Selected: " + item_text + " (id " + str(item_id) + ")")
 		
 		# managing standard files
-		if (item_type == "X"):
-			textarea.insert(INSERT, "X: " + item_text + " (id " + str(item_id) + ")")			
-			#print file content (if ASCII file) otherwise only first 50 chars
+		if (item_type == "X"):	
 			item_realpath = backup_path + item_text
+			textarea.insert(INSERT, "Selected: " + item_realpath)		
+			#print file content (if ASCII file) otherwise only first 50 chars
 			if (os.path.exists(item_realpath)):
 				if (magic.file(item_realpath) == "ASCII text"):
 					fh = open(item_realpath, 'rb')
@@ -613,6 +613,8 @@ if __name__ == '__main__':
 					fh.close()				
 					os.remove(manifest_tempfile)
 			return
+		
+		textarea.insert(INSERT, "Selected: " + item_text + " (id " + str(item_id) + ")")
 		
 		query = "SELECT * FROM indice WHERE id = %s" % item_id
 		cursor.execute(query)
