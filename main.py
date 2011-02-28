@@ -419,7 +419,13 @@ if __name__ == '__main__':
 	
 	
 	# populate the main tree frame ----------------------------------------------------------------------------
-		
+	
+	# standard files	
+	base_files_index = tree.insert('', 'end', text="Standard files")
+	tree.insert(base_files_index, 'end', text="Manifest.plist", values=("X", "", 0))
+	tree.insert(base_files_index, 'end', text="Info.plist", values=("X", "", 0))
+	tree.insert(base_files_index, 'end', text="Status.plist", values=("X", "", 0))
+	
 	cursor.execute("SELECT DISTINCT(domain_type) FROM indice");
 	domain_types = cursor.fetchall()
 	
@@ -572,6 +578,43 @@ if __name__ == '__main__':
 		textarea.delete(1.0, END)
 		textarea.insert(INSERT, "Selected: " + item_text + " (id " + str(item_id) + ")")
 		
+		# managing standard files
+		if (item_type == "X"):
+			textarea.insert(INSERT, "X: " + item_text + " (id " + str(item_id) + ")")			
+			#print file content (if ASCII file) otherwise only first 50 chars
+			item_realpath = backup_path + item_text
+			if (os.path.exists(item_realpath)):
+				if (magic.file(item_realpath) == "ASCII text"):
+					fh = open(item_realpath, 'rb')
+					textarea.insert(INSERT, "\n\nASCII content:\n\n")
+					while 1:
+						line = fh.readline()
+						if not line: break;
+						textarea.insert(INSERT, line)
+					fh.close()	
+				else:
+					fh = open(item_realpath, 'rb')
+					text = fh.read(30)
+					textarea.insert(INSERT, "\n\nFirst 30 chars from file (string): ")
+					textarea.insert(INSERT, "\n" + hex2string(text))
+					fh.close()
+			#if binary plist:
+			if (os.path.exists(item_realpath)):	
+				if (magic.file(item_realpath).partition("/")[2] == "binary_plist"):	
+					manifest_tempfile = "temp01"
+					os.system("plutil -convert xml1 -o temp01 " + item_realpath)
+					
+					textarea.insert(END, "\n\nDecoding binary Plist file:\n\n")
+					
+					fh = open(manifest_tempfile, 'rb')
+					while 1:
+						line = fh.readline()
+						if not line: break;
+						textarea.insert(INSERT, line)
+					fh.close()				
+					os.remove(manifest_tempfile)
+			return
+		
 		query = "SELECT * FROM indice WHERE id = %s" % item_id
 		cursor.execute(query)
 		data = cursor.fetchone()
@@ -668,7 +711,7 @@ if __name__ == '__main__':
 				manifest_tempfile = "temp01"
 				os.system("plutil -convert xml1 -o temp01 " + item_realpath)
 				
-				textarea.insert(END, "\n\nDecoding binary Plist file:\n")
+				textarea.insert(END, "\n\nDecoding binary Plist file:\n\n")
 				
 				fh = open(manifest_tempfile, 'rb')
 				while 1:
