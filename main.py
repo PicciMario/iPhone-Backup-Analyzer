@@ -60,7 +60,7 @@ import decodeManifestPlist
 
 # GLOBALS -------------------------------------------------------------------------------------------
 
-# **** TODO: option to set this path from command line
+# set this path from command line
 backup_path = "Backup2/" 
 
 # saves references to images in textarea
@@ -131,6 +131,10 @@ def hex2nums(src, length=8):
        N+=length
        result += (hexa + " ")
     return result
+    
+def log(text):
+	logbox.insert(END, "\n%s"%text)
+	logbox.yview(END)
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
@@ -138,22 +142,10 @@ def hex2nums(src, length=8):
 pattern = ""
 searchindex = "1.0"
 
-def buttonBoxPress(event):
-	print event.widget['text']
-	
-	if (event.widget['text'] == "Manifest.plist"):
-		if (os.path.exists(backup_path + "Manifest.plist")):
-			manifest_tempfile = "temp01"
-			os.system("plutil -convert xml1 -o temp01 " + backup_path + "Manifest.plist")
-		
-			textarea.delete(1.0, END)
-			textarea.insert(END, "Decoding Manifest.plist:\n")
-			textarea.insert(END, decodeManifestPlist.decodeManifestPlist(manifest_tempfile))
-
-			os.remove(manifest_tempfile)		
+def buttonBoxPress(event):		
 	
 	# SEARCH button
-	elif (event.widget['text'] == "Search"):
+	if (event.widget['text'] == "Search"):
 		
 		global pattern
 		global searchindex
@@ -177,7 +169,6 @@ def buttonBoxPress(event):
 		textarea.yview(searchindex)
 	
 	elif (event.widget['text'] == "Write txt"):
-		print("mille")
 		outfile = tkFileDialog.asksaveasfile(mode='w', parent=root, initialdir='/home/', title='Select output text file')
 		if (outfile):
 			text = textarea.get("1.0", END)
@@ -309,7 +300,7 @@ if __name__ == '__main__':
 		query += "'%s'" % hex2nums(fileinfo['datahash']).replace("'", "''")
 		query += ");"
 		
-		print(query)
+		#print(query)
 
 		cursor.execute(query)
 		
@@ -323,7 +314,7 @@ if __name__ == '__main__':
 	
 	# root window
 	root = Tkinter.Tk()
-	root.geometry("%dx%d%+d%+d" % (1100, 600, 0, 0))
+	root.geometry("%dx%d%+d%+d" % (1100, 700, 0, 0))
 	
 	# scrollbars for main tree view
 	vsb = ttk.Scrollbar(orient="vertical")
@@ -355,12 +346,11 @@ if __name__ == '__main__':
 	# right column
 	buttonbox = Frame(root, bd=2, relief=RAISED);
 	
-	w = Button(buttonbox, text="Manifest.plist", width=10)
-	w.bind("<Button-1>", buttonBoxPress)
-	w.pack()
-	
 	searchbox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2)
 	searchbox.pack()
+	
+	logbox = Text(root, relief="sunken", borderwidth=2, height=3, bg='lightgray')
+	logbox.grid(row=4, columnspan=6, sticky='ew')
 	
 	w = Button(buttonbox, text="Search", width=10, default=ACTIVE)
 	w.bind("<Button-1>", buttonBoxPress)
@@ -432,7 +422,7 @@ if __name__ == '__main__':
 	for domain_type_u in domain_types:
 		domain_type = str(domain_type_u[0])
 		domain_type_index = tree.insert('', 'end', text=domain_type)
-		print "Domain type index: %s" %domain_type_index
+		print "Extracting: %s" %domain_type
 		
 		query = "SELECT DISTINCT(domain) FROM indice WHERE domain_type = \"%s\" ORDER BY domain" % domain_type
 		cursor.execute(query);
@@ -580,7 +570,8 @@ if __name__ == '__main__':
 		# managing standard files
 		if (item_type == "X"):	
 			item_realpath = backup_path + item_text
-			textarea.insert(INSERT, "Selected: " + item_realpath)		
+			textarea.insert(INSERT, "Selected: " + item_realpath)
+			log("Opening file %s"%item_realpath)		
 			#print file content (if ASCII file) otherwise only first 50 chars
 			if (os.path.exists(item_realpath)):
 				if (magic.file(item_realpath) == "ASCII text"):
@@ -613,7 +604,7 @@ if __name__ == '__main__':
 					fh.close()				
 					os.remove(manifest_tempfile)
 			return
-		
+
 		textarea.insert(INSERT, "Selected: " + item_text + " (id " + str(item_id) + ")")
 		
 		query = "SELECT * FROM indice WHERE id = %s" % item_id
@@ -657,6 +648,8 @@ if __name__ == '__main__':
 		textarea.insert(INSERT, "\n\nAnalize file: ")
 		
 		item_realpath = backup_path + item_filecode
+		
+		log("Opening file %s (%s)"%(item_realpath, item_text))
 		
 		# print File type (from magic numbers)
 		textarea.insert(INSERT, "\nFile tipe (from magic numbers): ")
@@ -757,7 +750,9 @@ if __name__ == '__main__':
 	tree.bind("<ButtonRelease-1>", OnClick)
 	tablestree.bind("<ButtonRelease-1>", TablesTreeClick)
 	timebox.bind("<Key>", clearTimeBox)
-
+	
+	log("Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
+	log("Working directory: %s"%backup_path)
 
 	root.mainloop()
 	
