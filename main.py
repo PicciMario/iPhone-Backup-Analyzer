@@ -46,6 +46,7 @@ import binascii
 import getopt
 
 from PIL import Image, ImageTk
+from PIL.ExifTags import TAGS
 import StringIO	
 
 # APPLICATION FILES IMPORTS -------------------------------------------------------------------------
@@ -691,14 +692,20 @@ if __name__ == '__main__':
 		#if image file:
 		if (os.path.exists(item_realpath)):	
 			if (magic.file(item_realpath).partition("/")[0] == "image"):		
-				from PIL import Image, ImageTk
-				import StringIO				
-			
 				im = Image.open(item_realpath)
+					
 				tkim = ImageTk.PhotoImage(im)
 				photoImages.append(tkim)
 				textarea.insert(END, "\n\nImage data: \n ")
 				textarea.image_create(END, image=tkim)
+				
+				#decode EXIF (only JPG)
+				if (magic.file(item_realpath).partition("/")[2] == "jpeg"):
+					textarea.insert(END, "\n\nJPG EXIF tags:")
+					exifs = im._getexif()
+					for tag, value in exifs.items():
+						decoded = TAGS.get(tag, tag)
+						textarea.insert(END, "\nTag: %s, value: %s"%(decoded, value))
 				
 		#if binary plist:
 		if (os.path.exists(item_realpath)):	
