@@ -35,6 +35,7 @@ import sys, os
 # graphic libraries
 from Tkinter import *
 import Tkinter, ttk
+import tkFileDialog, tkMessageBox
 # datetime used to convert unix timestamps
 from datetime import datetime
 # hashlib used to build md5s of files
@@ -46,8 +47,6 @@ import getopt
 
 from PIL import Image, ImageTk
 import StringIO	
-
-import tkFileDialog, tkMessageBox
 
 # APPLICATION FILES IMPORTS -------------------------------------------------------------------------
 
@@ -102,25 +101,27 @@ def md5(md5fileName, excludeLine="", includeLine=""):
 
 FILTER=''.join([(len(repr(chr(x)))==3) and chr(x) or '.' for x in range(256)])
 
-def dump(src, length=8):
-    N=0; result=''
-    while src:
-       s,src = src[:length],src[length:]
-       hexa = ' '.join(["%02X"%ord(x) for x in s])
-       s = s.translate(FILTER)
-       result += "%04X   %-*s   %s\n" % (N, length*3, hexa, s)
-       N+=length
-    return result
+def dump(src, length=8, limit=10000):
+	N=0; result=''
+	while src:
+		s,src = src[:length],src[length:]
+		hexa = ' '.join(["%02X"%ord(x) for x in s])
+		s = s.translate(FILTER)
+		result += "%04X   %-*s   %s\n" % (N, length*3, hexa, s)
+		N+=length
+		if (len(result) > limit):
+			src = "";
+	return result
 
 def hex2string(src, length=8):
-    N=0; result=''
-    while src:
-       s,src = src[:length],src[length:]
-       hexa = ' '.join(["%02X"%ord(x) for x in s])
-       s = s.translate(FILTER)
-       N+=length
-       result += s
-    return result	
+	N=0; result=''
+	while src:
+		s,src = src[:length],src[length:]
+		hexa = ' '.join(["%02X"%ord(x) for x in s])
+		s = s.translate(FILTER)
+		N+=length
+		result += s
+	return result	
 
 def hex2nums(src, length=8):
     N=0; result=''
@@ -747,8 +748,8 @@ if __name__ == '__main__':
 			
 		# se "data", prova a fare il dump
 		if (os.path.exists(item_realpath) and magic.file(item_realpath) == "data"):
-			
-			textarea.insert(INSERT, "\n\nDumping hex data:\n")
+			limit = 10000
+			textarea.insert(INSERT, "\n\nDumping hex data (limit %i bytes):\n"%limit)
 			content = ""
 			fh = open(item_realpath, 'rb')
 			while 1:
@@ -757,7 +758,7 @@ if __name__ == '__main__':
 				content = content + line;
 			fh.close()
 			
-			textarea.insert(INSERT, dump(content, 16))
+			textarea.insert(INSERT, dump(content, 16, limit))
 
 	# Main ---------------------------------------------------------------------------------------------------
 
