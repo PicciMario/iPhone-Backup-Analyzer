@@ -314,7 +314,7 @@ if __name__ == '__main__':
 	
 	# root window
 	root = Tkinter.Tk()
-	root.geometry("%dx%d%+d%+d" % (1100, 700, 0, 0))
+	root.geometry("%dx%d%+d%+d" % (1200, 700, 0, 0))
 	
 	# scrollbars for main tree view
 	vsb = ttk.Scrollbar(orient="vertical")
@@ -395,7 +395,7 @@ if __name__ == '__main__':
 	tablestree.pack(fill=BOTH, expand=1)
 
 	# main textarea
-	textarea = Text(root, width=70, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
+	textarea = Text(root, width=90, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
 	    xscrollcommand=lambda f, l:autoscroll(thsb, f, l), bd=2, relief=SUNKEN)
 	textarea.grid(column=2, row=1, sticky="ns")
 
@@ -744,6 +744,20 @@ if __name__ == '__main__':
 				
 			except:
 				tempdb.close()
+			
+		# se "data", prova a fare il dump
+		if (os.path.exists(item_realpath) and magic.file(item_realpath) == "data"):
+			
+			textarea.insert(INSERT, "\n\nDumping hex data:\n")
+			content = ""
+			fh = open(item_realpath, 'rb')
+			while 1:
+				line = fh.readline()
+				if not line: break;
+				content = content + line;
+			fh.close()
+			
+			textarea.insert(INSERT, dump(content, 16))
 
 	# Main ---------------------------------------------------------------------------------------------------
 
