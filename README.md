@@ -1,5 +1,7 @@
 # iPBD - iPhone Backup Decoder and Analyzer
+
 (C)opyright 2010 Mario Piccinelli <mario.piccinelli@gmail.com>
+
 Released under MIT licence
 
 This software allows the user to browse through the content of an iPhone/iPad backup made by iTunes. The software is packed with all the routines needed to understand the content of files found.
@@ -26,8 +28,6 @@ User is presented with the list of tables in SQLite databases, and can immediate
 
 * MacOsX utility plutil. So right now this software is Mac only, until I find an alternative to plutil.
 
-* Python Tkinter library See http://tkinter.unpythonic.net/wiki/How_to_install_Tkinter for details about the installation. On MacOsX the Tkinter framework is installed along with ActiveTcl http://www.python.org/download/mac/tcltk/
+* Python Tkinter library See [this link](http://tkinter.unpythonic.net/wiki/How_to_install_Tkinter) for details about the installation. On MacOsX the Tkinter framework is installed along with [ActiveTcl](http://www.python.org/download/mac/tcltk/)
 
 * Python Imaging Library (PIL). Download from http://www.pythonware.com/products/pil/
-
-	<python setup.py build>
