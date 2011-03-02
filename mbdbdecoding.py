@@ -1,3 +1,16 @@
+'''
+ Analyzer for iPhone backup made by Apple iTunes
+
+ (C)opyright 2010 Mario Piccinelli <mario.piccinelli@gmail.com>
+ Released under MIT licence
+
+ Functions to decode MBDB and MBDX files have been derived from the work of:
+ - David Drysdale <dmd@lurklurk.org>
+ - Markus Stenberg <fingon@iki.fi>
+ - http://code.google.com/p/iphonebackupbrowser/
+ 
+'''
+
 #!/usr/bin/env python
 import sys
 
