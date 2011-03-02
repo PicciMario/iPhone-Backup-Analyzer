@@ -112,6 +112,7 @@ def dump(src, length=8, limit=10000):
 		N+=length
 		if (len(result) > limit):
 			src = "";
+			result += "(analysis limit reached after %i bytes)"%limit
 	return result
 
 def hex2string(src, length=8):

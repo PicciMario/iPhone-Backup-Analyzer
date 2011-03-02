@@ -83,12 +83,13 @@ def deviceInfo(filename):
 			"Device Name",
 			"Display Name",
 			"GUID",
-			"ICCD",
+			"ICCID",
 			"IMEI",
 			"Last Backup Date",
 			"Product Type",
 			"Product Version",
-			"Serial Number"			
+			"Serial Number",
+			"iTunes Version"		
 		)
 		
 		if (selectednode.nodeName == "key"):
