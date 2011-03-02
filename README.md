@@ -4,22 +4,23 @@ Released under MIT licence
 
 This software allows the user to browse through the content of an iPhone/iPad backup made by iTunes. The software is packed with all the routines needed to understand the content of files found.
 
-* For each file selected, the following informations are calculated/shown:
-** Real name and name in the backup directory
-** File UNIX permissions
-** Data hash (as calculated by iOS)
-** User and group ID
-** Modify time, access time, creation time
-** File type (from magic numbers)
-** File MD5 hash
-** First hex bytes
-** First bytes as ASCII characters
+For each file selected, the following informations are calculated/shown:
 
-* Binary plist files are translated on runtime into their XML counterpart by the MacOsX plutil utility
+* Real name and name in the backup directory
+* File UNIX permissions
+* Data hash (as calculated by iOS)
+* User and group ID
+* Modify time, access time, creation time
+* File type (from magic numbers)
+* File MD5 hash
+* First hex bytes
+* First bytes as ASCII characters
 
-* Images are shown
+Binary plist files are translated on runtime into their XML counterpart by the MacOsX plutil utility
 
-* User is presented with the list of tables in SQLite databases, and can immediately see the content of each and the structure of the fields.
+Images are shown
+
+User is presented with the list of tables in SQLite databases, and can immediately see the content of each and the structure of the fields.
 
 # Requires:
 
