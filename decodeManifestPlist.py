@@ -58,3 +58,48 @@ def decodeManifestPlist(filename):
 		xmlDecode += printXmlKey(selectednode)
 	
 	return xmlDecode
+
+# returns device info from passed filename (Info.plist)
+
+def deviceInfo(filename):
+
+	manifest = parse(filename)
+	# <plist>
+	document = manifest.getElementsByTagName("plist")
+	# main <dict>
+	basedict = document[0].childNodes[1]
+	# nodes in main <dict>
+	nodes = basedict.childNodes
+	
+	properties = {}
+	
+	for i in range(len(nodes)):
+		selectednode = nodes[i]
+		
+		keyname = ""
+		keyval = ""
+		
+		proplist = (
+			"Device Name",
+			"Display Name",
+			"GUID",
+			"ICCD",
+			"IMEI",
+			"Last Backup Date",
+			"Product Type",
+			"Product Version",
+			"Serial Number"			
+		)
+		
+		if (selectednode.nodeName == "key"):
+			keyname = selectednode.firstChild.toxml()
+			if keyname in proplist:
+				child = nodes[i+2].firstChild
+				if (child == None): 
+					print("no child")
+					continue
+				keyval = child.toxml()
+				#print("%s - %s"%(keyname, keyval))
+				properties[keyname] = keyval
+		
+	return properties

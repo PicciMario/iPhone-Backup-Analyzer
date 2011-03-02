@@ -776,6 +776,14 @@ if __name__ == '__main__':
 	log("Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
 	log("Working directory: %s"%backup_path)
 
+	textarea.insert(INSERT, "Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
+	textarea.insert(INSERT, "\nWorking directory: %s"%backup_path)
+	textarea.insert(INSERT, "\nFound working backup for the device:\n")
+	deviceinfo = decodeManifestPlist.deviceInfo(backup_path + "Info.plist")
+	print deviceinfo
+	for element in deviceinfo.keys():
+		textarea.insert(INSERT, "\n%s - %s"%(element, deviceinfo[element]))
+
 	root.mainloop()
 	
 	database.close() # Close the connection to the database
