@@ -15,10 +15,10 @@ For each file selected, the following informations are calculated/shown:
 * File MD5 hash
 * First hex bytes
 * First bytes as ASCII characters
+* File content: HEX dump if data, text if ASCII or UTF8, tables list if SQLite
+* EXIF data for JPG images
 
 Binary plist files are translated on runtime into their XML counterpart by the MacOsX plutil utility
-
-Images are shown
 
 User is presented with the list of tables in SQLite databases, and can immediately see the content of each and the structure of the fields.
 
@@ -30,4 +30,4 @@ User is presented with the list of tables in SQLite databases, and can immediate
 
 * Python Imaging Library (PIL). Download from http://www.pythonware.com/products/pil/
 
-	python setup.py build
+	<python setup.py build>
