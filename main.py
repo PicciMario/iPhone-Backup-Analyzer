@@ -596,10 +596,14 @@ if __name__ == '__main__':
 		if (item_type == "X"):	
 			item_realpath = backup_path + item_text
 			textarea.insert(INSERT, "Selected: " + item_realpath)
-			log("Opening file %s"%item_realpath)		
-			#print file content (if ASCII file) otherwise only first 50 chars
-			if (os.path.exists(item_realpath)):
-				if (magic.file(item_realpath) == "ASCII text"):
+			log("Opening file %s"%item_realpath)
+			
+			if (os.path.exists(item_realpath)):		
+				
+				filemagic = magic.file(item_realpath)
+				
+				#print file content (if text file) otherwise only first 50 chars
+				if (filemagic == "ASCII text" or filemagic.partition("/")[0] == "text"):
 					fh = open(item_realpath, 'rb')
 					textarea.insert(INSERT, "\n\nASCII content:\n\n")
 					while 1:
@@ -613,9 +617,9 @@ if __name__ == '__main__':
 					textarea.insert(INSERT, "\n\nFirst 30 chars from file (string): ")
 					textarea.insert(INSERT, "\n" + hex2string(text))
 					fh.close()
-			#if binary plist:
-			if (os.path.exists(item_realpath)):	
-				if (magic.file(item_realpath).partition("/")[2] == "binary_plist"):	
+			
+				#if binary plist:
+				if (filemagic.partition("/")[2] == "binary_plist"):	
 					manifest_tempfile = "temp01"
 					os.system("plutil -convert xml1 -o temp01 " + item_realpath)
 					
@@ -676,81 +680,73 @@ if __name__ == '__main__':
 		
 		log("Opening file %s (%s)"%(item_realpath, item_text))
 		
-		# print File type (from magic numbers)
-		textarea.insert(INSERT, "\nFile tipe (from magic numbers): ")
-		if (os.path.exists(item_realpath)):
-			textarea.insert(INSERT, magic.file(item_realpath))
-		else:
+		# check for existence 
+		if (os.path.exists(item_realpath) == 0):
 			textarea.insert(INSERT, "unable to analyze file")
+			return			
+		
+		# print file type (from magic numbers)
+		filemagic = magic.file(item_realpath)
+		textarea.insert(INSERT, "\nFile tipe (from magic numbers): %s" %filemagic)
 		
 		# print file MD5 hash
 		textarea.insert(INSERT, "\nFile MD5 hash: ")
 		textarea.insert(INSERT, md5(item_realpath))
 		
-		#print first 50 bytes from file (ASCII)
-		if (os.path.exists(item_realpath)):
-			fh = open(item_realpath, 'rb')
-			text = fh.read(30)
-			textarea.insert(INSERT, "\n\nFirst 30 hex bytes from file: ")
-			textarea.insert(INSERT, "\n" + hex2nums(text))#binascii.b2a_uu(text))
-			fh.close()
+		#print first 30 bytes from file
+		fh = open(item_realpath, 'rb')
+		first30bytes = fh.read(30)
+		textarea.insert(INSERT, "\n\nFirst 30 hex bytes from file: ")
+		textarea.insert(INSERT, "\n" + hex2nums(first30bytes))#binascii.b2a_uu(text))
+		fh.close()
 			
-		#print file content (if ASCII file) otherwise only first 50 chars
-		if (os.path.exists(item_realpath)):
-			if (magic.file(item_realpath) == "ASCII text"):
-				fh = open(item_realpath, 'rb')
-				textarea.insert(INSERT, "\n\nASCII content:\n\n")
-				while 1:
-					line = fh.readline()
-					if not line: break;
-					textarea.insert(INSERT, line)
-				fh.close()	
-			else:
-				fh = open(item_realpath, 'rb')
-				text = fh.read(30)
-				textarea.insert(INSERT, "\n\nFirst 30 chars from file (string): ")
-				textarea.insert(INSERT, "\n" + hex2string(text))
-				fh.close()						
+		#print file content (if ASCII file) otherwise only first 30 bytes
+		if (filemagic == "ASCII text" or filemagic.partition("/")[0] == "text"):
+			fh = open(item_realpath, 'rb')
+			textarea.insert(INSERT, "\n\nASCII content:\n\n")
+			while 1:
+				line = fh.readline()
+				if not line: break;
+				textarea.insert(INSERT, line)
+			fh.close()	
+		else:
+			textarea.insert(INSERT, "\n\nFirst 30 chars from file (string): ")
+			textarea.insert(INSERT, "\n" + hex2string(first30bytes))					
 		
 		#if image file:
-		if (os.path.exists(item_realpath)):	
-			if (magic.file(item_realpath).partition("/")[0] == "image"):		
-				im = Image.open(item_realpath)
-					
-				tkim = ImageTk.PhotoImage(im)
-				photoImages.append(tkim)
-				textarea.insert(END, "\n\nImage data: \n ")
-				textarea.image_create(END, image=tkim)
+		if (filemagic.partition("/")[0] == "image"):		
+			im = Image.open(item_realpath)
 				
-				#decode EXIF (only JPG)
-				if (magic.file(item_realpath).partition("/")[2] == "jpeg"):
-					textarea.insert(END, "\n\nJPG EXIF tags:")
-					exifs = im._getexif()
-					for tag, value in exifs.items():
-						decoded = TAGS.get(tag, tag)
-						textarea.insert(END, "\nTag: %s, value: %s"%(decoded, value))
+			tkim = ImageTk.PhotoImage(im)
+			photoImages.append(tkim)
+			textarea.insert(END, "\n\nImage data: \n ")
+			textarea.image_create(END, image=tkim)
+			
+		#decode EXIF (only JPG)
+		if (filemagic == "image/jpeg"):
+			textarea.insert(END, "\n\nJPG EXIF tags:")
+			exifs = im._getexif()
+			for tag, value in exifs.items():
+				decoded = TAGS.get(tag, tag)
+				textarea.insert(END, "\nTag: %s, value: %s"%(decoded, value))
 				
 		#if binary plist:
-		if (os.path.exists(item_realpath)):	
-			if (magic.file(item_realpath).partition("/")[2] == "binary_plist"):	
-				manifest_tempfile = "temp01"
-				os.system("plutil -convert xml1 -o temp01 " + item_realpath)
-				
-				textarea.insert(END, "\n\nDecoding binary Plist file:\n\n")
-				
-				fh = open(manifest_tempfile, 'rb')
-				while 1:
-					line = fh.readline()
-					if not line: break;
-					textarea.insert(INSERT, line)
-				fh.close()	
-				
-				#textarea.insert(END, decodeManifestPlist.decodeManifestPlist(manifest_tempfile))
-	
-				os.remove(manifest_tempfile)	
+		if (filemagic.partition("/")[2] == "binary_plist"):	
+			manifest_tempfile = "temp01"
+			os.system("plutil -convert xml1 -o temp01 " + item_realpath)
+			
+			textarea.insert(END, "\n\nDecoding binary Plist file:\n\n")
+			
+			fh = open(manifest_tempfile, 'rb')
+			while 1:
+				line = fh.readline()
+				if not line: break;
+				textarea.insert(INSERT, line)
+			fh.close()
+			os.remove(manifest_tempfile)	
 		
-		#if sqlite3, print tables list
-		if (os.path.exists(item_realpath)):
+		#if sqlite, print tables list
+		if (filemagic.partition("/")[2] == "sqlite"):	
 			tempdb = sqlite3.connect(item_realpath) 
 			
 			try:
@@ -776,8 +772,8 @@ if __name__ == '__main__':
 			except:
 				tempdb.close()
 			
-		# se "data", prova a fare il dump
-		if (os.path.exists(item_realpath) and magic.file(item_realpath) == "data"):
+		# if unknown "data", dump hex
+		if (filemagic == "data"):
 			limit = 10000
 			textarea.insert(INSERT, "\n\nDumping hex data (limit %i bytes):\n"%limit)
 			content = ""
@@ -803,7 +799,6 @@ if __name__ == '__main__':
 	textarea.insert(INSERT, "\nWorking directory: %s"%backup_path)
 	
 	deviceinfo = decodeManifestPlist.deviceInfo(backup_path + "Info.plist")
-	print deviceinfo
 	for element in deviceinfo.keys():
 		infobox.insert(INSERT, "%s: %s\n"%(element, deviceinfo[element]))
 

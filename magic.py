@@ -7,7 +7,7 @@ magic.py
  All Rights Reserved
 
  Command Line Usage: running as `python magic.py file` will print
-                     a description of what 'file' is.
+                     a description of what 'file' Is.
 
  Module Usage:
      magic.whatis(data): when passed a string 'data' containing 
@@ -25,6 +25,7 @@ __version__ = '0.1'
 magic = [
   [0L, 'string', '=', 'SQLite', 'data/sqlite'],
   [0L, 'string', '=', 'bplist', 'data/binary_plist'],
+  [0L, 'string', '=', '<?xml', 'text/plist'],
    
   [0L, 'leshort', '=', 1538L, 'application/x-alan-adventure-game'],
   [0L, 'string', '=', 'TADS', 'application/x-tads-game'],
