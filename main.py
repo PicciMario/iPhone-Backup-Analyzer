@@ -317,42 +317,45 @@ if __name__ == '__main__':
 	# root window
 	root = Tkinter.Tk()
 	root.geometry("%dx%d%+d%+d" % (1200, 700, 0, 0))
+	root.grid_columnconfigure(2, weight=1)
+	root.grid_rowconfigure(1, weight=1)
+
+	# left column
+	leftcol = Frame(root, relief=RAISED);
+	leftcol.grid(column = 0, row = 1, sticky="nsew")
+	leftcol.grid_columnconfigure(0, weight=1)
+	leftcol.grid_rowconfigure(1, weight=1)
 	
 	# scrollbars for main tree view
-	vsb = ttk.Scrollbar(orient="vertical")
-	hsb = ttk.Scrollbar(orient="horizontal")
+	vsb = ttk.Scrollbar(leftcol, orient="vertical")
+	hsb = ttk.Scrollbar(leftcol, orient="horizontal")
 	  
 	# main tree view definition
-	tree = ttk.Treeview(columns=("type", "size", "id"),
+	tree = ttk.Treeview(leftcol, columns=("type", "size", "id"),
 	    displaycolumns=("size"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
 	    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
- 	 
-	vsb['command'] = tree.yview
-	hsb['command'] = tree.xview
-
 	tree.heading("#0", text="Element description", anchor='w')
 	tree.heading("size", text="File Size", anchor='w')
-	#tree.heading("id", text="File ID", anchor='w')
-	tree.grid(column=0, row=1, sticky='nswe')
+	tree.column("#0", width=300)
+	tree.column("size", width=50)
+	vsb['command'] = tree.yview
+	hsb['command'] = tree.xview
 	
+	# insert main tree view in leftcol grid
 	tree.grid(column=0, row=1, sticky='nswe')
 	vsb.grid(column=1, row=1, sticky='ns')
-	hsb.grid(column=0, row=3, sticky='ew')
+	hsb.grid(column=0, row=2, sticky='ew')
 	
-	root.grid_columnconfigure(0, weight=1)
-	root.grid_rowconfigure(1, weight=1)
-	
-	tree.column("#0", width=250)
-	tree.column("size", width=40)
+	# device info box
+	infobox = Text(leftcol, relief="sunken", borderwidth=2, height=10, width=20)
+	infobox.grid(column=0, row=0, sticky='ew')
 	
 	# right column
 	buttonbox = Frame(root, bd=2, relief=RAISED);
+	buttonbox.grid(column = 4, row = 1, sticky="ns", padx=5, pady=5)
 	
 	searchbox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2)
 	searchbox.pack()
-	
-	logbox = Text(root, relief="sunken", borderwidth=2, height=3, bg='lightgray')
-	logbox.grid(row=4, columnspan=6, sticky='ew')
 	
 	w = Button(buttonbox, text="Search", width=10, default=ACTIVE)
 	w.bind("<Button-1>", buttonBoxPress)
@@ -368,8 +371,15 @@ if __name__ == '__main__':
 	w = Button(buttonbox, text="Write txt", width=10, default=ACTIVE)
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
-		
-	buttonbox.grid(column = 4, row = 1, sticky="ns", padx=5, pady=5)
+
+	# tables tree (in right column)
+	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
+	tablestree.heading("#0", text="Tables")
+	tablestree.pack(fill=BOTH, expand=1)
+	
+	# log row
+	logbox = Text(root, relief="sunken", borderwidth=2, height=3, bg='lightgray')
+	logbox.grid(row=4, columnspan=6, sticky='ew')
 	
 	# header row
 	headerbox = Frame(root, bd=2, relief=RAISED);
@@ -390,16 +400,11 @@ if __name__ == '__main__':
 	w.pack()
 	
 	headerbox.grid(column=0, row=0, sticky='ew', columnspan=6, padx=5, pady=5)
-	
-	# tables tree (in right column)
-	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
-	tablestree.heading("#0", text="Tables")
-	tablestree.pack(fill=BOTH, expand=1)
 
 	# main textarea
-	textarea = Text(root, width=90, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
+	textarea = Text(root, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
 	    xscrollcommand=lambda f, l:autoscroll(thsb, f, l), bd=2, relief=SUNKEN)
-	textarea.grid(column=2, row=1, sticky="ns")
+	textarea.grid(column=2, row=1, sticky="nsew")
 
 	# scrollbars for main textarea
 	tvsb = ttk.Scrollbar(orient="vertical")
@@ -778,11 +783,11 @@ if __name__ == '__main__':
 
 	textarea.insert(INSERT, "Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
 	textarea.insert(INSERT, "\nWorking directory: %s"%backup_path)
-	textarea.insert(INSERT, "\nFound working backup for the device:\n")
+	
 	deviceinfo = decodeManifestPlist.deviceInfo(backup_path + "Info.plist")
 	print deviceinfo
 	for element in deviceinfo.keys():
-		textarea.insert(INSERT, "\n%s - %s"%(element, deviceinfo[element]))
+		infobox.insert(INSERT, "%s: %s\n"%(element, deviceinfo[element]))
 
 	root.mainloop()
 	
