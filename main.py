@@ -324,13 +324,15 @@ if __name__ == '__main__':
 	leftcol = Frame(root, relief=RAISED);
 	leftcol.grid(column = 0, row = 1, sticky="nsew")
 	leftcol.grid_columnconfigure(0, weight=1)
-	leftcol.grid_rowconfigure(1, weight=1)
+	leftcol.grid_rowconfigure(3, weight=1)
 	
 	# scrollbars for main tree view
 	vsb = ttk.Scrollbar(leftcol, orient="vertical")
 	hsb = ttk.Scrollbar(leftcol, orient="horizontal")
 	  
 	# main tree view definition
+	w = Label(leftcol, text="Backup content:")
+	w.grid(column=0, row=2, sticky='ew')
 	tree = ttk.Treeview(leftcol, columns=("type", "size", "id"),
 	    displaycolumns=("size"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
 	    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
@@ -340,25 +342,31 @@ if __name__ == '__main__':
 	tree.column("size", width=50)
 	vsb['command'] = tree.yview
 	hsb['command'] = tree.xview
-	
-	# insert main tree view in leftcol grid
-	tree.grid(column=0, row=1, sticky='nswe')
-	vsb.grid(column=1, row=1, sticky='ns')
-	hsb.grid(column=0, row=2, sticky='ew')
+	tree.grid(column=0, row=3, sticky='nswe')
+	vsb.grid(column=1, row=3, sticky='ns')
+	hsb.grid(column=0, row=4, sticky='ew')
 	
 	# device info box
+	w = Label(leftcol, text="Device data:")
+	w.grid(column=0, row=0, sticky='ew')
 	infobox = Text(leftcol, relief="sunken", borderwidth=2, height=10, width=20)
-	infobox.grid(column=0, row=0, sticky='ew')
+	infobox.grid(column=0, row=1, sticky='ew')
 	
 	# right column
 	buttonbox = Frame(root, bd=2, relief=RAISED);
 	buttonbox.grid(column = 4, row = 1, sticky="ns", padx=5, pady=5)
+	
+	w = Label(buttonbox, text="Text search")
+	w.pack()
 	
 	searchbox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2)
 	searchbox.pack()
 	
 	w = Button(buttonbox, text="Search", width=10, default=ACTIVE)
 	w.bind("<Button-1>", buttonBoxPress)
+	w.pack()
+
+	w = Label(buttonbox, text="Timestamp translation")
 	w.pack()
 	
 	timebox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2)
@@ -367,12 +375,21 @@ if __name__ == '__main__':
 	w = Button(buttonbox, text="Convert", width=10, default=ACTIVE)
 	w.bind("<Button-1>", convertTimeStamp)
 	w.pack()
+
+	w = Label(buttonbox, text="Save as text file")
+	w.pack()
 	
 	w = Button(buttonbox, text="Write txt", width=10, default=ACTIVE)
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
+	
+	w = ttk.Separator(buttonbox, orient=HORIZONTAL)
+	w.pack()
 
 	# tables tree (in right column)
+	w = Label(buttonbox, text="Database tables")
+	w.pack()
+	
 	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
 	tablestree.heading("#0", text="Tables")
 	tablestree.pack(fill=BOTH, expand=1)
