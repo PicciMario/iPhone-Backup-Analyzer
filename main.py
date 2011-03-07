@@ -255,10 +255,20 @@ if __name__ == '__main__':
 		"file_path VARCHAR(100)," +
 		"file_name VARCHAR(100)," + 
 		"link_target VARCHAR(100)," + 
-		"datahash VARCHAR(100)" + 
+		"datahash VARCHAR(100)," + 
+		"flag VARCHAR(100)"
 		");"
 	)
 	
+	cursor.execute(
+		"CREATE TABLE properties (" + 
+		"id INTEGER PRIMARY KEY AUTOINCREMENT," +
+		"file_id INTEGER," +
+		"property_name VARCHAR(100)," +
+		"property_val VARCHAR(100)" +
+		");"
+	)
+		
 	# count items parsed from Manifest file
 	items = 0;
 	
@@ -285,7 +295,7 @@ if __name__ == '__main__':
 			filename = "";
 
 		# Insert record in database
-		query = "INSERT INTO indice(type, permissions, userid, groupid, filelen, mtime, atime, ctime, fileid, domain_type, domain, file_path, file_name, link_target, datahash) VALUES(";
+		query = "INSERT INTO indice(type, permissions, userid, groupid, filelen, mtime, atime, ctime, fileid, domain_type, domain, file_path, file_name, link_target, datahash, flag) VALUES(";
 		query += "'%s'," % type
 		query += "'%s'," % mbdbdecoding.modestr(fileinfo['mode']&0x0FFF)
 		query += "'%08x'," % fileinfo['userid']
@@ -295,12 +305,13 @@ if __name__ == '__main__':
 		query += "%i," % fileinfo['atime']
 		query += "%i," % fileinfo['ctime']
 		query += "'%s'," % fileinfo['fileID']
-		query += "'%s'," % domaintype.replace("'", " ")
-		query += "'%s'," % domain.replace("'", " ")
-		query += "'%s'," % filepath.replace("'", " ")
-		query += "'%s'," % filename.replace("'", " ")
+		query += "'%s'," % domaintype.replace("'", "''")
+		query += "'%s'," % domain.replace("'", "''")
+		query += "'%s'," % filepath.replace("'", "''")
+		query += "'%s'," % filename.replace("'", "''")
 		query += "'%s'," % fileinfo['linktarget']
-		query += "'%s'" % hex2nums(fileinfo['datahash']).replace("'", "''")
+		query += "'%s'," % hex2nums(fileinfo['datahash']).replace("'", "''")
+		query += "'%s'" % fileinfo['flag']
 		query += ");"
 		
 		#print(query)
@@ -308,6 +319,32 @@ if __name__ == '__main__':
 		cursor.execute(query)
 		
 		items += 1;
+		
+		# check if file has properties to store in the properties table
+		if (fileinfo['numprops'] > 0):
+	
+			query = "SELECT id FROM indice WHERE "
+			query += "domain = '%s' " % domain.replace("'", "''")
+			query += "AND fileid = '%s' " % fileinfo['fileID']
+			query += "LIMIT 1"
+			 
+			cursor.execute(query);
+			id = cursor.fetchall()
+			
+			if (len(id) > 0):
+				index = id[0][0]
+				properties = fileinfo['properties']
+				for property in properties.keys():
+					query = "INSERT INTO properties(file_id, property_name, property_val) VALUES (";
+					query += "'%i'," % index
+					query += "'%s'," % property
+					query += "'%s'" % hex2nums(properties[property]).replace("'", "''")
+					query += ");"
+					
+					cursor.execute(query);
+		
+			#print("File: %s, properties: %i"%(domain + ":" + filepath + "/" + filename, fileinfo['numprops']))
+			#print(fileinfo['properties'])
 
 	database.commit() 
 		
@@ -651,6 +688,7 @@ if __name__ == '__main__':
 		item_filecode = str(data[9])
 		item_link_target = str(data[14])
 		item_datahash = str(data[15])
+		item_flag = str(data[16])
 		
 		textarea.insert(INSERT, "\n\nElement type: " + item_type)
 		textarea.insert(INSERT, "\nPermissions: " + item_permissions)
@@ -661,7 +699,17 @@ if __name__ == '__main__':
 		textarea.insert(INSERT, "\nLast modify time: " + item_mtime)
 		textarea.insert(INSERT, "\nLast access Time: " + item_atime)
 		textarea.insert(INSERT, "\nCreation time: " + item_ctime)
-		textarea.insert(INSERT, "\nObfuscated file name: " + item_filecode)
+		textarea.insert(INSERT, "\nFile Key (obfuscated file name): " + item_filecode)
+		textarea.insert(INSERT, "\nFlag: " + item_flag)
+
+		# file properties (from properties table, which is data from mbdb file)
+		query = "SELECT property_name, property_val FROM properties WHERE file_id = %s" % item_id
+		cursor.execute(query)
+		data = cursor.fetchall()
+		if (len(data) > 0):
+			textarea.insert(INSERT, "\n\nElement properties (from mdbd file):")
+			for element in data:
+				textarea.insert(INSERT, "\n%s: %s" %(element[0], element[1]))
 		
 		# treat sym links
 		if (item_type == "l"):
