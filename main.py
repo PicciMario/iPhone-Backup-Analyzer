@@ -657,8 +657,11 @@ if __name__ == '__main__':
 			
 				#if binary plist:
 				if (filemagic.partition("/")[2] == "binary_plist"):	
-					manifest_tempfile = "temp01"
-					os.system("plutil -convert xml1 -o temp01 " + item_realpath)
+					manifest_tempfile = "out.plist" #default name from perl script plutil.pl
+					#os.system("plutil -convert xml1 -o temp01 " + item_realpath)
+					command = "perl plutil.pl " + item_realpath
+					log("Executing: %s"%command)
+					os.system(command)
 					
 					textarea.insert(END, "\n\nDecoding binary Plist file:\n\n")
 					
@@ -780,8 +783,11 @@ if __name__ == '__main__':
 				
 		#if binary plist:
 		if (filemagic.partition("/")[2] == "binary_plist"):	
-			manifest_tempfile = "temp01"
-			os.system("plutil -convert xml1 -o temp01 " + item_realpath)
+			manifest_tempfile = "out.plist" #default name from perl script plutil.pl
+			#os.system("plutil -convert xml1 -o temp01 " + item_realpath)
+			command = "perl plutil.pl " + item_realpath
+			log("Executing: %s"%command)
+			os.system(command)
 			
 			textarea.insert(END, "\n\nDecoding binary Plist file:\n\n")
 			
