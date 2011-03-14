@@ -566,8 +566,6 @@ if __name__ == '__main__':
 					for seltable_record in seltable_cont:
 
 						textarea.insert(INSERT, "\n- " + str(seltable_record))
-						
-						#textarea.insert(END, "\nlen: %i" %len(seltable_record))
 							
 						for i in range(len(seltable_record)):	
 						
@@ -589,8 +587,9 @@ if __name__ == '__main__':
 									textarea.insert(END, "\n ")
 									textarea.image_create(END, image=tkim)
 								else:
-									dataMagic = magic.whatis(value)
-									textarea.insert(END, "\n(format: " + dataMagic + ")")									
+									textarea.insert(END, "\n\n")	
+									textarea.insert(END, dump(value, 16, 1000))
+											
 							else:
 								try:
 									textarea.insert(END, "\n- " + seltable_fieldslist[i] + " : " + value)
