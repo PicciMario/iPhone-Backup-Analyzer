@@ -813,17 +813,21 @@ if __name__ == '__main__':
 				for i in tables_list:
 					table_name = str(i[0])
 					textarea.insert(INSERT, "\n- " + table_name);
-				
-					tempcur.execute("SELECT count(*) FROM %s" % table_name);
-					elem_count = tempcur.fetchone()
-					textarea.insert(INSERT, " (%i elements) " % int(elem_count[0]))
 					
-					# inserts table into tables tree
-					tablestree.insert('', 'end', text=table_name, values=(item_realpath, table_name))	
-					
+					try:
+						tempcur.execute("SELECT count(*) FROM %s" % table_name);
+						elem_count = tempcur.fetchone()
+						textarea.insert(INSERT, " (%i elements) " % int(elem_count[0]))
+						# inserts table into tables tree
+						tablestree.insert('', 'end', text=table_name, values=(item_realpath, table_name))	
+					except:
+						#probably a virtual table?
+						textarea.insert(INSERT, " (unable to read) ")
+						
 				tempdb.close()		
 				
 			except:
+				print "Unexpected error:", sys.exc_info()
 				tempdb.close()
 			
 		# if unknown "data", dump hex
