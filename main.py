@@ -45,6 +45,8 @@ import binascii
 # getopt used to parse command line options
 import getopt
 
+import time
+
 from PIL import Image, ImageTk
 from PIL.ExifTags import TAGS
 import StringIO	
@@ -723,7 +725,11 @@ if __name__ == '__main__':
 		if (item_type == "d"):
 			textarea.insert(INSERT, "\n\nThis item represents a directory.")
 			return
-			
+		
+		# last modification date of the file in the backup directory
+		last_mod_time = time.strftime("%m/%d/%Y %I:%M:%S %p",time.localtime(os.path.getmtime(backup_path + item_filecode)))
+		textarea.insert(INSERT, "\n\nLast modification time (in backup dir): %s"%last_mod_time)
+		
 		textarea.insert(INSERT, "\n\nAnalize file: ")
 		
 		item_realpath = backup_path + item_filecode
