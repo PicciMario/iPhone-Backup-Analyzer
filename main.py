@@ -141,6 +141,12 @@ def log(text):
 	logbox.insert(END, "\n%s"%text)
 	logbox.yview(END)
 	
+def maintext(text):
+	textarea.insert(END, "%s"%text)
+
+def clearmaintext():
+	textarea.delete(1.0, END)
+	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
 # search function globals
@@ -150,6 +156,7 @@ searchindex = "1.0"
 def buttonBoxPress(event):		
 	
 	# SEARCH button
+	
 	if (event.widget['text'] == "Search"):
 		
 		global pattern
@@ -172,6 +179,8 @@ def buttonBoxPress(event):
 		
 		textarea.mark_set("current", searchindex)
 		textarea.yview(searchindex)
+	
+	# WRITE TEXT TO FILE button
 	
 	elif (event.widget['text'] == "Write txt"):
 		outfile = tkFileDialog.asksaveasfile(mode='w', parent=root, initialdir='/home/', title='Select output text file')
@@ -531,10 +540,10 @@ if __name__ == '__main__':
 		seltable_tablename = tablestree.set(seltable, "tablename")
 		
 		# clears main text field
-		textarea.delete(1.0, END)
-		
+		clearmaintext()
+				
 		# table informations
-		textarea.insert(INSERT, "Dumping table: %s\nFrom file: %s"%(seltable_tablename, seltable_dbname))
+		maintext("Dumping table: %s\nFrom file: %s"%(seltable_tablename, seltable_dbname))
 		log("Dumping table %s from database %s."%(seltable_tablename, seltable_dbname))
 		
 		if (os.path.exists(seltable_dbname)):
@@ -548,11 +557,11 @@ if __name__ == '__main__':
 				
 				# append table fields to main textares
 				seltable_fieldslist = []
-				textarea.insert(INSERT, "\n\nTable Fields:")
+				maintext("\n\nTable Fields:")
 				for i in range(len(seltable_fields)):
 					seltable_field = seltable_fields[i]
-					textarea.insert(INSERT, "\n- ")
-					textarea.insert(INSERT, "%i \"%s\" (%s)" %(seltable_field[0], seltable_field[1], seltable_field[2]))
+					maintext("\n- ")
+					maintext("%i \"%s\" (%s)" %(seltable_field[0], seltable_field[1], seltable_field[2]))
 					seltable_fieldslist.append(str(seltable_field[1]))
 							
 				# read all fields from selected table
@@ -562,13 +571,13 @@ if __name__ == '__main__':
 				try:
 				
 					# appends records to main text field
-					textarea.insert(END, "\n\nTable Records:")
+					maintext("\n\nTable Records:")
 					
 					del photoImages[:]
 					
 					for seltable_record in seltable_cont:
 
-						textarea.insert(INSERT, "\n- " + str(seltable_record))
+						maintext("\n- " + str(seltable_record))
 							
 						for i in range(len(seltable_record)):	
 						
@@ -581,26 +590,26 @@ if __name__ == '__main__':
 							#maybe an image?
 							if (seltable_fieldslist[i] == "data"):
 								dataMagic = magic.whatis(value)
-								textarea.insert(END, "\n- Binary data: (%s)" %dataMagic)
+								maintext("\n- Binary data: (%s)" %dataMagic)
 								if (dataMagic.partition("/")[0] == "image"):			
 								
 									im = Image.open(StringIO.StringIO(value))
 									tkim = ImageTk.PhotoImage(im)
 									photoImages.append(tkim)
-									textarea.insert(END, "\n ")
+									maintext("\n ")
 									textarea.image_create(END, image=tkim)
 								else:
-									textarea.insert(END, "\n\n")	
-									textarea.insert(END, dump(value, 16, 1000))
+									maintext("\n\n")	
+									maintext(dump(value, 16, 1000))
 											
 							else:
 								try:
-									textarea.insert(END, "\n- " + seltable_fieldslist[i] + " : " + value)
+									maintext("\n- " + seltable_fieldslist[i] + " : " + value)
 								except:
 									dataMagic = magic.whatis(value)
-									textarea.insert(END, "\n- " + seltable_fieldslist[i] + "  (" + dataMagic + ")")
+									maintext("\n- " + seltable_fieldslist[i] + "  (" + dataMagic + ")")
 						
-						textarea.insert(END, "\n---------------------------------------")
+						maintext("\n---------------------------------------")
 				
 				except:
 					print "Unexpected error:", sys.exc_info()
@@ -629,12 +638,12 @@ if __name__ == '__main__':
 		if (item_type == ""): return;
 		
 		#clears textarea
-		textarea.delete(1.0, END)
+		clearmaintext()
 		
 		# managing standard files
 		if (item_type == "X"):	
 			item_realpath = backup_path + item_text
-			textarea.insert(INSERT, "Selected: " + item_realpath)
+			maintext("Selected: " + item_realpath)
 			log("Opening file %s"%item_realpath)
 			
 			if (os.path.exists(item_realpath)):		
@@ -644,17 +653,17 @@ if __name__ == '__main__':
 				#print file content (if text file) otherwise only first 50 chars
 				if (filemagic == "ASCII text" or filemagic.partition("/")[0] == "text"):
 					fh = open(item_realpath, 'rb')
-					textarea.insert(INSERT, "\n\nASCII content:\n\n")
+					maintext("\n\nASCII content:\n\n")
 					while 1:
 						line = fh.readline()
 						if not line: break;
-						textarea.insert(INSERT, line)
+						maintext(line)
 					fh.close()	
 				else:
 					fh = open(item_realpath, 'rb')
 					text = fh.read(30)
-					textarea.insert(INSERT, "\n\nFirst 30 chars from file (string): ")
-					textarea.insert(INSERT, "\n" + hex2string(text))
+					maintext("\n\nFirst 30 chars from file (string): ")
+					maintext("\n" + hex2string(text))
 					fh.close()
 			
 				#if binary plist:
@@ -665,18 +674,18 @@ if __name__ == '__main__':
 					log("Executing: %s"%command)
 					os.system(command)
 					
-					textarea.insert(END, "\n\nDecoding binary Plist file:\n\n")
+					maintext("\n\nDecoding binary Plist file:\n\n")
 					
 					fh = open(manifest_tempfile, 'rb')
 					while 1:
 						line = fh.readline()
 						if not line: break;
-						textarea.insert(INSERT, line)
+						maintext(line)
 					fh.close()				
 					os.remove(manifest_tempfile)
 			return
 
-		textarea.insert(INSERT, "Selected: " + item_text + " (id " + str(item_id) + ")")
+		maintext("Selected: " + item_text + " (id " + str(item_id) + ")")
 		
 		query = "SELECT * FROM indice WHERE id = %s" % item_id
 		cursor.execute(query)
@@ -695,43 +704,43 @@ if __name__ == '__main__':
 		item_datahash = str(data[15])
 		item_flag = str(data[16])
 		
-		textarea.insert(INSERT, "\n\nElement type: " + item_type)
-		textarea.insert(INSERT, "\nPermissions: " + item_permissions)
-		textarea.insert(INSERT, "\nData hash: ")
-		textarea.insert(INSERT, "\n " + item_datahash)
-		textarea.insert(INSERT, "\nUser id: " + item_userid)
-		textarea.insert(INSERT, "\nGroup id: " + item_groupid)
-		textarea.insert(INSERT, "\nLast modify time: " + item_mtime)
-		textarea.insert(INSERT, "\nLast access Time: " + item_atime)
-		textarea.insert(INSERT, "\nCreation time: " + item_ctime)
-		textarea.insert(INSERT, "\nFile Key (obfuscated file name): " + item_filecode)
-		textarea.insert(INSERT, "\nFlag: " + item_flag)
+		maintext("\n\nElement type: " + item_type)
+		maintext("\nPermissions: " + item_permissions)
+		maintext("\nData hash: ")
+		maintext("\n " + item_datahash)
+		maintext("\nUser id: " + item_userid)
+		maintext("\nGroup id: " + item_groupid)
+		maintext("\nLast modify time: " + item_mtime)
+		maintext("\nLast access Time: " + item_atime)
+		maintext("\nCreation time: " + item_ctime)
+		maintext("\nFile Key (obfuscated file name): " + item_filecode)
+		maintext("\nFlag: " + item_flag)
 
 		# file properties (from properties table, which is data from mbdb file)
 		query = "SELECT property_name, property_val FROM properties WHERE file_id = %s" % item_id
 		cursor.execute(query)
 		data = cursor.fetchall()
 		if (len(data) > 0):
-			textarea.insert(INSERT, "\n\nElement properties (from mdbd file):")
+			maintext("\n\nElement properties (from mdbd file):")
 			for element in data:
-				textarea.insert(INSERT, "\n%s: %s" %(element[0], element[1]))
+				maintext("\n%s: %s" %(element[0], element[1]))
 		
 		# treat sym links
 		if (item_type == "l"):
-			textarea.insert(INSERT, "\n\nThis item is a symbolic link to another file.")
-			textarea.insert(INSERT, "\nLink Target: " + item_link_target)
+			maintext("\n\nThis item is a symbolic link to another file.")
+			maintext("\nLink Target: " + item_link_target)
 			return
 			
 		# treat directories
 		if (item_type == "d"):
-			textarea.insert(INSERT, "\n\nThis item represents a directory.")
+			maintext("\n\nThis item represents a directory.")
 			return
 		
 		# last modification date of the file in the backup directory
 		last_mod_time = time.strftime("%m/%d/%Y %I:%M:%S %p",time.localtime(os.path.getmtime(backup_path + item_filecode)))
-		textarea.insert(INSERT, "\n\nLast modification time (in backup dir): %s"%last_mod_time)
+		maintext("\n\nLast modification time (in backup dir): %s"%last_mod_time)
 		
-		textarea.insert(INSERT, "\n\nAnalize file: ")
+		maintext("\n\nAnalize file: ")
 		
 		item_realpath = backup_path + item_filecode
 		
@@ -739,36 +748,36 @@ if __name__ == '__main__':
 		
 		# check for existence 
 		if (os.path.exists(item_realpath) == 0):
-			textarea.insert(INSERT, "unable to analyze file")
+			maintext("unable to analyze file")
 			return			
 		
 		# print file type (from magic numbers)
 		filemagic = magic.file(item_realpath)
-		textarea.insert(INSERT, "\nFile tipe (from magic numbers): %s" %filemagic)
+		maintext("\nFile tipe (from magic numbers): %s" %filemagic)
 		
 		# print file MD5 hash
-		textarea.insert(INSERT, "\nFile MD5 hash: ")
-		textarea.insert(INSERT, md5(item_realpath))
+		maintext("\nFile MD5 hash: ")
+		maintext(md5(item_realpath))
 		
 		#print first 30 bytes from file
 		fh = open(item_realpath, 'rb')
 		first30bytes = fh.read(30)
-		textarea.insert(INSERT, "\n\nFirst 30 hex bytes from file: ")
-		textarea.insert(INSERT, "\n" + hex2nums(first30bytes))#binascii.b2a_uu(text))
+		maintext("\n\nFirst 30 hex bytes from file: ")
+		maintext("\n" + hex2nums(first30bytes))#binascii.b2a_uu(text))
 		fh.close()
 			
 		#print file content (if ASCII file) otherwise only first 30 bytes
 		if (filemagic == "ASCII text" or filemagic.partition("/")[0] == "text"):
 			fh = open(item_realpath, 'rb')
-			textarea.insert(INSERT, "\n\nASCII content:\n\n")
+			maintext("\n\nASCII content:\n\n")
 			while 1:
 				line = fh.readline()
 				if not line: break;
-				textarea.insert(INSERT, line)
+				maintext(line)
 			fh.close()	
 		else:
-			textarea.insert(INSERT, "\n\nFirst 30 chars from file (string): ")
-			textarea.insert(INSERT, "\n" + hex2string(first30bytes))					
+			maintext("\n\nFirst 30 chars from file (string): ")
+			maintext("\n" + hex2string(first30bytes))					
 		
 		#if image file:
 		if (filemagic.partition("/")[0] == "image"):		
@@ -776,16 +785,16 @@ if __name__ == '__main__':
 				
 			tkim = ImageTk.PhotoImage(im)
 			photoImages.append(tkim)
-			textarea.insert(END, "\n\nImage data: \n ")
+			maintext("\n\nImage data: \n ")
 			textarea.image_create(END, image=tkim)
 			
 		#decode EXIF (only JPG)
 		if (filemagic == "image/jpeg"):
-			textarea.insert(END, "\n\nJPG EXIF tags:")
+			maintext("\n\nJPG EXIF tags:")
 			exifs = im._getexif()
 			for tag, value in exifs.items():
 				decoded = TAGS.get(tag, tag)
-				textarea.insert(END, "\nTag: %s, value: %s"%(decoded, value))
+				maintext("\nTag: %s, value: %s"%(decoded, value))
 				
 		#if binary plist:
 		if (filemagic.partition("/")[2] == "binary_plist"):	
@@ -795,13 +804,13 @@ if __name__ == '__main__':
 			log("Executing: %s"%command)
 			os.system(command)
 			
-			textarea.insert(END, "\n\nDecoding binary Plist file:\n\n")
+			maintext("\n\nDecoding binary Plist file:\n\n")
 			
 			fh = open(manifest_tempfile, 'rb')
 			while 1:
 				line = fh.readline()
 				if not line: break;
-				textarea.insert(INSERT, line)
+				maintext(line)
 			fh.close()
 			os.remove(manifest_tempfile)	
 		
@@ -814,21 +823,21 @@ if __name__ == '__main__':
 				tempcur.execute("SELECT name FROM sqlite_master WHERE type=\"table\"")
 				tables_list = tempcur.fetchall();
 				
-				textarea.insert(INSERT, "\n\nTables in database: ")
+				maintext("\n\nTables in database: ")
 				
 				for i in tables_list:
 					table_name = str(i[0])
-					textarea.insert(INSERT, "\n- " + table_name);
+					maintext("\n- " + table_name);
 					
 					try:
 						tempcur.execute("SELECT count(*) FROM %s" % table_name);
 						elem_count = tempcur.fetchone()
-						textarea.insert(INSERT, " (%i elements) " % int(elem_count[0]))
+						maintext(" (%i elements) " % int(elem_count[0]))
 						# inserts table into tables tree
 						tablestree.insert('', 'end', text=table_name, values=(item_realpath, table_name))	
 					except:
 						#probably a virtual table?
-						textarea.insert(INSERT, " (unable to read) ")
+						maintext(" (unable to read) ")
 						
 				tempdb.close()		
 				
@@ -839,7 +848,7 @@ if __name__ == '__main__':
 		# if unknown "data", dump hex
 		if (filemagic == "data"):
 			limit = 10000
-			textarea.insert(INSERT, "\n\nDumping hex data (limit %i bytes):\n"%limit)
+			maintext("\n\nDumping hex data (limit %i bytes):\n"%limit)
 			content = ""
 			fh = open(item_realpath, 'rb')
 			while 1:
@@ -848,7 +857,7 @@ if __name__ == '__main__':
 				content = content + line;
 			fh.close()
 			
-			textarea.insert(INSERT, dump(content, 16, limit))
+			maintext(dump(content, 16, limit))
 
 	# Main ---------------------------------------------------------------------------------------------------
 
@@ -859,8 +868,8 @@ if __name__ == '__main__':
 	log("Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
 	log("Working directory: %s"%backup_path)
 
-	textarea.insert(INSERT, "Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
-	textarea.insert(INSERT, "\nWorking directory: %s"%backup_path)
+	maintext("Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
+	maintext("\nWorking directory: %s"%backup_path)
 	
 	deviceinfo = decodeManifestPlist.deviceInfo(backup_path + "Info.plist")
 	for element in deviceinfo.keys():
