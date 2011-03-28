@@ -535,6 +535,7 @@ if __name__ == '__main__':
 		
 		# table informations
 		textarea.insert(INSERT, "Dumping table: %s\nFrom file: %s"%(seltable_tablename, seltable_dbname))
+		log("Dumping table %s from database %s."%(seltable_tablename, seltable_dbname))
 		
 		if (os.path.exists(seltable_dbname)):
 			seltabledb = sqlite3.connect(seltable_dbname)
