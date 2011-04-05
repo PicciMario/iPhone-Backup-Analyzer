@@ -44,11 +44,12 @@ import hashlib
 import binascii
 # getopt used to parse command line options
 import getopt
-
+# time used to read system date and time of files
 import time
-
+# Python Image Library: graphics and EXIF data from JPG images
 from PIL import Image, ImageTk
 from PIL.ExifTags import TAGS
+# String IO to pass data dumps from databases directly to PIL
 import StringIO	
 
 # APPLICATION FILES IMPORTS -------------------------------------------------------------------------
@@ -61,6 +62,10 @@ import mbdbdecoding
 import decodeManifestPlist
 
 # GLOBALS -------------------------------------------------------------------------------------------
+
+# version
+version = "1.0 RC"
+creation_date = "03/2011"
 
 # set this path from command line
 backup_path = "Backup2/" 
@@ -220,14 +225,14 @@ if __name__ == '__main__':
 
 	# input parameters
 	def usage():
-		print "iPBD - iPhone backup decoder."
-		print " -h              : this help";
-		print " -d <dir>        : backup dir (default: " + backup_path + ")";
+		print("iPBD - iPhone backup decoder.")
+		print(" -h              : this help")
+		print(" -d <dir>        : backup dir (default: " + backup_path + ")")
 
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "hd:")
 	except getopt.GetoptError, err:
-		print str(err)
+		print(str(err))
 		sys.exit(2)
 	
 	for o, a in opts:
@@ -359,7 +364,7 @@ if __name__ == '__main__':
 
 	database.commit() 
 		
-	print "new items: %i" %items
+	print("new items: %i" %items)
 	
 	# Builds user interface ----------------------------------------------------------------------------------
 	
@@ -462,7 +467,7 @@ if __name__ == '__main__':
 	w.photo = photo
 	w.pack(side=RIGHT)
 	
-	w = Label(headerbox, text="iPBD - iPhone Backup Decoder\nMario Piccinelli <mario.piccinelli@gmail.com>")
+	w = Label(headerbox, text="iPBD - iPhone Backup Decoder\nVersion: %s (%s)"%(version, creation_date))
 	w.pack()
 	
 	headerbox.grid(column=0, row=0, sticky='ew', columnspan=6, padx=5, pady=5)
@@ -480,6 +485,24 @@ if __name__ == '__main__':
 	tvsb['command'] = textarea.yview
 	thsb['command'] = textarea.xview
 	
+	# menu --------------------------------------------------------------------------------------------------
+	
+	def aboutBox():
+		aboutTitle = "iPBD iPhone Backup Decoder"
+		aboutText = "(c) Mario Piccinelli 2011 <mario.piccinelli@gmail.com>"
+		aboutText += "\n Released under MIT Licence"
+		aboutText += "\n Version: " + version
+		tkMessageBox.showinfo(aboutTitle, aboutText)
+
+	# ABOUT menu
+	menubar = Menu(root)
+	
+	helpmenu = Menu(menubar, tearoff=0)
+	helpmenu.add_command(label="About", command=aboutBox)
+	menubar.add_cascade(label="Help", menu=helpmenu)
+	
+	# display the menu
+	root.config(menu=menubar)
 	
 	# populate the main tree frame ----------------------------------------------------------------------------
 	
@@ -495,7 +518,7 @@ if __name__ == '__main__':
 	for domain_type_u in domain_types:
 		domain_type = str(domain_type_u[0])
 		domain_type_index = tree.insert('', 'end', text=domain_type)
-		print "Extracting: %s" %domain_type
+		print("Extracting: %s" %domain_type)
 		
 		query = "SELECT DISTINCT(domain) FROM indice WHERE domain_type = \"%s\" ORDER BY domain" % domain_type
 		cursor.execute(query);
@@ -612,11 +635,11 @@ if __name__ == '__main__':
 						maintext("\n---------------------------------------")
 				
 				except:
-					print "Unexpected error:", sys.exc_info()
+					print("Unexpected error:", sys.exc_info())
 					
 				seltabledb.close()		
 			except:
-				print "Unexpected error:", sys.exc_info()
+				print("Unexpected error:", sys.exc_info())
 				seltabledb.close()
 
 	# Called when an element is clicked in the main tree frame ---------------------------------------------------
@@ -842,7 +865,7 @@ if __name__ == '__main__':
 				tempdb.close()		
 				
 			except:
-				print "Unexpected error:", sys.exc_info()
+				print("Unexpected error:", sys.exc_info())
 				tempdb.close()
 			
 		# if unknown "data", dump hex
@@ -866,15 +889,18 @@ if __name__ == '__main__':
 	timebox.bind("<Key>", clearTimeBox)
 	
 	log("Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
+	log("Version: " + version)
 	log("Working directory: %s"%backup_path)
 
 	maintext("Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
+	maintext("\nVersion: " + version)
 	maintext("\nWorking directory: %s"%backup_path)
 	
 	deviceinfo = decodeManifestPlist.deviceInfo(backup_path + "Info.plist")
 	for element in deviceinfo.keys():
 		infobox.insert(INSERT, "%s: %s\n"%(element, deviceinfo[element]))
 
+	root.focus_set()
 	root.mainloop()
 	
 	database.close() # Close the connection to the database
