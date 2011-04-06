@@ -30,7 +30,7 @@ def sms_window(filename):
 	print("opening SMS window")
 	smswindow = Toplevel()
 	smswindow.title('SMS window')
-	otherlabel = Label(smswindow, text = 'This is the other window', relief = RIDGE)
+	otherlabel = Label(smswindow, text = filename, relief = RIDGE)
 	otherlabel.pack(side = TOP, fill = BOTH, expand = YES)
 	smswindow.focus_set()
 	
@@ -986,8 +986,7 @@ if __name__ == '__main__':
 
 	root.focus_set()
 	
-	sms_window("")
-	print(realFileName(filename="sms.db", domaintype="HomeDomain"))
+	sms_window(backup_path + realFileName(filename="sms.db", domaintype="HomeDomain"))
 	
 	root.mainloop()
 	
