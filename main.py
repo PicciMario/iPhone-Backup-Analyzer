@@ -26,6 +26,19 @@
 
 '''
 
+def sms_window(filename):
+	print("opening SMS window")
+	smswindow = Toplevel()
+	smswindow.title('SMS window')
+	otherlabel = Label(smswindow, text = 'This is the other window', relief = RIDGE)
+	otherlabel.pack(side = TOP, fill = BOTH, expand = YES)
+	smswindow.focus_set()
+	
+	tempdb = sqlite3.connect(filename)
+	 
+
+
+
 # GENERIC IMPORTS --------------------------------------------------------------------------------------
 
 # sqlite3 support library
@@ -151,6 +164,38 @@ def maintext(text):
 
 def clearmaintext():
 	textarea.delete(1.0, END)
+	
+# scans the main tree view and returns the code of the node with a specified ID
+# (by the way, the ID is the index of the element in the index database)
+def searchIndexInTree(index, parent=""):
+	#print("---- searching under node: %s"%(tree.item(parent)['text']))
+	for node in tree.get_children(parent):			
+		#print("node under exam: %s - %s"%(node,tree.item(node)['text']))
+		id = tree.set(node, "id")
+		#print("Confronto id %s con %s"%(id, index))
+		if (id != ""):
+			if (int(id) == int(index)): 
+				#print("found!")
+				return node			
+		sottonodi = searchIndexInTree(index, node)
+		if (sottonodi != None): return sottonodi	
+	return
+	
+# returns the real file name for the searched element
+def realFileName(filename="", domaintype=""):
+	query = "SELECT fileid FROM indice WHERE 1=1"
+	if (filename != ""):
+		query = query + " AND file_name = \"%s\""%filename
+	if (domaintype != ""):
+		query = query + " AND domain_type = \"%s\""%domaintype
+
+	cursor.execute(query);
+	results = cursor.fetchall()
+			
+	if (len(results) > 0):
+		return results[0][0]
+	else:
+		return None	
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
@@ -496,20 +541,6 @@ if __name__ == '__main__':
 	
 	def quitMenu():
 		exit(0)
-		
-	def searchIndexInTree(index, parent=""):
-		#print("---- searching under node: %s"%(tree.item(parent)['text']))
-		for node in tree.get_children(parent):			
-			#print("node under exam: %s - %s"%(node,tree.item(node)['text']))
-			id = tree.set(node, "id")
-			#print("Confronto id %s con %s"%(id, index))
-			if (id != ""):
-				if (int(id) == int(index)): 
-					#print("found!")
-					return node			
-			sottonodi = searchIndexInTree(index, node)
-			if (sottonodi != None): return sottonodi	
-		return
 			
 	def placesMenu(filename):
 		if (filename == ""): return
@@ -954,8 +985,11 @@ if __name__ == '__main__':
 		infobox.insert(INSERT, "%s: %s\n"%(element, deviceinfo[element]))
 
 	root.focus_set()
+	
+	sms_window("")
+	print(realFileName(filename="sms.db", domaintype="HomeDomain"))
+	
 	root.mainloop()
 	
 	database.close() # Close the connection to the database
-	
 	
