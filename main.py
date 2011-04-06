@@ -3,7 +3,7 @@
 '''
  Analyzer for iPhone backup made by Apple iTunes
 
- (C)opyright 2010 Mario Piccinelli <mario.piccinelli@gmail.com>
+ (C)opyright 2011 Mario Piccinelli <mario.piccinelli@gmail.com>
  Released under MIT licence
  
  Permission is hereby granted, free of charge, to any person obtaining a copy

@@ -1,11 +1,30 @@
+#!/usr/bin/env python
+
+'''
+ Analyzer for iPhone backup made by Apple iTunes
+
+ (C)opyright 2011 Mario Piccinelli <mario.piccinelli@gmail.com>
+ Released under MIT licence
+
+ smswindow.py provides the code to show a TK window to browse through
+ the SQLite file which holds the SMS data in the iPhone Backup.
+
+'''
+
+# IMPORTS -----------------------------------------------------------------------------------------
+
 from Tkinter import *
 import sqlite3
 import ttk
 from datetime import datetime
 
+# GLOBALS -----------------------------------------------------------------------------------------
+
 groupstree = None
 textarea = None
 filename = ""
+
+# Called when the user clicks on the main tree list -----------------------------------------------
 
 def OnClick(event):
 	global filename
@@ -36,30 +55,37 @@ def OnClick(event):
 		newmonth = convdate.month
 		newyear = convdate.year
 		
+		# checks whether the day is the same from the last message
 		changeday = 0
 		if (curday != newday) or (curmonth != newmonth) or (curyear != newyear): 
 			changeday = 1
 			curday = newday
 			curmonth = newmonth
 			curyear = newyear
-		
+			
+		# if day changed print a separator with date	
 		if (changeday == 1):
 			textarea.insert(END, "\n******** %s ********\n"%convdate.date())
 		else:
 			textarea.insert(END, "-------\n")
 		
+		# tests the field "flag" whether the message was sent or received		
 		if (flag == 2):
 			status = "Received"
 		else:
 			status = "Sent"
+		
+		# prints message date and text
 		textarea.insert(END, "%s in date: %s\n"%(status,convdate))
 		textarea.insert(END, "%s\n"%text)
 		
-		# other message parts
-		query = "SELECT part_id, content_type, content_loc FROM msg_pieces WHERE message_id = %i ORDER BY part_id "%messageid
+		# other message parts (from table message_id)
+		query = "SELECT part_id, content_type, content_loc FROM msg_pieces "
+		query = query + "WHERE message_id = %i ORDER BY part_id "%messageid
 		tempcur.execute(query)
 		attachments = tempcur.fetchall()
 		
+		# prints attachments under the message text
 		for attachment in attachments:
 			part_id = attachment[0]
 			content_type = attachment[1]
@@ -68,6 +94,7 @@ def OnClick(event):
 
 	tempdb.close()
 
+# MAIN FUNCTION --------------------------------------------------------------------------------
 	
 def sms_window(filenamenew):
 	global filename
