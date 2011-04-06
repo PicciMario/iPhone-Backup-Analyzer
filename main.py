@@ -152,6 +152,38 @@ def maintext(text):
 def clearmaintext():
 	textarea.delete(1.0, END)
 	
+# scans the main tree view and returns the code of the node with a specified ID
+# (by the way, the ID is the index of the element in the index database)
+def searchIndexInTree(index, parent=""):
+	#print("---- searching under node: %s"%(tree.item(parent)['text']))
+	for node in tree.get_children(parent):			
+		#print("node under exam: %s - %s"%(node,tree.item(node)['text']))
+		id = tree.set(node, "id")
+		#print("Confronto id %s con %s"%(id, index))
+		if (id != ""):
+			if (int(id) == int(index)): 
+				#print("found!")
+				return node			
+		sottonodi = searchIndexInTree(index, node)
+		if (sottonodi != None): return sottonodi	
+	return
+	
+# returns the real file name for the searched element
+def realFileName(filename="", domaintype=""):
+	query = "SELECT fileid FROM indice WHERE 1=1"
+	if (filename != ""):
+		query = query + " AND file_name = \"%s\""%filename
+	if (domaintype != ""):
+		query = query + " AND domain_type = \"%s\""%domaintype
+
+	cursor.execute(query);
+	results = cursor.fetchall()
+			
+	if (len(results) > 0):
+		return results[0][0]
+	else:
+		return None	
+	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
 # search function globals
@@ -493,12 +525,59 @@ if __name__ == '__main__':
 		aboutText += "\n Released under MIT Licence"
 		aboutText += "\n Version: " + version
 		tkMessageBox.showinfo(aboutTitle, aboutText)
+	
+	def quitMenu():
+		exit(0)
+			
+	def placesMenu(filename):
+		if (filename == ""): return
 
-	# ABOUT menu
+		query = "SELECT id FROM indice WHERE file_name = \"%s\""%filename
+		cursor.execute(query)
+		result = cursor.fetchall()
+		
+		if (len(result) == 0):
+			log("File %s not found."%filename)
+			return
+		
+		id = result[0][0]
+		nodeFound = searchIndexInTree(id)
+		
+		if (nodeFound == None):
+			log("Node not found in tree while searching for file %s (id %s)."%(filename, id))
+			return
+			
+		tree.see(nodeFound)
+		tree.selection_set(nodeFound)
+		OnClick("") #triggers refresh of main text area
+
+	# Menu Bar
 	menubar = Menu(root)
 	
+	# Places menu
+	placesmenu = Menu(menubar, tearoff=0)
+
+	placesmenu.add_command(label="Address Book", command=lambda:placesMenu(filename="AddressBook.sqlitedb"))
+	placesmenu.add_command(label="Address Book Images", command=lambda:placesMenu(filename="AddressBookImages.sqlitedb"))
+	placesmenu.add_command(label="Calendar", command=lambda:placesMenu(filename="Calendar.sqlitedb"))
+	placesmenu.add_command(label="Notes", command=lambda:placesMenu(filename="notes.sqlite"))
+	placesmenu.add_command(label="SMS", command=lambda:placesMenu(filename="sms.db"))
+		
+	menubar.add_cascade(label="Places", menu=placesmenu)
+	
+	# Windows menu
+	winmenu = Menu(menubar, tearoff=0)
+	
+	import smswindow
+	winmenu.add_command(label="SMS browser", command=lambda:smswindow.sms_window(backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")))
+	
+	menubar.add_cascade(label="Windows", menu=winmenu)
+	
+	# ABOUT menu
 	helpmenu = Menu(menubar, tearoff=0)
 	helpmenu.add_command(label="About", command=aboutBox)
+	helpmenu.add_separator()
+	helpmenu.add_command(label="Quit", command=quitMenu)
 	menubar.add_cascade(label="Help", menu=helpmenu)
 	
 	# display the menu
@@ -901,8 +980,8 @@ if __name__ == '__main__':
 		infobox.insert(INSERT, "%s: %s\n"%(element, deviceinfo[element]))
 
 	root.focus_set()
+	
 	root.mainloop()
 	
 	database.close() # Close the connection to the database
-	
 	
