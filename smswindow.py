@@ -12,12 +12,12 @@ def OnClick(event):
 	global groupstree, textarea
 	if (len(groupstree.selection()) == 0): return;
 	msg_group = int(groupstree.item(groupstree.selection(), "text"))
-	query = "SELECT text, date, flags FROM message INNER JOIN msg_group ON msg_group.rowid = message.group_id WHERE msg_group.rowid = %i ORDER BY date "%msg_group
+	
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
+	query = "SELECT text, date, flags, message.ROWID FROM message INNER JOIN msg_group ON msg_group.rowid = message.group_id WHERE msg_group.rowid = %i ORDER BY date "%msg_group
 	tempcur.execute(query)
 	messages = tempcur.fetchall()
-	tempdb.close()
 	
 	textarea.delete(1.0, END)
 	
@@ -29,6 +29,7 @@ def OnClick(event):
 		text = message[0]
 		date = int(message[1])
 		flag = int(message[2])
+		messageid = int(message[3])
 		
 		convdate = datetime.fromtimestamp(int(date))
 		newday = convdate.day
@@ -53,6 +54,19 @@ def OnClick(event):
 			status = "Sent"
 		textarea.insert(END, "%s in date: %s\n"%(status,convdate))
 		textarea.insert(END, "%s\n"%text)
+		
+		# other message parts
+		query = "SELECT part_id, content_type, content_loc FROM msg_pieces WHERE message_id = %i ORDER BY part_id "%messageid
+		tempcur.execute(query)
+		attachments = tempcur.fetchall()
+		
+		for attachment in attachments:
+			part_id = attachment[0]
+			content_type = attachment[1]
+			content_loc = attachment[2]
+			textarea.insert(END, "-> %i - %s (%s)\n"%(part_id, content_type, content_loc))
+
+	tempdb.close()
 
 	
 def sms_window(filenamenew):
