@@ -493,12 +493,68 @@ if __name__ == '__main__':
 		aboutText += "\n Released under MIT Licence"
 		aboutText += "\n Version: " + version
 		tkMessageBox.showinfo(aboutTitle, aboutText)
+	
+	def quitMenu():
+		exit(0)
+		
+	def searchIndexInTree(index, parent=""):
+		print("---- searching under node: %s"%(tree.item(parent)['text']))
+		for node in tree.get_children(parent):
+			
+			print("node under exam: %s - %s"%(node,tree.item(node)['text']))
+			
+			id = tree.set(node, "id")
+			print("Confronto id %s con %s"%(id, index))
+			if (id != ""):
+				if (int(id) == int(index)): 
+					print("found!")
+					return node
+			
+			sottonodi = searchIndexInTree(index, node)
+			if (sottonodi != None): return sottonodi
+		
+		return
+			
+	def placesMenu(code):
+		if (code == "sms"):
+			#Library/SMS/sms.db
+			print("sms menu")
+			
+			filename = "sms.db"
+			query = "SELECT id FROM indice WHERE file_name = \"%s\""%filename
+			cursor.execute(query)
+			result = cursor.fetchall()
+			id = result[0][0]
+			print(id)
+			
+			nodeFound = searchIndexInTree(id)
+			print("Ritorno: %s"%nodeFound)
+			
+			tree.see(nodeFound)
+			tree.selection_set(nodeFound)
+			OnClick("")
+			
+			
+			
+			
+		else:
+			print("unknown code in PLACES menu")
 
-	# ABOUT menu
+	# Menu Bar
 	menubar = Menu(root)
 	
+	# Places menu
+	placesmenu = Menu(menubar, tearoff=0)
+	
+	placesmenu.add_command(label="SMS", command=lambda:placesMenu("sms"))
+	
+	menubar.add_cascade(label="Places", menu=placesmenu)
+	
+	# ABOUT menu
 	helpmenu = Menu(menubar, tearoff=0)
 	helpmenu.add_command(label="About", command=aboutBox)
+	helpmenu.add_separator()
+	helpmenu.add_command(label="Quit", command=quitMenu)
 	menubar.add_cascade(label="Help", menu=helpmenu)
 	
 	# display the menu
