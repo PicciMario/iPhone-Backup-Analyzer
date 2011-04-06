@@ -12,7 +12,7 @@ def OnClick(event):
 	global groupstree, textarea
 	if (len(groupstree.selection()) == 0): return;
 	msg_group = int(groupstree.item(groupstree.selection(), "text"))
-	query = "SELECT text, date FROM message INNER JOIN msg_group ON msg_group.rowid = message.group_id WHERE msg_group.rowid = %i ORDER BY date "%msg_group
+	query = "SELECT text, date, flags FROM message INNER JOIN msg_group ON msg_group.rowid = message.group_id WHERE msg_group.rowid = %i ORDER BY date "%msg_group
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
 	tempcur.execute(query)
@@ -20,16 +20,39 @@ def OnClick(event):
 	tempdb.close()
 	
 	textarea.delete(1.0, END)
+	
+	curday = 0
+	curmonth = 0
+	curyear = 0
+	
 	for message in messages:
 		text = message[0]
 		date = int(message[1])
+		flag = int(message[2])
 		
-		#date = date + 978307200 #JAN 1 1970
 		convdate = datetime.fromtimestamp(int(date))
+		newday = convdate.day
+		newmonth = convdate.month
+		newyear = convdate.year
 		
-		textarea.insert(END, "Date: %s\n"%convdate)
+		changeday = 0
+		if (curday != newday) or (curmonth != newmonth) or (curyear != newyear): 
+			changeday = 1
+			curday = newday
+			curmonth = newmonth
+			curyear = newyear
+		
+		if (changeday == 1):
+			textarea.insert(END, "\n******** %s ********\n"%convdate.date())
+		else:
+			textarea.insert(END, "-------\n")
+		
+		if (flag == 2):
+			status = "Received"
+		else:
+			status = "Sent"
+		textarea.insert(END, "%s in date: %s\n"%(status,convdate))
 		textarea.insert(END, "%s\n"%text)
-		textarea.insert(END, "----------\n")
 
 	
 def sms_window(filenamenew):
