@@ -26,19 +26,6 @@
 
 '''
 
-def sms_window(filename):
-	print("opening SMS window")
-	smswindow = Toplevel()
-	smswindow.title('SMS window')
-	otherlabel = Label(smswindow, text = filename, relief = RIDGE)
-	otherlabel.pack(side = TOP, fill = BOTH, expand = YES)
-	smswindow.focus_set()
-	
-	tempdb = sqlite3.connect(filename)
-	 
-
-
-
 # GENERIC IMPORTS --------------------------------------------------------------------------------------
 
 # sqlite3 support library
@@ -578,6 +565,14 @@ if __name__ == '__main__':
 		
 	menubar.add_cascade(label="Places", menu=placesmenu)
 	
+	# Windows menu
+	winmenu = Menu(menubar, tearoff=0)
+	
+	import smswindow
+	winmenu.add_command(label="SMS browser", command=lambda:smswindow.sms_window(backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")))
+	
+	menubar.add_cascade(label="Windows", menu=winmenu)
+	
 	# ABOUT menu
 	helpmenu = Menu(menubar, tearoff=0)
 	helpmenu.add_command(label="About", command=aboutBox)
@@ -985,8 +980,6 @@ if __name__ == '__main__':
 		infobox.insert(INSERT, "%s: %s\n"%(element, deviceinfo[element]))
 
 	root.focus_set()
-	
-	sms_window(backup_path + realFileName(filename="sms.db", domaintype="HomeDomain"))
 	
 	root.mainloop()
 	
