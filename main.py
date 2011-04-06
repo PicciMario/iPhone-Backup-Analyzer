@@ -498,47 +498,40 @@ if __name__ == '__main__':
 		exit(0)
 		
 	def searchIndexInTree(index, parent=""):
-		print("---- searching under node: %s"%(tree.item(parent)['text']))
-		for node in tree.get_children(parent):
-			
-			print("node under exam: %s - %s"%(node,tree.item(node)['text']))
-			
+		#print("---- searching under node: %s"%(tree.item(parent)['text']))
+		for node in tree.get_children(parent):			
+			#print("node under exam: %s - %s"%(node,tree.item(node)['text']))
 			id = tree.set(node, "id")
-			print("Confronto id %s con %s"%(id, index))
+			#print("Confronto id %s con %s"%(id, index))
 			if (id != ""):
 				if (int(id) == int(index)): 
-					print("found!")
-					return node
-			
+					#print("found!")
+					return node			
 			sottonodi = searchIndexInTree(index, node)
-			if (sottonodi != None): return sottonodi
-		
+			if (sottonodi != None): return sottonodi	
 		return
 			
-	def placesMenu(code):
-		if (code == "sms"):
-			#Library/SMS/sms.db
-			print("sms menu")
+	def placesMenu(filename):
+		if (filename == ""): return
+
+		query = "SELECT id FROM indice WHERE file_name = \"%s\""%filename
+		cursor.execute(query)
+		result = cursor.fetchall()
+		
+		if (len(result) == 0):
+			log("File %s not found."%filename)
+			return
+		
+		id = result[0][0]
+		nodeFound = searchIndexInTree(id)
+		
+		if (nodeFound == None):
+			log("Node not found in tree while searching for file %s (id %s)."%(filename, id))
+			return
 			
-			filename = "sms.db"
-			query = "SELECT id FROM indice WHERE file_name = \"%s\""%filename
-			cursor.execute(query)
-			result = cursor.fetchall()
-			id = result[0][0]
-			print(id)
-			
-			nodeFound = searchIndexInTree(id)
-			print("Ritorno: %s"%nodeFound)
-			
-			tree.see(nodeFound)
-			tree.selection_set(nodeFound)
-			OnClick("")
-			
-			
-			
-			
-		else:
-			print("unknown code in PLACES menu")
+		tree.see(nodeFound)
+		tree.selection_set(nodeFound)
+		OnClick("") #triggers refresh of main text area
 
 	# Menu Bar
 	menubar = Menu(root)
@@ -546,7 +539,9 @@ if __name__ == '__main__':
 	# Places menu
 	placesmenu = Menu(menubar, tearoff=0)
 	
-	placesmenu.add_command(label="SMS", command=lambda:placesMenu("sms"))
+	placesmenu.add_command(label="SMS", command=lambda:placesMenu(filename="sms.db"))
+	placesmenu.add_command(label="Calendar", command=lambda:placesMenu(filename="Calendar.sqlitedb"))
+
 	
 	menubar.add_cascade(label="Places", menu=placesmenu)
 	
