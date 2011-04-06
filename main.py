@@ -538,11 +538,13 @@ if __name__ == '__main__':
 	
 	# Places menu
 	placesmenu = Menu(menubar, tearoff=0)
-	
-	placesmenu.add_command(label="SMS", command=lambda:placesMenu(filename="sms.db"))
-	placesmenu.add_command(label="Calendar", command=lambda:placesMenu(filename="Calendar.sqlitedb"))
 
-	
+	placesmenu.add_command(label="Address Book", command=lambda:placesMenu(filename="AddressBook.sqlitedb"))
+	placesmenu.add_command(label="Address Book Images", command=lambda:placesMenu(filename="AddressBookImages.sqlitedb"))
+	placesmenu.add_command(label="Calendar", command=lambda:placesMenu(filename="Calendar.sqlitedb"))
+	placesmenu.add_command(label="Notes", command=lambda:placesMenu(filename="notes.sqlite"))
+	placesmenu.add_command(label="SMS", command=lambda:placesMenu(filename="sms.db"))
+		
 	menubar.add_cascade(label="Places", menu=placesmenu)
 	
 	# ABOUT menu
