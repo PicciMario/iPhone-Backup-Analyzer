@@ -53,7 +53,20 @@ def OnClick(event):
 	last = user[1]
 	organization = user[2]
 	
-	textarea.insert(END, "%s %s %s"%(first, last, organization))
+	textarea.insert(END, "%s %s %s\n"%(first, last, organization))
+	
+	# multivalues
+	query = "SELECT property, label, value FROM ABMultiValue WHERE UID = \"%s\""%user_id
+	tempcur.execute(query)
+	multivalues = tempcur.fetchall()
+	
+	for multivalue in multivalues:
+		property = multivalue[0]
+		label = multivalue[1]
+		value = multivalue[2]
+		textarea.insert(END, "%s %s %s\n"%(property, label, value))
+		
+		
 	
 	tempdb.close()
 
