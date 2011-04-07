@@ -25,6 +25,10 @@ contactstree = None
 textarea = None
 filename = ""
 
+def cleanSpace(string):
+	if (isinstance(string, str)): string = string.replace(' ', '\ ')
+	return string
+
 # Called when the user clicks on the main tree list -----------------------------------------------
 
 def OnClick(event):
@@ -125,7 +129,7 @@ def contact_window(filenamenew):
 	contactstree.heading("first", text="First", anchor='w')
 	contactstree.heading("last", text="Last", anchor='w')
 	
-	contactstree.column("#0", width=30)
+	contactstree.column("#0", width=80)
 	contactstree.column("first", width=150)
 	contactstree.column("last", width=150)
 	
@@ -161,9 +165,9 @@ def contact_window(filenamenew):
 	for group in groups:
 		groupid = group[0]
 		name = group[1]
-		groupnode = contactstree.insert('', 'end', text=groupid, values=(name, ""))
+		groupnode = contactstree.insert('', 'end', text=groupid, values=(cleanSpace(name), ""))
 
-		query = "SELECT ROWID, First, Last FROM ABGroupMembers INNER JOIN ABPerson ON ABGroupMembers.member_id = ABPerson.ROWID WHERE ABGroupMembers.group_id = \"%s\""%groupid
+		query = "SELECT ABPerson.ROWID, First, Last FROM ABGroupMembers INNER JOIN ABPerson ON ABGroupMembers.member_id = ABPerson.ROWID WHERE ABGroupMembers.group_id = \"%s\""%groupid
 		tempcur.execute(query)
 		people = tempcur.fetchall()
 		
@@ -171,8 +175,8 @@ def contact_window(filenamenew):
 			personid = person[0]
 			personfirst = person[1]
 			personlast = person[2]
-			contactstree.insert(groupnode, 'end', text=personid, values=(personfirst, personlast))
-
+			contactstree.insert(groupnode, 'end', text=personid, 
+				values=(cleanSpace(personfirst), cleanSpace(personlast)))
 
 	tempdb.close()
 	contactstree.bind("<ButtonRelease-1>", OnClick)
