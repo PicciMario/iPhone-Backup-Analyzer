@@ -37,6 +37,7 @@ def OnClick(event):
 	if (len(contactstree.selection()) == 0): return;
 	user_id = int(contactstree.item(contactstree.selection(), "text"))
 	
+	# check whether the selection is a group or a contact
 	type = contactstree.set(contactstree.selection(), "type")
 	if (type == "G"): return
 	
@@ -80,16 +81,14 @@ def contact_window(filenamenew):
 
 	# tree
 	# Column type: G for groups, C for contacts
-	contactstree = ttk.Treeview(contactswindow, columns=("first", "last", "type"),
-	    displaycolumns=("first", "last"))
+	contactstree = ttk.Treeview(contactswindow, columns=("name", "type"),
+	    displaycolumns=("name"))
 	
 	contactstree.heading("#0", text="ID", anchor='w')
-	contactstree.heading("first", text="First", anchor='w')
-	contactstree.heading("last", text="Last", anchor='w')
+	contactstree.heading("name", text="First", anchor='w')
 	
 	contactstree.column("#0", width=80)
-	contactstree.column("first", width=150)
-	contactstree.column("last", width=150)
+	contactstree.column("name", width=250)
 	
 	contactstree.grid(column = 0, row = 1, sticky="ns")
 	
@@ -105,16 +104,22 @@ def contact_window(filenamenew):
 	tempcur = tempdb.cursor() 
 
 	# all contacts
-	allnode = contactstree.insert('', 'end', text="", values=("All Contacts", "", "G"))
-	query = "SELECT ROWID, First, Last FROM ABPerson"
+	allnode = contactstree.insert('', 'end', text="", values=("All Contacts", "G"))
+	query = "SELECT ROWID, First, Last, Organization FROM ABPerson"
 	tempcur.execute(query)
 	people = tempcur.fetchall()
 	for person in people:
 		personid = person[0]
-		personfirst = person[1]
-		personlast = person[2]
+		
+		if (person[1] != None):
+			name = person[1]
+		if (person[2] != None):
+			name = name + " " + person[2]
+		if (person[1] == None and person[2] == None):
+			name = person[3]
+		
 		contactstree.insert(allnode, 'end', text=personid, 
-			values=(cleanSpace(personfirst), cleanSpace(personlast), "C"))	
+			values=(cleanSpace(name), "C"))	
 	
 	# groups contacts
 	query = "SELECT ROWID, Name FROM ABGroup"
@@ -124,18 +129,24 @@ def contact_window(filenamenew):
 	for group in groups:
 		groupid = group[0]
 		name = group[1]
-		groupnode = contactstree.insert('', 'end', text=groupid, values=(cleanSpace(name), "", "G"))
+		groupnode = contactstree.insert('', 'end', text=groupid, values=(cleanSpace(name), "G"))
 
-		query = "SELECT ABPerson.ROWID, First, Last FROM ABGroupMembers INNER JOIN ABPerson ON ABGroupMembers.member_id = ABPerson.ROWID WHERE ABGroupMembers.group_id = \"%s\""%groupid
+		query = "SELECT ABPerson.ROWID, First, Last, Organization FROM ABGroupMembers INNER JOIN ABPerson ON ABGroupMembers.member_id = ABPerson.ROWID WHERE ABGroupMembers.group_id = \"%s\""%groupid
 		tempcur.execute(query)
 		people = tempcur.fetchall()
 		
 		for person in people:
 			personid = person[0]
-			personfirst = person[1]
-			personlast = person[2]
+			
+			if (person[1] != None):
+				name = person[1]
+			if (person[2] != None):
+				name = name + " " + person[2]
+			if (person[1] == None and person[2] == None):
+				name = person[3]
+				
 			contactstree.insert(groupnode, 'end', text=personid, 
-				values=(cleanSpace(personfirst), cleanSpace(personlast), "C"))
+				values=(cleanSpace(name), "C"))
 
 	tempdb.close()
 	contactstree.bind("<ButtonRelease-1>", OnClick)
