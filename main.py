@@ -182,7 +182,7 @@ def realFileName(filename="", domaintype=""):
 	if (len(results) > 0):
 		return results[0][0]
 	else:
-		return None	
+		return ""	
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
@@ -570,6 +570,9 @@ if __name__ == '__main__':
 	
 	import smswindow
 	winmenu.add_command(label="SMS browser", command=lambda:smswindow.sms_window(backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")))
+
+	import contactwindow
+	winmenu.add_command(label="Contacts browser", command=lambda:contactwindow.contact_window(backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain")))
 	
 	menubar.add_cascade(label="Windows", menu=winmenu)
 	

@@ -6,8 +6,8 @@
  (C)opyright 2011 Mario Piccinelli <mario.piccinelli@gmail.com>
  Released under MIT licence
 
- smswindow.py provides the code to show a TK window to browse through
- the SQLite file which holds the SMS data in the iPhone Backup.
+ contactwindow.py provides the code to show a TK window to browse through
+ the SQLite file which holds the Contacts data in the iPhone Backup.
 
 '''
 
@@ -21,7 +21,7 @@ import os
 
 # GLOBALS -----------------------------------------------------------------------------------------
 
-groupstree = None
+contactstree = None
 textarea = None
 filename = ""
 
@@ -29,9 +29,9 @@ filename = ""
 
 def OnClick(event):
 	global filename
-	global groupstree, textarea
-	if (len(groupstree.selection()) == 0): return;
-	msg_group = int(groupstree.item(groupstree.selection(), "text"))
+	global contactstree, textarea
+	if (len(contactstree.selection()) == 0): return;
+	msg_group = int(contactstree.item(contactstree.selection(), "text"))
 	
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
@@ -97,54 +97,82 @@ def OnClick(event):
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 	
-def sms_window(filenamenew):
+def contact_window(filenamenew):
 	global filename
-	global groupstree, textarea
+	global contactstree, textarea
 	filename = filenamenew
 	
+	print("Filename: %s"%filename)
+	
 	if (not os.path.isfile(filename)):
-		print("Invalid file name for SMS database")
+		print("Invalid file name for SMS database: %s"%filename)
 		return	
 	
 	# main window
-	smswindow = Toplevel()
-	smswindow.title('SMS data')
-	smswindow.focus_set()
+	contactswindow = Toplevel()
+	contactswindow.title('SMS data')
+	contactswindow.focus_set()
 	
 	# header label
-	smstitle = Label(smswindow, text = "SMS data from: " + filename, relief = RIDGE)
-	smstitle.grid(column = 0, row = 0, sticky="ew", columnspan=2, padx=5, pady=5)
+	contactstitle = Label(contactswindow, text = "Contacts data from: " + filename, relief = RIDGE)
+	contactstitle.grid(column = 0, row = 0, sticky="ew", columnspan=2, padx=5, pady=5)
 
 	# tree
-	groupstree = ttk.Treeview(smswindow, columns=("address"),
-	    displaycolumns=("address"))
+	contactstree = ttk.Treeview(contactswindow, columns=("first", "last"),
+	    displaycolumns=("first", "last"))
 	
-	groupstree.heading("#0", text="ID", anchor='w')
-	groupstree.heading("address", text="Address", anchor='w')
+	contactstree.heading("#0", text="ID", anchor='w')
+	contactstree.heading("first", text="First", anchor='w')
+	contactstree.heading("last", text="Last", anchor='w')
 	
-	groupstree.column("#0", width=30)
-	groupstree.column("address", width=200)
+	contactstree.column("#0", width=30)
+	contactstree.column("first", width=150)
+	contactstree.column("last", width=150)
 	
-	groupstree.grid(column = 0, row = 1, sticky="ns")
+	contactstree.grid(column = 0, row = 1, sticky="ns")
 	
 	# textarea
-	textarea = Text(smswindow, bd=2, relief=SUNKEN)
+	textarea = Text(contactswindow, bd=2, relief=SUNKEN)
 	textarea.grid(column = 1, row = 1, sticky="nsew")
 	
 	# destroy window when closed
-	smswindow.protocol("WM_DELETE_WINDOW", smswindow.destroy)
+	contactswindow.protocol("WM_DELETE_WINDOW", contactswindow.destroy)
 	
-	# populating tree with SMS groups
+	# populating tree with Contact names
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
-	query = "SELECT DISTINCT(msg_group.rowid), address FROM msg_group INNER JOIN group_member ON msg_group.rowid = group_member.group_id"
+
+	# all contacts
+	allnode = contactstree.insert('', 'end', text="", values=("All Contacts", ""))
+	query = "SELECT ROWID, First, Last FROM ABPerson"
+	tempcur.execute(query)
+	people = tempcur.fetchall()
+	for person in people:
+		personid = person[0]
+		personfirst = person[1]
+		personlast = person[2]
+		contactstree.insert(allnode, 'end', text=personid, values=(personfirst, personlast))	
+	
+	# groups contacts
+	query = "SELECT ROWID, Name FROM ABGroup"
 	tempcur.execute(query)
 	groups = tempcur.fetchall()
-	tempdb.close()
 	
 	for group in groups:
 		groupid = group[0]
-		address = group[1].replace(' ', '')
-		groupstree.insert('', 'end', text=groupid, values=(address))
+		name = group[1]
+		groupnode = contactstree.insert('', 'end', text=groupid, values=(name, ""))
+
+		query = "SELECT ROWID, First, Last FROM ABGroupMembers INNER JOIN ABPerson ON ABGroupMembers.member_id = ABPerson.ROWID WHERE ABGroupMembers.group_id = \"%s\""%groupid
+		tempcur.execute(query)
+		people = tempcur.fetchall()
 		
-	groupstree.bind("<ButtonRelease-1>", OnClick)
+		for person in people:
+			personid = person[0]
+			personfirst = person[1]
+			personlast = person[2]
+			contactstree.insert(groupnode, 'end', text=personid, values=(personfirst, personlast))
+
+
+	tempdb.close()
+	contactstree.bind("<ButtonRelease-1>", OnClick)
