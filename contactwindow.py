@@ -44,7 +44,7 @@ def OnClick(event):
 	
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
-	query = "SELECT First, Last, Organization FROM ABPerson WHERE ROWID = \"%i\""%user_id
+	query = "SELECT First, Last, Organization, Middle, Department, Note, Birthday, JobTitle, Nickname FROM ABPerson WHERE ROWID = \"%i\""%user_id
 	tempcur.execute(query)
 	user = tempcur.fetchall()[0]
 	
@@ -53,23 +53,58 @@ def OnClick(event):
 	first = user[0]
 	last = user[1]
 	organization = user[2]
+	middle = user[3]
+	department = user[4]
+	note = user[5]
+	birthday = user[6]
+	jobtitle = user[7]
+	nickname = user[8]
 	
+	# Print contact complete name and organization
 	name = ""
-	if (user[0] != None):
-		name = user[0]
-	if (user[1] != None):
-		name = name + " " + user[1]
-	if (user[0] == None and user[1] == None):
-		name = user[2]
+	if (first != None):
+		name = first
+	if (middle != None):
+		name = name + " " + middle
+	if (last != None):
+		name = name + " " + last
+
+	if (first == None and last == None):
+		name = organization
+		textarea.insert(END, "%s\n"%(name))
 	else:
-		if (user[2] != None):
-			name = name + " (" + user[2] +")"
+		if (organization != None):
+			textarea.insert(END, "%s\n"%(name))
+			textarea.insert(END, "%s\n"%(organization))
 	
-	textarea.insert(END, "%s\n"%(name))
+	if (department != None):
+		textarea.insert(END, "Dept: %s\n"%(department))
+	
 	textarea.insert(END, "****************************\n")
 	
+	# other elements from the ABPerson table
+	printsep = 0
+	
+	if (note != None):
+		textarea.insert(END, "Note: %s\n"%note)
+		printsep = 1
+	if (birthday != None):
+		birthday = int(birthday.partition(".")[0]) + 978307200 #JAN 1 1970
+		birthdaydate = datetime.fromtimestamp(int(birthday)).date()
+		textarea.insert(END, "Birthday: %s\n"%birthdaydate)
+		printsep = 1
+	if (jobtitle != None):
+		textarea.insert(END, "Job Title: %s\n"%jobtitle)
+		printsep = 1
+	if (nickname != None):
+		textarea.insert(END, "Nickname: %s\n"%nickname)
+		printsep = 1	
+	
+	if (printsep == 1):
+		textarea.insert(END, "****************************\n")
+	
 	# multivalues
-	query = "SELECT property, label, value FROM ABMultiValue WHERE record_id = \"%s\""%user_id
+	query = "SELECT property, label, value, UID FROM ABMultiValue WHERE record_id = \"%s\""%user_id
 	tempcur.execute(query)
 	multivalues = tempcur.fetchall()
 	
@@ -77,9 +112,16 @@ def OnClick(event):
 	query = "SELECT value FROM ABMultiValueLabel"
 	tempcur.execute(query)
 	multivaluelabels = tempcur.fetchall()
-	
+
+	# acquire multivalue labels keys
+	query = "SELECT value FROM ABMultiValueEntryKey"
+	tempcur.execute(query)
+	multivalueentrykeys = tempcur.fetchall()
+
+	# print multivalues
 	for multivalue in multivalues:
 		
+		# decode multivalue type
 		if (multivalue[0] == 3):	
 			property = "Phone number"
 		elif (multivalue[0] == 4):
@@ -91,12 +133,32 @@ def OnClick(event):
 		else: 
 			property = "Unknown (%s)"%multivalue[0]
 		
-		label = multivaluelabels[int(multivalue[1]) - 1][0]
-		label = lstrip(label, "_!<$")
-		label = rstrip(label, "_!>$")
+		# decode multivalue label
+		label = ""
+		if (multivalue[1] != None):
+			label = multivaluelabels[int(multivalue[1]) - 1][0]
+			label = lstrip(label, "_!<$")
+			label = rstrip(label, "_!>$")
 		
 		value = multivalue[2]
-		textarea.insert(END, "%s (%s): %s\n"%(property, label, value))
+		
+		# if multivalue is multipart (an address)...
+		if (multivalue[0] == 5):
+			multivalueid = multivalue[3]
+			query = "SELECT KEY, value FROM ABMultiValueEntry WHERE parent_id = \"%i\" ORDER BY key"%multivalueid
+			tempcur.execute(query)
+			parts = tempcur.fetchall()
+
+			textarea.insert(END, "Address (%s):\n"%(label))
+			
+			for part in parts:
+				partkey = part[0]
+				partvalue = part[1]
+				label = multivalueentrykeys[int(partkey) - 1][0]
+				textarea.insert(END, "- %s : %s\n"%(label, partvalue))
+			
+		else:
+			textarea.insert(END, "%s (%s): %s\n"%(property, label, value))
 		
 		
 	
