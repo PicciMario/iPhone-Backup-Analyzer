@@ -73,8 +73,8 @@ def OnClick(event):
 		name = organization
 		textarea.insert(END, "%s\n"%(name))
 	else:
+		textarea.insert(END, "%s\n"%(name))
 		if (organization != None):
-			textarea.insert(END, "%s\n"%(name))
 			textarea.insert(END, "%s\n"%(organization))
 	
 	if (department != None):
