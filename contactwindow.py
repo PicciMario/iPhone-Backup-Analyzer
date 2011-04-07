@@ -18,6 +18,7 @@ import sqlite3
 import ttk
 from datetime import datetime
 import os
+from string import *
 
 # GLOBALS -----------------------------------------------------------------------------------------
 
@@ -53,18 +54,49 @@ def OnClick(event):
 	last = user[1]
 	organization = user[2]
 	
-	textarea.insert(END, "%s %s %s\n"%(first, last, organization))
+	name = ""
+	if (user[0] != None):
+		name = user[0]
+	if (user[1] != None):
+		name = name + " " + user[1]
+	if (user[0] == None and user[1] == None):
+		name = user[2]
+	else:
+		if (user[2] != None):
+			name = name + " (" + user[2] +")"
+	
+	textarea.insert(END, "%s\n"%(name))
+	textarea.insert(END, "****************************\n")
 	
 	# multivalues
-	query = "SELECT property, label, value FROM ABMultiValue WHERE UID = \"%s\""%user_id
+	query = "SELECT property, label, value FROM ABMultiValue WHERE record_id = \"%s\""%user_id
 	tempcur.execute(query)
 	multivalues = tempcur.fetchall()
 	
+	# acquire multivalue labels
+	query = "SELECT value FROM ABMultiValueLabel"
+	tempcur.execute(query)
+	multivaluelabels = tempcur.fetchall()
+	
 	for multivalue in multivalues:
-		property = multivalue[0]
-		label = multivalue[1]
+		
+		if (multivalue[0] == 3):	
+			property = "Phone number"
+		elif (multivalue[0] == 4):
+			property = "EMail address"
+		elif (multivalue[0] == 5):
+			property = "Multivalue"
+		elif (multivalue[0] == 22):
+			property = "URL"
+		else: 
+			property = "Unknown (%s)"%multivalue[0]
+		
+		label = multivaluelabels[int(multivalue[1]) - 1][0]
+		label = lstrip(label, "_!<$")
+		label = rstrip(label, "_!>$")
+		
 		value = multivalue[2]
-		textarea.insert(END, "%s %s %s\n"%(property, label, value))
+		textarea.insert(END, "%s (%s): %s\n"%(property, label, value))
 		
 		
 	
@@ -98,7 +130,7 @@ def contact_window(filenamenew):
 	    displaycolumns=("name"))
 	
 	contactstree.heading("#0", text="ID", anchor='w')
-	contactstree.heading("name", text="First", anchor='w')
+	contactstree.heading("name", text="Name", anchor='w')
 	
 	contactstree.column("#0", width=80)
 	contactstree.column("name", width=250)
