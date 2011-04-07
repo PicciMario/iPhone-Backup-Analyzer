@@ -36,11 +36,12 @@ def OnClick(event):
 	global filename
 	global contactstree, textarea
 	if (len(contactstree.selection()) == 0): return;
-	user_id = int(contactstree.item(contactstree.selection(), "text"))
 	
 	# check whether the selection is a group or a contact
 	type = contactstree.set(contactstree.selection(), "type")
 	if (type == "G"): return
+	
+	user_id = int(contactstree.item(contactstree.selection(), "text"))
 	
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
