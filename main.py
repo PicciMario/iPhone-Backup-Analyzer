@@ -3,7 +3,7 @@
 '''
  Analyzer for iPhone backup made by Apple iTunes
 
- (C)opyright 2010 Mario Piccinelli <mario.piccinelli@gmail.com>
+ (C)opyright 2011 Mario Piccinelli <mario.piccinelli@gmail.com>
  Released under MIT licence
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -182,7 +182,7 @@ def realFileName(filename="", domaintype=""):
 	if (len(results) > 0):
 		return results[0][0]
 	else:
-		return None	
+		return ""	
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
@@ -570,6 +570,9 @@ if __name__ == '__main__':
 	
 	import smswindow
 	winmenu.add_command(label="SMS browser", command=lambda:smswindow.sms_window(backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")))
+
+	import contactwindow
+	winmenu.add_command(label="Contacts browser", command=lambda:contactwindow.contact_window(backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain"), backup_path + realFileName(filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")))
 	
 	menubar.add_cascade(label="Windows", menu=winmenu)
 	
@@ -984,4 +987,7 @@ if __name__ == '__main__':
 	root.mainloop()
 	
 	database.close() # Close the connection to the database
-	
+
+
+if __name__ == '__main__':
+	print("mille")
