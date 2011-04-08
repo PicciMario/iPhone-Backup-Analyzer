@@ -987,4 +987,7 @@ if __name__ == '__main__':
 	root.mainloop()
 	
 	database.close() # Close the connection to the database
-	
+
+
+if __name__ == '__main__':
+	print("mille")

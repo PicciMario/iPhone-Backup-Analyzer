@@ -21,6 +21,7 @@ import os
 from string import *
 from PIL import Image, ImageTk
 import StringIO
+import getopt
 
 # GLOBALS -----------------------------------------------------------------------------------------
 
