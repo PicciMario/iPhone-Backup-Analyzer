@@ -204,16 +204,32 @@ def contact_window(filenamenew):
 	textarea = Text(contactswindow, bd=2, relief=SUNKEN)
 	textarea.grid(column = 1, row = 1, sticky="nsew")
 	
+	# footer label
+	footerlabel = StringVar()
+	contactsfooter = Label(contactswindow, textvariable = footerlabel, relief = RIDGE)
+	contactsfooter.grid(column = 0, row = 2, sticky="ew", columnspan=2, padx=5, pady=5)
+	
 	# destroy window when closed
 	contactswindow.protocol("WM_DELETE_WINDOW", contactswindow.destroy)
 	
-	# populating tree with Contact names
+	# opening database
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
 
+	# footer statistics
+	query = "SELECT count(ROWID) from ABPerson"
+	tempcur.execute(query)
+	contactsnumber = tempcur.fetchall()[0][0]
+	query = "SELECT count(ROWID) from ABGroup"
+	tempcur.execute(query)
+	groupsnumber = tempcur.fetchall()[0][0]
+	footerlabel.set("Found %s contacts in %s groups."%(contactsnumber, groupsnumber))
+	
+	# populating contacts tree
+
 	# all contacts
 	allnode = contactstree.insert('', 'end', text="", values=("All Contacts", "G"))
-	query = "SELECT ROWID, First, Last, Organization FROM ABPerson"
+	query = "SELECT ROWID, First, Last, Organization FROM ABPerson ORDER BY Last, First, Organization"
 	tempcur.execute(query)
 	people = tempcur.fetchall()
 	for person in people:
@@ -239,7 +255,7 @@ def contact_window(filenamenew):
 		name = group[1]
 		groupnode = contactstree.insert('', 'end', text=groupid, values=(cleanSpace(name), "G"))
 
-		query = "SELECT ABPerson.ROWID, First, Last, Organization FROM ABGroupMembers INNER JOIN ABPerson ON ABGroupMembers.member_id = ABPerson.ROWID WHERE ABGroupMembers.group_id = \"%s\""%groupid
+		query = "SELECT ABPerson.ROWID, First, Last, Organization FROM ABGroupMembers INNER JOIN ABPerson ON ABGroupMembers.member_id = ABPerson.ROWID WHERE ABGroupMembers.group_id = \"%s\" ORDER BY Last, First, Organization"%groupid
 		tempcur.execute(query)
 		people = tempcur.fetchall()
 		
