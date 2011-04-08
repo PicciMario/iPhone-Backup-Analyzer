@@ -27,6 +27,7 @@ import getopt
 
 contactstree = None
 textarea = None
+contactswindow = None
 filename = ""
 thumbsfilename = ""
 
@@ -198,7 +199,7 @@ def OnClick(event):
 	
 def contact_window(filenamenew, thumbsfilenamenew = None):
 	global filename, thumbsfilename
-	global contactstree, textarea
+	global contactstree, textarea, contactswindow
 	filename = filenamenew
 	thumbsfilename = thumbsfilenamenew
 	
@@ -312,3 +313,35 @@ def contact_window(filenamenew, thumbsfilenamenew = None):
 
 	tempdb.close()
 	contactstree.bind("<ButtonRelease-1>", OnClick)
+
+# STANDALONE FUNCTION ---------------------------------------------------------------------------
+
+
+if __name__ == '__main__':
+	# input parameters
+	def usage():
+		print("iPhone Backup Decoder - Contacts window.")
+		print(" -h              : this help")
+		print(" -f <filename>   : filename")
+
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "hf:")
+	except getopt.GetoptError as err:
+		print(str(err))
+		sys.exit(2)
+	
+	file = ""
+	
+	for o, a in opts:
+		if o in ("-h"):
+			usage()
+			sys.exit(0)
+		if o in ("-f"):
+			file = a
+	
+	if (len(file) == 0):
+		usage()
+		sys.exit(0)
+	else:
+		contact_window(file)
+		contactswindow.mainloop()
