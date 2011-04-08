@@ -19,12 +19,19 @@ import ttk
 from datetime import datetime
 import os
 from string import *
+from PIL import Image, ImageTk
+import StringIO
 
 # GLOBALS -----------------------------------------------------------------------------------------
 
 contactstree = None
 textarea = None
 filename = ""
+thumbsfilename = ""
+
+# saves references to images in textarea
+# (to keep them alive after callback end)
+photoImages = []
 
 def cleanSpace(string):
 	if (isinstance(string, str)): string = string.replace(' ', '\ ')
@@ -33,8 +40,10 @@ def cleanSpace(string):
 # Called when the user clicks on the main tree list -----------------------------------------------
 
 def OnClick(event):
-	global filename
+	global filename, thumbsfilename
 	global contactstree, textarea
+	global photoImages
+	
 	if (len(contactstree.selection()) == 0): return;
 	
 	# check whether the selection is a group or a contact
@@ -161,27 +170,55 @@ def OnClick(event):
 		else:
 			textarea.insert(END, "%s (%s): %s\n"%(property, label, value))
 		
+	# print thumbnail (if thumbnail file selected)
+	if (thumbsfilename != None):
+		thumbdb = sqlite3.connect(thumbsfilename)
+		thumbcur = thumbdb.cursor() 
 		
+		query = "SELECT data FROM ABThumbnailImage WHERE record_id = %s"%user_id
+		thumbcur.execute(query)
+		queryresult = thumbcur.fetchall()
+		
+		if (len(queryresult) > 0 ):
+			imagedata = queryresult[0][0]
+			im = Image.open(StringIO.StringIO(imagedata))
+			tkim = ImageTk.PhotoImage(im)
+			del photoImages[:]
+			photoImages.append(tkim)
+			textarea.insert(END,"\n")
+			textarea.image_create(END, image=tkim)		
+		
+		thumbdb.close()
 	
+	# free database file
 	tempdb.close()
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 	
-def contact_window(filenamenew):
-	global filename
+def contact_window(filenamenew, thumbsfilenamenew = None):
+	global filename, thumbsfilename
 	global contactstree, textarea
 	filename = filenamenew
+	thumbsfilename = thumbsfilenamenew
 	
-	print("Filename: %s"%filename)
+	#print("Filename: %s"%filename)
 	
 	if (not os.path.isfile(filename)):
-		print("Invalid file name for SMS database: %s"%filename)
-		return	
+		print("Invalid file name for Contacts database: %s"%filename)
+		return
+	
+	if (thumbsfilename != None):
+		if (not os.path.isfile(thumbsfilename)):
+			print("Invalid file name for Contacts Thumbnails database: %s"%thumbsfilename)
+			return	
 	
 	# main window
 	contactswindow = Toplevel()
 	contactswindow.title('SMS data')
 	contactswindow.focus_set()
+	
+	contactswindow.grid_columnconfigure(1, weight=1)
+	contactswindow.grid_rowconfigure(1, weight=1)
 	
 	# header label
 	contactstitle = Label(contactswindow, text = "Contacts data from: " + filename, relief = RIDGE)

@@ -572,7 +572,7 @@ if __name__ == '__main__':
 	winmenu.add_command(label="SMS browser", command=lambda:smswindow.sms_window(backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")))
 
 	import contactwindow
-	winmenu.add_command(label="Contacts browser", command=lambda:contactwindow.contact_window(backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain")))
+	winmenu.add_command(label="Contacts browser", command=lambda:contactwindow.contact_window(backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain"), backup_path + realFileName(filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")))
 	
 	menubar.add_cascade(label="Windows", menu=winmenu)
 	
