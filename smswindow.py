@@ -130,7 +130,12 @@ def sms_window(filenamenew):
 	# textarea
 	textarea = Text(smswindow, bd=2, relief=SUNKEN)
 	textarea.grid(column = 1, row = 1, sticky="nsew")
-	
+
+	# scrollbars for main textarea
+	tvsb = ttk.Scrollbar(orient="vertical")
+	tvsb.grid(column=3, row=1, sticky='ns')
+	tvsb['command'] = textarea.yview
+		
 	# footer label
 	footerlabel = StringVar()
 	smsfooter = Label(smswindow, textvariable = footerlabel, relief = RIDGE)
