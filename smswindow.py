@@ -120,6 +120,9 @@ def sms_window(filenamenew):
 	smswindow.title('SMS data')
 	smswindow.focus_set()
 	
+	smswindow.grid_columnconfigure(1, weight=1)
+	smswindow.grid_rowconfigure(1, weight=1)
+	
 	# header label
 	smstitle = Label(smswindow, text = "SMS data from: " + filename, relief = RIDGE)
 	smstitle.grid(column = 0, row = 0, sticky="ew", columnspan=2, padx=5, pady=5)
