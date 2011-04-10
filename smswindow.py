@@ -131,12 +131,28 @@ def sms_window(filenamenew):
 	textarea = Text(smswindow, bd=2, relief=SUNKEN)
 	textarea.grid(column = 1, row = 1, sticky="nsew")
 	
+	# footer label
+	footerlabel = StringVar()
+	smsfooter = Label(smswindow, textvariable = footerlabel, relief = RIDGE)
+	smsfooter.grid(column = 0, row = 2, sticky="ew", columnspan=2, padx=5, pady=5)
+	
 	# destroy window when closed
 	smswindow.protocol("WM_DELETE_WINDOW", smswindow.destroy)
 	
-	# populating tree with SMS groups
+	# opening database
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
+	
+	# footer statistics
+	query = "SELECT count(ROWID) FROM msg_group"
+	tempcur.execute(query)
+	groupsnumber = tempcur.fetchall()[0][0]
+	query = "SELECT count(ROWID) FROM message"
+	tempcur.execute(query)
+	smsnumber = tempcur.fetchall()[0][0]
+	footerlabel.set("Found %s messages in %s groups."%(smsnumber, groupsnumber))
+
+	# populating tree with SMS groups
 	query = "SELECT DISTINCT(msg_group.rowid), address FROM msg_group INNER JOIN group_member ON msg_group.rowid = group_member.group_id"
 	tempcur.execute(query)
 	groups = tempcur.fetchall()
