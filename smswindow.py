@@ -120,16 +120,16 @@ def sms_window(filenamenew):
 	smswindow.title('SMS data')
 	smswindow.focus_set()
 	
-	smswindow.grid_columnconfigure(1, weight=1)
+	smswindow.grid_columnconfigure(2, weight=1)
 	smswindow.grid_rowconfigure(1, weight=1)
 	
 	# header label
 	smstitle = Label(smswindow, text = "SMS data from: " + filename, relief = RIDGE)
-	smstitle.grid(column = 0, row = 0, sticky="ew", columnspan=2, padx=5, pady=5)
+	smstitle.grid(column = 0, row = 0, sticky="ew", columnspan=4, padx=5, pady=5)
 
 	# tree
 	groupstree = ttk.Treeview(smswindow, columns=("address"),
-	    displaycolumns=("address"))
+	    displaycolumns=("address"), yscrollcommand=lambda f, l: autoscroll(mvsb, f, l))
 	
 	groupstree.heading("#0", text="ID", anchor='w')
 	groupstree.heading("address", text="Address", anchor='w')
@@ -141,17 +141,22 @@ def sms_window(filenamenew):
 	
 	# textarea
 	textarea = Text(smswindow, bd=2, relief=SUNKEN, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l))
-	textarea.grid(column = 1, row = 1, sticky="nsew")
+	textarea.grid(column = 2, row = 1, sticky="nsew")
+
+	# scrollbars for tree
+	mvsb = ttk.Scrollbar(smswindow, orient="vertical")
+	mvsb.grid(column=1, row=1, sticky='ns')
+	mvsb['command'] = groupstree.yview
 
 	# scrollbars for main textarea
 	tvsb = ttk.Scrollbar(smswindow, orient="vertical")
-	tvsb.grid(column=2, row=1, sticky='ns')
+	tvsb.grid(column=3, row=1, sticky='ns')
 	tvsb['command'] = textarea.yview
 		
 	# footer label
 	footerlabel = StringVar()
 	smsfooter = Label(smswindow, textvariable = footerlabel, relief = RIDGE)
-	smsfooter.grid(column = 0, row = 2, sticky="ew", columnspan=2, padx=5, pady=5)
+	smsfooter.grid(column = 0, row = 2, sticky="ew", columnspan=4, padx=5, pady=5)
 	
 	# destroy window when closed
 	smswindow.protocol("WM_DELETE_WINDOW", smswindow.destroy)
