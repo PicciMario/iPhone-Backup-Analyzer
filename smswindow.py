@@ -25,6 +25,15 @@ groupstree = None
 textarea = None
 filename = ""
 
+def autoscroll(sbar, first, last):
+    """Hide and show scrollbar as needed."""
+    first, last = float(first), float(last)
+    #if first <= 0 and last >= 1:
+    #    sbar.grid_remove()
+    #else:
+    #    sbar.grid()
+    sbar.set(first, last)
+
 # Called when the user clicks on the main tree list -----------------------------------------------
 
 def OnClick(event):
@@ -128,12 +137,12 @@ def sms_window(filenamenew):
 	groupstree.grid(column = 0, row = 1, sticky="ns")
 	
 	# textarea
-	textarea = Text(smswindow, bd=2, relief=SUNKEN)
+	textarea = Text(smswindow, bd=2, relief=SUNKEN, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l))
 	textarea.grid(column = 1, row = 1, sticky="nsew")
 
 	# scrollbars for main textarea
-	tvsb = ttk.Scrollbar(orient="vertical")
-	tvsb.grid(column=3, row=1, sticky='ns')
+	tvsb = ttk.Scrollbar(smswindow, orient="vertical")
+	tvsb.grid(column=2, row=1, sticky='ns')
 	tvsb['command'] = textarea.yview
 		
 	# footer label
