@@ -25,9 +25,11 @@ Binary plist files are translated on runtime into their XML counterpart by the M
 User is presented with the list of tables in SQLite databases, and can immediately see the content of each and the structure of the fields.
 
 Built separate windows to show:
+
 * text messages by thread
 * contacts by groups
 * Safari bookmarks
+
 More views will be written to see calendar, notes, ....
 
 # Requires:
