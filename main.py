@@ -78,8 +78,12 @@ photoImages = []
 rowsoffset = 0
 rowsnumber = 100
 
+# set SMALLMONITOR to 1 to modify main UI for small monitors
+# (such as a 7' Asus eeepc)
+smallmonitor = 0
+
 # global font configuration
-globalfont=('Helvetica', 12, 'normal')
+globalfont=('Times', 12, 'normal')
 
 # FUNCTIONS -------------------------------------------------------------------------------------------
 
@@ -224,19 +228,19 @@ def buttonBoxPress(event):
 		textarea.mark_set("current", searchindex)
 		textarea.yview(searchindex)
 	
-	# WRITE TEXT TO FILE button
-	
-	elif (event.widget['text'] == "Write txt"):
-		outfile = tkFileDialog.asksaveasfile(mode='w', parent=root, initialdir='/home/', title='Select output text file')
-		if (outfile):
-			text = textarea.get("1.0", END)
-			outfile.write(text)
-			tkMessageBox.showwarning("Done", "Text saved\n")
-			outfile.close()
-		else:
-			tkMessageBox.showwarning("Error", "Text NON saved\n")
+# WRITE TEXT TO FILE button
 
-	return ""
+def writeTXT(): 
+
+	outfile = tkFileDialog.asksaveasfile(mode='w', parent=root, initialdir='/home/', title='Select output text file')
+	if (outfile):
+		text = textarea.get("1.0", END)
+		outfile.write(text)
+		tkMessageBox.showwarning("Done", "Text saved\n")
+		outfile.close()
+	else:
+		tkMessageBox.showwarning("Error", "Text NON saved\n")
+
 
 # Called when the "convert from unix timestamp" button is clicked  ------------------------------------
 
@@ -267,9 +271,10 @@ if __name__ == '__main__':
 		print("iPBD - iPhone backup decoder.")
 		print(" -h              : this help")
 		print(" -d <dir>        : backup dir (default: " + backup_path + ")")
+		print("-s               : adapt main UI for small monitors (such as 7')")
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hd:")
+		opts, args = getopt.getopt(sys.argv[1:], "hd:s")
 	except getopt.GetoptError as err:
 		print(str(err))
 		sys.exit(2)
@@ -280,11 +285,14 @@ if __name__ == '__main__':
 			sys.exit(0)
 		
 		if o in ("-d"):
-			backup_path = a;
+			backup_path = a
 			if (backup_path.strip()[-1] != "/"):
 				backup_path = backup_path + "/"
+		
+		if o in ("-s"):
+			smallmonitor = 1
+			globalfont=('Times', 10, 'normal')
 
-	
 	# decode Manifest files
 	mbdb = mbdbdecoding.process_mbdb_file(backup_path + "Manifest.mbdb")
 	mbdx = mbdbdecoding.process_mbdx_file(backup_path + "Manifest.mbdx")
@@ -431,8 +439,14 @@ if __name__ == '__main__':
 	    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
 	tree.heading("#0", text="Element description", anchor='w')
 	tree.heading("size", text="File Size", anchor='w')
-	tree.column("#0", width=250)
-	tree.column("size", width=50)
+	
+	if (smallmonitor == 1):
+		tree.column("#0", width=200)
+		tree.column("size", width=30)
+	else:
+		tree.column("#0", width=250)
+		tree.column("size", width=50)	
+	
 	vsb['command'] = tree.yview
 	hsb['command'] = tree.xview
 	tree.grid(column=0, row=3, sticky='nswe')
@@ -467,16 +481,6 @@ if __name__ == '__main__':
 	
 	w = Button(buttonbox, text="Convert", width=10, default=ACTIVE, font=globalfont)
 	w.bind("<Button-1>", convertTimeStamp)
-	w.pack()
-
-	w = Label(buttonbox, text="Save as text file", font=globalfont)
-	w.pack()
-	
-	w = Button(buttonbox, text="Write txt", width=10, default=ACTIVE, font=globalfont)
-	w.bind("<Button-1>", buttonBoxPress)
-	w.pack()
-	
-	w = ttk.Separator(buttonbox, orient=HORIZONTAL)
 	w.pack()
 
 	# tables tree (in right column)
@@ -607,6 +611,9 @@ if __name__ == '__main__':
 	placesmenu.add_command(label="Calendar", command=lambda:placesMenu(filename="Calendar.sqlitedb"))
 	placesmenu.add_command(label="Notes", command=lambda:placesMenu(filename="notes.sqlite"))
 	placesmenu.add_command(label="SMS", command=lambda:placesMenu(filename="sms.db"))
+
+	placesmenu.add_separator()
+	placesmenu.add_command(label="Write txt", command=writeTXT)
 		
 	menubar.add_cascade(label="Places", menu=placesmenu)
 	
