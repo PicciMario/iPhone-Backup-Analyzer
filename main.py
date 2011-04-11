@@ -491,6 +491,11 @@ if __name__ == '__main__':
 	
 	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
 	tablestree.heading("#0", text="Tables")
+	
+	if (smallmonitor == 1):
+		tablestree.column("#0", width=150)
+	else:
+		tablestree.column("#0", width=200)
 	tablestree.pack(fill=BOTH, expand=1)
 	
 	# log row
