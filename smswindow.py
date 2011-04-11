@@ -25,6 +25,15 @@ groupstree = None
 textarea = None
 filename = ""
 
+def autoscroll(sbar, first, last):
+    """Hide and show scrollbar as needed."""
+    #first, last = float(first), float(last)
+    #if first <= 0 and last >= 1:
+    #    sbar.grid_remove()
+    #else:
+    #    sbar.grid()
+    sbar.set(first, last)
+
 # Called when the user clicks on the main tree list -----------------------------------------------
 
 def OnClick(event):
@@ -111,13 +120,16 @@ def sms_window(filenamenew):
 	smswindow.title('SMS data')
 	smswindow.focus_set()
 	
+	smswindow.grid_columnconfigure(2, weight=1)
+	smswindow.grid_rowconfigure(1, weight=1)
+	
 	# header label
 	smstitle = Label(smswindow, text = "SMS data from: " + filename, relief = RIDGE)
-	smstitle.grid(column = 0, row = 0, sticky="ew", columnspan=2, padx=5, pady=5)
+	smstitle.grid(column = 0, row = 0, sticky="ew", columnspan=4, padx=5, pady=5)
 
 	# tree
 	groupstree = ttk.Treeview(smswindow, columns=("address"),
-	    displaycolumns=("address"))
+	    displaycolumns=("address"), yscrollcommand=lambda f, l: autoscroll(mvsb, f, l))
 	
 	groupstree.heading("#0", text="ID", anchor='w')
 	groupstree.heading("address", text="Address", anchor='w')
@@ -128,15 +140,41 @@ def sms_window(filenamenew):
 	groupstree.grid(column = 0, row = 1, sticky="ns")
 	
 	# textarea
-	textarea = Text(smswindow, bd=2, relief=SUNKEN)
-	textarea.grid(column = 1, row = 1, sticky="nsew")
+	textarea = Text(smswindow, bd=2, relief=SUNKEN, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l))
+	textarea.grid(column = 2, row = 1, sticky="nsew")
+
+	# scrollbars for tree
+	mvsb = ttk.Scrollbar(smswindow, orient="vertical")
+	mvsb.grid(column=1, row=1, sticky='ns')
+	mvsb['command'] = groupstree.yview
+
+	# scrollbars for main textarea
+	tvsb = ttk.Scrollbar(smswindow, orient="vertical")
+	tvsb.grid(column=3, row=1, sticky='ns')
+	tvsb['command'] = textarea.yview
+		
+	# footer label
+	footerlabel = StringVar()
+	smsfooter = Label(smswindow, textvariable = footerlabel, relief = RIDGE)
+	smsfooter.grid(column = 0, row = 2, sticky="ew", columnspan=4, padx=5, pady=5)
 	
 	# destroy window when closed
 	smswindow.protocol("WM_DELETE_WINDOW", smswindow.destroy)
 	
-	# populating tree with SMS groups
+	# opening database
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
+	
+	# footer statistics
+	query = "SELECT count(ROWID) FROM msg_group"
+	tempcur.execute(query)
+	groupsnumber = tempcur.fetchall()[0][0]
+	query = "SELECT count(ROWID) FROM message"
+	tempcur.execute(query)
+	smsnumber = tempcur.fetchall()[0][0]
+	footerlabel.set("Found %s messages in %s groups."%(smsnumber, groupsnumber))
+
+	# populating tree with SMS groups
 	query = "SELECT DISTINCT(msg_group.rowid), address FROM msg_group INNER JOIN group_member ON msg_group.rowid = group_member.group_id"
 	tempcur.execute(query)
 	groups = tempcur.fetchall()

@@ -316,7 +316,6 @@ def contact_window(filenamenew, thumbsfilenamenew = None):
 
 # STANDALONE FUNCTION ---------------------------------------------------------------------------
 
-
 if __name__ == '__main__':
 	# input parameters
 	def usage():

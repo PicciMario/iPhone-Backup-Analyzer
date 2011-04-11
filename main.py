@@ -74,6 +74,10 @@ backup_path = "Backup2/"
 # (to keep them alive after callback end)
 photoImages = []
 
+# limits the display of rows dumped from a table
+rowsoffset = 0
+rowsnumber = 100
+
 # FUNCTIONS -------------------------------------------------------------------------------------------
 
 def substWith(text, subst = "-"):
@@ -504,19 +508,57 @@ if __name__ == '__main__':
 	
 	headerbox.grid(column=0, row=0, sticky='ew', columnspan=6, padx=5, pady=5)
 
+	# center column
+	centercolumn = Frame(root, bd=2, relief=RAISED);
+	centercolumn.grid(column = 2, row = 1, sticky="nsew")
+	centercolumn.grid_columnconfigure(0, weight=1)
+	centercolumn.grid_rowconfigure(0, weight=1)
+
 	# main textarea
-	textarea = Text(root, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
-	    xscrollcommand=lambda f, l:autoscroll(thsb, f, l), bd=2, relief=SUNKEN)
-	textarea.grid(column=2, row=1, sticky="nsew")
+	textarea = Text(centercolumn, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
+	    bd=2, relief=SUNKEN)
+	textarea.grid(column=0, row=0, sticky="nsew")
 
 	# scrollbars for main textarea
-	tvsb = ttk.Scrollbar(orient="vertical")
-	thsb = ttk.Scrollbar(orient="horizontal")
-	tvsb.grid(column=3, row=1, sticky='ns')
-	thsb.grid(column=2, row=3, sticky='ew')
+	tvsb = ttk.Scrollbar(centercolumn, orient="vertical")
+	tvsb.grid(column=1, row=0, sticky='ns')
 	tvsb['command'] = textarea.yview
-	thsb['command'] = textarea.xview
 	
+	# block for selecting limit for browsing table fields
+	tableblock = Frame(centercolumn, bd=2, relief=RAISED);
+	tableblock.grid(column = 0, row = 1, sticky="nsew")	
+	tableblock.grid_columnconfigure(1, weight=1)
+
+	def recordlabelupdate():
+		global rowsoffset, rowsnumber
+		fieldlabeltext.set("Showing records from %i to %i."%(rowsoffset*rowsnumber, (rowsoffset+1)*rowsnumber-1));
+	
+	def recordplusbutton(event):
+		global rowsoffset
+		rowsoffset = rowsoffset+1
+		recordlabelupdate()
+		TablesTreeClick(None)
+
+	def recordlessbutton(event):
+		global rowsoffset
+		rowsoffset = rowsoffset-1
+		if (rowsoffset < 0): rowsoffset = 0
+		recordlabelupdate()
+		TablesTreeClick(None)
+
+	fieldless = Button(tableblock, text="<", width=10, default=ACTIVE)
+	fieldless.bind("<Button-1>", recordlessbutton)
+	fieldless.grid(column=0, row=0, sticky="nsew")
+
+	fieldlabeltext = StringVar()
+	fieldlabel = Label(tableblock, textvariable = fieldlabeltext, relief = RIDGE)
+	fieldlabel.grid(column=1, row=0, sticky="nsew")
+	recordlabelupdate()
+
+	fieldplus = Button(tableblock, text=">", width=10, default=ACTIVE)
+	fieldplus.bind("<Button-1>", recordplusbutton)
+	fieldplus.grid(column=2, row=0, sticky="nsew")
+
 	# menu --------------------------------------------------------------------------------------------------
 	
 	def aboutBox():
@@ -638,6 +680,11 @@ if __name__ == '__main__':
 	
 	def TablesTreeClick(event):
 	
+		global rowsoffset, rowsnumber
+		if (event != None): 
+			rowsoffset = 0
+			recordlabelupdate()
+
 		if (len(tablestree.selection()) == 0): return;
 		
 		seltable = tablestree.selection()[0]
@@ -668,9 +715,17 @@ if __name__ == '__main__':
 					maintext("\n- ")
 					maintext("%i \"%s\" (%s)" %(seltable_field[0], seltable_field[1], seltable_field[2]))
 					seltable_fieldslist.append(str(seltable_field[1]))
+
+				# count fields from selected table
+				seltablecur.execute("SELECT COUNT(*) FROM %s" % seltable_tablename)
+				seltable_rownumber = seltablecur.fetchall();
+				maintext("\n\nThe selected table has %s rows"%seltable_rownumber[0][0])
+				limit = rowsnumber
+				offset = rowsoffset*rowsnumber
+				maintext("\nShowing %i rows from row %i."%(limit, offset))
 							
 				# read all fields from selected table
-				seltablecur.execute("SELECT * FROM %s" % seltable_tablename)
+				seltablecur.execute("SELECT * FROM %s LIMIT %i OFFSET %i" % (seltable_tablename, limit, offset))
 				seltable_cont = seltablecur.fetchall();
 				
 				try:
@@ -987,7 +1042,4 @@ if __name__ == '__main__':
 	root.mainloop()
 	
 	database.close() # Close the connection to the database
-
-
-if __name__ == '__main__':
-	print("mille")
+	
