@@ -27,6 +27,7 @@ textarea = None
 filename = ""
 namelabel = None
 urllabel = None
+url = ""
 
 def autoscroll(sbar, first, last):
     """Hide and show scrollbar as needed."""
@@ -38,8 +39,7 @@ def autoscroll(sbar, first, last):
     sbar.set(first, last)
    
 def openurl(event):
-	global urllabel
-	url = urllabel.get()
+	global url
 	if (len(url) == 0):
 		return
 	webbrowser.open_new(url)
@@ -49,7 +49,7 @@ def openurl(event):
 def OnClick(event):
 	global filename
 	global bookmarkstree, textarea
-	global namelabel, urllabel
+	global namelabel, urllabel, url
 	
 	if (len(bookmarkstree.selection()) == 0): return;
 	bookmark = int(bookmarkstree.set(bookmarkstree.selection(), "id"))
@@ -67,7 +67,7 @@ def OnClick(event):
 	bookmark = bookmarks[0]
 	type = bookmark[0]
 	title = bookmark[1]
-	url = bookmark[2]
+	newurl = bookmark[2]
 	num_children = bookmark[3]
 	editable = bookmark[4]
 	deletable = bookmark[5]
@@ -76,8 +76,18 @@ def OnClick(event):
 	
 	textarea.delete(1.0, END)
 	
+	textarea.insert(END, "Title: %s\n"%title)
+	textarea.insert(END, "URL: %s\n"%newurl)
+
+	# store url in global for the "GO" button to work with
+	url = newurl
+
+	# set title and url labels limiting length
+	maxlen = 50
+	if (len(title) > maxlen): title = title[0:maxlen] + "..."
 	namelabel.set(title)
-	urllabel.set(url)
+	if (len(newurl) > maxlen): newurl = newurl[0:maxlen] + "..."
+	urllabel.set(newurl)
 	
 	if (type == 0):
 		textarea.insert(END, "Type: simple URL\n")
@@ -106,7 +116,7 @@ def OnClick(event):
 def safbookmark_window(filenamenew):
 	global filename
 	global bookmarkstree, textarea
-	global namelabel, urllabel
+	global namelabel, urllabel, url
 	
 	filename = filenamenew
 	
@@ -194,7 +204,7 @@ def safbookmark_window(filenamenew):
 	footerlabel.set("Found %s bookmarks."%(bookmarksnumber))
 
 	def insertBookmark(parent_node, parent_id):
-		query = "SELECT id, title, num_children FROM bookmarks WHERE parent = \"%s\""%parent_id
+		query = "SELECT id, title, num_children FROM bookmarks WHERE parent = \"%s\" ORDER BY order_index"%parent_id
 		tempcur.execute(query)
 		bookmarks = tempcur.fetchall()
 		for bookmark in bookmarks:
