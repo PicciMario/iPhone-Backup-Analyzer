@@ -78,6 +78,9 @@ photoImages = []
 rowsoffset = 0
 rowsnumber = 100
 
+# global font configuration
+globalfont=('Helvetica', 12, 'normal')
+
 # FUNCTIONS -------------------------------------------------------------------------------------------
 
 def substWith(text, subst = "-"):
@@ -421,14 +424,14 @@ if __name__ == '__main__':
 	hsb = ttk.Scrollbar(leftcol, orient="horizontal")
 	  
 	# main tree view definition
-	w = Label(leftcol, text="Backup content:")
+	w = Label(leftcol, text="Backup content:", font=globalfont)
 	w.grid(column=0, row=2, sticky='ew')
 	tree = ttk.Treeview(leftcol, columns=("type", "size", "id"),
 	    displaycolumns=("size"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
 	    xscrollcommand=lambda f, l:autoscroll(hsb, f, l))
 	tree.heading("#0", text="Element description", anchor='w')
 	tree.heading("size", text="File Size", anchor='w')
-	tree.column("#0", width=300)
+	tree.column("#0", width=250)
 	tree.column("size", width=50)
 	vsb['command'] = tree.yview
 	hsb['command'] = tree.xview
@@ -437,39 +440,39 @@ if __name__ == '__main__':
 	hsb.grid(column=0, row=4, sticky='ew')
 	
 	# device info box
-	w = Label(leftcol, text="Device data:")
+	w = Label(leftcol, text="Device data:", font=globalfont)
 	w.grid(column=0, row=0, sticky='ew')
-	infobox = Text(leftcol, relief="sunken", borderwidth=2, height=10, width=20)
+	infobox = Text(leftcol, relief="sunken", borderwidth=2, height=10, width=20, font=globalfont)
 	infobox.grid(column=0, row=1, sticky='ew')
 	
 	# right column
 	buttonbox = Frame(root, bd=2, relief=RAISED);
 	buttonbox.grid(column = 4, row = 1, sticky="ns", padx=5, pady=5)
 	
-	w = Label(buttonbox, text="Text search")
+	w = Label(buttonbox, text="Text search", font=globalfont)
 	w.pack()
 	
-	searchbox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2)
+	searchbox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2, font=globalfont)
 	searchbox.pack()
 	
-	w = Button(buttonbox, text="Search", width=10, default=ACTIVE)
+	w = Button(buttonbox, text="Search", width=10, default=ACTIVE, font=globalfont)
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
 
-	w = Label(buttonbox, text="Timestamp translation")
+	w = Label(buttonbox, text="Timestamp translation", font=globalfont)
 	w.pack()
 	
-	timebox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2)
+	timebox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2, font=globalfont)
 	timebox.pack()
 	
-	w = Button(buttonbox, text="Convert", width=10, default=ACTIVE)
+	w = Button(buttonbox, text="Convert", width=10, default=ACTIVE, font=globalfont)
 	w.bind("<Button-1>", convertTimeStamp)
 	w.pack()
 
-	w = Label(buttonbox, text="Save as text file")
+	w = Label(buttonbox, text="Save as text file", font=globalfont)
 	w.pack()
 	
-	w = Button(buttonbox, text="Write txt", width=10, default=ACTIVE)
+	w = Button(buttonbox, text="Write txt", width=10, default=ACTIVE, font=globalfont)
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
 	
@@ -477,7 +480,7 @@ if __name__ == '__main__':
 	w.pack()
 
 	# tables tree (in right column)
-	w = Label(buttonbox, text="Database tables")
+	w = Label(buttonbox, text="Database tables", font=globalfont)
 	w.pack()
 	
 	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
@@ -485,7 +488,7 @@ if __name__ == '__main__':
 	tablestree.pack(fill=BOTH, expand=1)
 	
 	# log row
-	logbox = Text(root, relief="sunken", borderwidth=2, height=3, bg='lightgray')
+	logbox = Text(root, relief="sunken", borderwidth=2, height=3, bg='lightgray', font=globalfont)
 	logbox.grid(row=4, columnspan=6, sticky='ew')
 	
 	# header row
@@ -503,7 +506,7 @@ if __name__ == '__main__':
 	w.photo = photo
 	w.pack(side=RIGHT)
 	
-	w = Label(headerbox, text="iPBD - iPhone Backup Decoder\nVersion: %s (%s)"%(version, creation_date))
+	w = Label(headerbox, text="iPBD - iPhone Backup Decoder\nVersion: %s (%s)"%(version, creation_date), font=globalfont)
 	w.pack()
 	
 	headerbox.grid(column=0, row=0, sticky='ew', columnspan=6, padx=5, pady=5)
@@ -516,7 +519,7 @@ if __name__ == '__main__':
 
 	# main textarea
 	textarea = Text(centercolumn, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
-	    bd=2, relief=SUNKEN)
+	    bd=2, relief=SUNKEN, font=globalfont)
 	textarea.grid(column=0, row=0, sticky="nsew")
 
 	# scrollbars for main textarea
@@ -546,16 +549,16 @@ if __name__ == '__main__':
 		recordlabelupdate()
 		TablesTreeClick(None)
 
-	fieldless = Button(tableblock, text="<", width=10, default=ACTIVE)
+	fieldless = Button(tableblock, text="<", width=10, default=ACTIVE, font=globalfont)
 	fieldless.bind("<Button-1>", recordlessbutton)
 	fieldless.grid(column=0, row=0, sticky="nsew")
 
 	fieldlabeltext = StringVar()
-	fieldlabel = Label(tableblock, textvariable = fieldlabeltext, relief = RIDGE)
+	fieldlabel = Label(tableblock, textvariable = fieldlabeltext, relief = RIDGE, font=globalfont)
 	fieldlabel.grid(column=1, row=0, sticky="nsew")
 	recordlabelupdate()
 
-	fieldplus = Button(tableblock, text=">", width=10, default=ACTIVE)
+	fieldplus = Button(tableblock, text=">", width=10, default=ACTIVE, font=globalfont)
 	fieldplus.bind("<Button-1>", recordplusbutton)
 	fieldplus.grid(column=2, row=0, sticky="nsew")
 
@@ -630,18 +633,21 @@ if __name__ == '__main__':
 	
 	# populate the main tree frame ----------------------------------------------------------------------------
 	
-	# standard files	
-	base_files_index = tree.insert('', 'end', text="Standard files")
-	tree.insert(base_files_index, 'end', text="Manifest.plist", values=("X", "", 0))
-	tree.insert(base_files_index, 'end', text="Info.plist", values=("X", "", 0))
-	tree.insert(base_files_index, 'end', text="Status.plist", values=("X", "", 0))
+	# standard files
+	
+	tree.tag_configure('base', font=globalfont)
+		
+	base_files_index = tree.insert('', 'end', text="Standard files", tag='base')
+	tree.insert(base_files_index, 'end', text="Manifest.plist", values=("X", "", 0), tag='base')
+	tree.insert(base_files_index, 'end', text="Info.plist", values=("X", "", 0), tag='base')
+	tree.insert(base_files_index, 'end', text="Status.plist", values=("X", "", 0), tag='base')
 	
 	cursor.execute("SELECT DISTINCT(domain_type) FROM indice");
 	domain_types = cursor.fetchall()
 	
 	for domain_type_u in domain_types:
 		domain_type = str(domain_type_u[0])
-		domain_type_index = tree.insert('', 'end', text=domain_type)
+		domain_type_index = tree.insert('', 'end', text=domain_type, tag='base')
 		print("Extracting: %s" %domain_type)
 		
 		query = "SELECT DISTINCT(domain) FROM indice WHERE domain_type = \"%s\" ORDER BY domain" % domain_type
@@ -651,7 +657,7 @@ if __name__ == '__main__':
 		for domain_name_u in domain_names:
 			domain_name = str(domain_name_u[0])
 			
-			domain_name_index = tree.insert(domain_type_index, 'end', text=substWith(domain_name, "<no domain>"))
+			domain_name_index = tree.insert(domain_type_index, 'end', text=substWith(domain_name, "<no domain>"), tag='base')
 			
 			query = "SELECT DISTINCT(file_path) FROM indice WHERE domain_type = \"%s\" AND domain = \"%s\" ORDER BY file_path" %(domain_type, domain_name)
 			cursor.execute(query)
@@ -659,7 +665,7 @@ if __name__ == '__main__':
 			
 			for path_u in paths:
 				path = str(path_u[0])
-				path_index = tree.insert(domain_name_index, 'end', text=substWith(path, "/"))
+				path_index = tree.insert(domain_name_index, 'end', text=substWith(path, "/"), tag='base')
 				
 				query = "SELECT file_name, filelen, id, type FROM indice WHERE domain_type = \"%s\" AND domain = \"%s\" AND file_path = \"%s\" ORDER BY file_name" %(domain_type, domain_name, path)
 				cursor.execute(query)
@@ -673,7 +679,7 @@ if __name__ == '__main__':
 						file_dim = str(file[1] / 1024) + " kb"
 					file_id = int(file[2])
 					file_type = str(file[3])
-					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type, file_dim, file_id))
+					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type, file_dim, file_id), tag='base')
 			
 
 	# called when an element is clicked in the tables tree frame ------------------------------------------------
@@ -994,7 +1000,8 @@ if __name__ == '__main__':
 						elem_count = tempcur.fetchone()
 						maintext(" (%i elements) " % int(elem_count[0]))
 						# inserts table into tables tree
-						tablestree.insert('', 'end', text=table_name, values=(item_realpath, table_name))	
+						tablestree.tag_configure('base', font=globalfont)
+						tablestree.insert('', 'end', text=table_name, values=(item_realpath, table_name), tag="base")	
 					except:
 						#probably a virtual table?
 						maintext(" (unable to read) ")
