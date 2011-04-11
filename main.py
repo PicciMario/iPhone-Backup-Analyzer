@@ -83,7 +83,9 @@ rowsnumber = 100
 smallmonitor = 0
 
 # global font configuration
-globalfont=('Times', 12, 'normal')
+normalglobalfont = ('Times', 12, 'normal')
+smallglobalfont = ('Times', 8, 'normal')
+globalfont=normalglobalfont
 
 # FUNCTIONS -------------------------------------------------------------------------------------------
 
@@ -291,7 +293,7 @@ if __name__ == '__main__':
 		
 		if o in ("-s"):
 			smallmonitor = 1
-			globalfont=('Times', 10, 'normal')
+			globalfont=smallglobalfont
 
 	# decode Manifest files
 	mbdb = mbdbdecoding.process_mbdb_file(backup_path + "Manifest.mbdb")
