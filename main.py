@@ -634,7 +634,10 @@ if __name__ == '__main__':
 	winmenu.add_command(label="Contacts browser", command=lambda:contactwindow.contact_window(backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain"), backup_path + realFileName(filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")))
 	
 	import safbookmark
-	winmenu.add_command(label="Safari Bookmarks", command=lambda:safbookmark.safbookmark_window(backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")))	
+	winmenu.add_command(label="Safari Bookmarks", command=lambda:safbookmark.safbookmark_window(backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")))
+	
+	import celllocation
+	winmenu.add_command(label="Cell Locations", command=lambda:celllocation.cell_window(backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")))		
 	
 	menubar.add_cascade(label="Windows", menu=winmenu)
 	
