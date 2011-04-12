@@ -38,7 +38,7 @@ def autoscroll(sbar, first, last):
 
 # called when the user double clicks on the cell tree list ----------------------------------------
 
-def OnCellClick(event):
+def OnCellDoubleClick(event):
 	global filename
 	global datetree, textarea, cellstree
 	if (len(cellstree.selection()) == 0): return;
@@ -46,6 +46,48 @@ def OnCellClick(event):
 	lat = cellstree.set(cellstree.selection(), "lat")
 	url = "http://www.openstreetmap.org/index.html?mlat=%s&mlon=%s&zoom=12"%(lat, lon)
 	webbrowser.open_new(url)
+	
+# called when the user clicks on the cell tree list ----------------------------------------------
+
+def OnCellClick(event):
+	global filename
+	global datetree, textarea, cellstree
+	if (len(cellstree.selection()) == 0): return
+	mcc = cellstree.item(cellstree.selection(), "text")
+	mnc = cellstree.set(cellstree.selection(), "mnc")
+	lac = cellstree.set(cellstree.selection(), "lac")
+	ci = cellstree.set(cellstree.selection(), "ci")
+		
+	lon = cellstree.set(cellstree.selection(), "lon")
+	lat = cellstree.set(cellstree.selection(), "lat")
+	alt = cellstree.set(cellstree.selection(), "alt")
+	
+	hacc = cellstree.set(cellstree.selection(), "hacc")
+	vacc = cellstree.set(cellstree.selection(), "vacc")
+	speed = cellstree.set(cellstree.selection(), "speed")
+	course = cellstree.set(cellstree.selection(), "course")
+	confidence = cellstree.set(cellstree.selection(), "confidence")
+	
+	# clears textarea
+	textarea.delete(1.0, END)
+	
+	if (mcc == "" and mnc == ""): return
+	
+	textarea.insert(END, "MCC (mobile country code): %s\n"%mcc)	
+	textarea.insert(END, "MNC (mobile network code): %s\n"%mnc)
+	textarea.insert(END, "LAC (location area code): %s\n"%lac)
+	textarea.insert(END, "CI (cell id): %s\n"%ci)
+	textarea.insert(END, "\n")
+	textarea.insert(END, "Latitude: %s\n"%lat)
+	textarea.insert(END, "Longitude: %s\n"%lon)
+	textarea.insert(END, "Altitude: %s\n"%alt)
+	textarea.insert(END, "\n")
+	textarea.insert(END, "Horizontal accuracy: %s\n"%hacc)
+	textarea.insert(END, "Vertical accuracy: %s\n"%vacc)
+	textarea.insert(END, "Speed: %s\n"%speed)
+	textarea.insert(END, "Course: %s\n"%course)
+	textarea.insert(END, "Confidence: %s\n"%confidence)
+	
 
 # Called when the user clicks on the main tree list -----------------------------------------------
 
@@ -57,7 +99,7 @@ def OnClick(event):
 	
 	tempdb = sqlite3.connect(filename)
 	tempcur = tempdb.cursor() 
-	query = "SELECT MCC, MNC, LAC, CI, Latitude, Longitude, Altitude FROM CellLocation WHERE timestamp = %s"%timestamp
+	query = "SELECT MCC, MNC, LAC, CI, Latitude, Longitude, Altitude, HorizontalAccuracy, VerticalAccuracy, Speed, Course, Confidence FROM CellLocation WHERE timestamp = %s"%timestamp
 	tempcur.execute(query)
 	cells = tempcur.fetchall()
 	
@@ -87,8 +129,13 @@ def OnClick(event):
 		latitude = cell[4]
 		longitude = cell[5]
 		altitude = cell[6]
+		hacc = cell[7]
+		vacc = cell[8]
+		speed = cell[9]
+		course = cell[10]
+		confidence = cell[11]
 
-		cellstree.insert('', 'end', text=mcc, values=(mnc, lac, ci, latitude, longitude, altitude))
+		cellstree.insert('', 'end', text=mcc, values=(mnc, lac, ci, latitude, longitude, altitude, hacc, vacc, speed, course, confidence))
 		
 		# keep totals for calculating average
 		sum_lat += latitude
@@ -97,7 +144,7 @@ def OnClick(event):
 		sum_num += 1
 	
 	# calculates and inserts average values
-	cellstree.insert('', 'end', text="", values=("", "", "AVG:", sum_lat/sum_num, sum_lon/sum_num, sum_alt/sum_num))
+	cellstree.insert('', 'end', text="", values=("", "", "Average:", sum_lat/sum_num, sum_lon/sum_num, sum_alt/sum_num))
 
 	tempdb.close()
 
@@ -140,10 +187,15 @@ def cell_window(filenamenew):
 	mainblock = Frame(cellwindow, bd=2, relief=RAISED);
 	mainblock.grid(column=2, row=1, sticky="nsew")
 	mainblock.grid_columnconfigure(0, weight=1)
-	mainblock.grid_rowconfigure(1, weight=1)
+	mainblock.grid_rowconfigure(2, weight=1)
+
+	# main block label
+	mainblocklabel = Label(mainblock, text="Click on the list to show description, double click to show location in browser", relief=RIDGE)
+	mainblocklabel.grid(column = 0, row = 0, sticky="nsew")
 
 	# tree
-	cellstree = ttk.Treeview(mainblock, columns=("mnc", "lac", "ci", "lat", "lon", "alt"),
+	cellstree = ttk.Treeview(mainblock, 
+		columns=("mnc", "lac", "ci", "lat", "lon", "alt", "hacc", "vacc", "speed", "course", "confidence"),
 	    displaycolumns=("mnc", "lac", "ci", "lat", "lon", "alt"))
 	
 	cellstree.heading("#0", text="MCC", anchor='w')
@@ -167,15 +219,15 @@ def cell_window(filenamenew):
 	cellstree.heading("alt", text="ALT", anchor='w')
 	cellstree.column("alt", width=50)
 	
-	cellstree.grid(column = 0, row = 0, sticky="nsew")
+	cellstree.grid(column = 0, row = 1, sticky="nsew")
 
 	# textarea
 	textarea = Text(mainblock, bd=2, relief=SUNKEN, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l))
-	textarea.grid(column = 0, row = 1, sticky="nsew")
+	textarea.grid(column = 0, row = 2, sticky="nsew")
 
 	# scrollbars for main textarea
 	tvsb = ttk.Scrollbar(mainblock, orient="vertical")
-	tvsb.grid(column=1, row=1, sticky='ns')
+	tvsb.grid(column=1, row=2, sticky='ns')
 	tvsb['command'] = textarea.yview
 		
 	# footer label
@@ -207,4 +259,5 @@ def cell_window(filenamenew):
 		datetree.insert('', 'end', text=converted, values=(raw))
 		
 	datetree.bind("<ButtonRelease-1>", OnClick)
-	cellstree.bind("<Double-Button-1>", OnCellClick)
+	cellstree.bind("<Double-Button-1>", OnCellDoubleClick)
+	cellstree.bind("<ButtonRelease-1>", OnCellClick)
