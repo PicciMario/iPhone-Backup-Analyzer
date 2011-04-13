@@ -856,7 +856,7 @@ if __name__ == '__main__':
 				if (filemagic.partition("/")[2] == "binary_plist"):	
 					manifest_tempfile = "out.plist" #default name from perl script plutil.pl
 					#os.system("plutil -convert xml1 -o temp01 " + item_realpath)
-					command = "perl plutil.pl " + item_realpath
+					command = "perl plutil.pl \"%s\" "%item_realpath
 					log("Executing: %s"%command)
 					os.system(command)
 					
@@ -986,7 +986,7 @@ if __name__ == '__main__':
 		if (filemagic.partition("/")[2] == "binary_plist"):	
 			manifest_tempfile = "out.plist" #default name from perl script plutil.pl
 			#os.system("plutil -convert xml1 -o temp01 " + item_realpath)
-			command = "perl plutil.pl " + item_realpath
+			command = "perl plutil.pl \"%s\""%item_realpath
 			log("Executing: %s"%command)
 			os.system(command)
 			
