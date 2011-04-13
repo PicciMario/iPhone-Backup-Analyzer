@@ -51,6 +51,10 @@ from PIL import Image, ImageTk
 from PIL.ExifTags import TAGS
 # String IO to pass data dumps from databases directly to PIL
 import StringIO	
+# decode base64 encoded text
+import base64
+# string functions
+import string
 
 # APPLICATION FILES IMPORTS -------------------------------------------------------------------------
 
@@ -606,6 +610,16 @@ if __name__ == '__main__':
 		tree.see(nodeFound)
 		tree.selection_set(nodeFound)
 		OnClick("") #triggers refresh of main text area
+	
+	def base64dec():
+		try:
+			enctext = textarea.get(SEL_FIRST, SEL_LAST)
+			dectext = base64.b64decode(enctext)		
+			decstring = ''.join(ch for ch in dectext if ch in string.printable)
+			tkMessageBox.showinfo("Decoded Base64 data", decstring)
+		except:
+			print "Unexpected error:", sys.exc_info()[0]
+			tkMessageBox.showwarning("Error", "Unable to decode selected data.\n Maybe you didn't selected the whole data, or the selected data is not encoded in Base64?")
 
 	# Menu Bar
 	menubar = Menu(root)
@@ -621,6 +635,7 @@ if __name__ == '__main__':
 
 	placesmenu.add_separator()
 	placesmenu.add_command(label="Write txt", command=writeTXT)
+	placesmenu.add_command(label="Decode Base64", command=base64dec)
 		
 	menubar.add_cascade(label="Places", menu=placesmenu)
 	
