@@ -618,8 +618,7 @@ if __name__ == '__main__':
 			decstring = ''.join(ch for ch in dectext if ch in string.printable)
 			tkMessageBox.showinfo("Decoded Base64 data", decstring)
 		except:
-			print "Unexpected error:", sys.exc_info()[0]
-			tkMessageBox.showwarning("Error", "Unable to decode selected data.\n Maybe you didn't selected the whole data, or the selected data is not encoded in Base64?")
+			tkMessageBox.showwarning("Error", "Unable to decode selected data.\nMaybe you didn't select the whole data, or the selected data is not encoded in Base64?")
 
 	# Menu Bar
 	menubar = Menu(root)
@@ -652,7 +651,10 @@ if __name__ == '__main__':
 	winmenu.add_command(label="Safari Bookmarks", command=lambda:safbookmark.safbookmark_window(backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")))
 	
 	import celllocation
-	winmenu.add_command(label="Cell Locations", command=lambda:celllocation.cell_window(backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")))		
+	winmenu.add_command(label="Cell Locations", command=lambda:celllocation.cell_window(backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")))	
+	
+	import callhistory
+	winmenu.add_command(label="Call history", command=lambda:callhistory.calls_window(backup_path + realFileName(filename="call_history.db", domaintype="WirelessDomain")))			
 	
 	menubar.add_cascade(label="Windows", menu=winmenu)
 	
