@@ -270,7 +270,7 @@ if __name__ == '__main__':
 
 	# input parameters
 	def usage():
-		print("iPBD - iPhone backup decoder.")
+		print("iPBA - iPhone backup analyzer.")
 		print(" -h              : this help")
 		print(" -d <dir>        : backup dir (default: " + backup_path + ")")
 		print("-s               : adapt main UI for small monitors (such as 7')")
@@ -517,7 +517,7 @@ if __name__ == '__main__':
 	w.photo = photo
 	w.pack(side=RIGHT)
 	
-	w = Label(headerbox, text="iPBD - iPhone Backup Decoder\nVersion: %s (%s)"%(version, creation_date), font=globalfont)
+	w = Label(headerbox, text="iPBA - iPhone Backup Analyzer\nVersion: %s (%s)"%(version, creation_date), font=globalfont)
 	w.pack()
 	
 	headerbox.grid(column=0, row=0, sticky='ew', columnspan=6, padx=5, pady=5)
@@ -576,7 +576,7 @@ if __name__ == '__main__':
 	# menu --------------------------------------------------------------------------------------------------
 	
 	def aboutBox():
-		aboutTitle = "iPBD iPhone Backup Decoder"
+		aboutTitle = "iPBA iPhone Backup Analyzer"
 		aboutText = "(c) Mario Piccinelli 2011 <mario.piccinelli@gmail.com>"
 		aboutText += "\n Released under MIT Licence"
 		aboutText += "\n Version: " + version
@@ -634,7 +634,10 @@ if __name__ == '__main__':
 	winmenu.add_command(label="Contacts browser", command=lambda:contactwindow.contact_window(backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain"), backup_path + realFileName(filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")))
 	
 	import safbookmark
-	winmenu.add_command(label="Safari Bookmarks", command=lambda:safbookmark.safbookmark_window(backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")))	
+	winmenu.add_command(label="Safari Bookmarks", command=lambda:safbookmark.safbookmark_window(backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")))
+	
+	import celllocation
+	winmenu.add_command(label="Cell Locations", command=lambda:celllocation.cell_window(backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")))		
 	
 	menubar.add_cascade(label="Windows", menu=winmenu)
 	
