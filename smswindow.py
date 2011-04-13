@@ -137,11 +137,15 @@ def sms_window(filenamenew):
 	groupstree.column("#0", width=30)
 	groupstree.column("address", width=200)
 	
-	groupstree.grid(column = 0, row = 1, sticky="ns")
+	groupstree.grid(column = 0, row = 1, sticky="ns", rowspan=2)
+
+	# upper textarea
+	uppertextarea = Text(smswindow, bd=2, relief=SUNKEN, height=5)
+	uppertextarea.grid(column = 2, row = 1, sticky="nsew")
 	
 	# textarea
 	textarea = Text(smswindow, bd=2, relief=SUNKEN, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l))
-	textarea.grid(column = 2, row = 1, sticky="nsew")
+	textarea.grid(column = 2, row = 2, sticky="nsew")
 
 	# scrollbars for tree
 	mvsb = ttk.Scrollbar(smswindow, orient="vertical")
@@ -150,13 +154,13 @@ def sms_window(filenamenew):
 
 	# scrollbars for main textarea
 	tvsb = ttk.Scrollbar(smswindow, orient="vertical")
-	tvsb.grid(column=3, row=1, sticky='ns')
+	tvsb.grid(column=3, row=2, sticky='ns')
 	tvsb['command'] = textarea.yview
 		
 	# footer label
 	footerlabel = StringVar()
 	smsfooter = Label(smswindow, textvariable = footerlabel, relief = RIDGE)
-	smsfooter.grid(column = 0, row = 2, sticky="ew", columnspan=4, padx=5, pady=5)
+	smsfooter.grid(column = 0, row = 3, sticky="ew", columnspan=4, padx=5, pady=5)
 	
 	# destroy window when closed
 	smswindow.protocol("WM_DELETE_WINDOW", smswindow.destroy)
@@ -173,7 +177,24 @@ def sms_window(filenamenew):
 	tempcur.execute(query)
 	smsnumber = tempcur.fetchall()[0][0]
 	footerlabel.set("Found %s messages in %s groups."%(smsnumber, groupsnumber))
-
+	
+	# uppertextarea statistics
+	def readKey(key):
+		query = "SELECT value FROM _SqliteDatabaseProperties WHERE key = \"%s\""%key
+		tempcur.execute(query)
+		data = tempcur.fetchall()
+		if (len(data) > 0):
+			value = data[0][0]
+		else:
+			value = 0
+		return value
+	
+	uppertextarea.insert(END, "Incoming messages (after last reset): %s\n"%(readKey("counter_in_all")))	
+	uppertextarea.insert(END, "Lifetime incoming messages: %s\n"%(readKey("counter_in_lifetime")))
+	uppertextarea.insert(END, "Outgoing messages (after last reset): %s\n"%(readKey("counter_out_all")))
+	uppertextarea.insert(END, "Lifetime outgoing messages: %s\n"%(readKey("counter_out_lifetime")))
+	uppertextarea.insert(END, "Counter last reset: %s\n"%(readKey("counter_last_reset")))
+	
 	# populating tree with SMS groups
 	query = "SELECT DISTINCT(msg_group.rowid), address FROM msg_group INNER JOIN group_member ON msg_group.rowid = group_member.group_id"
 	tempcur.execute(query)
