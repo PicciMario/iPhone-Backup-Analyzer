@@ -508,14 +508,15 @@ if __name__ == '__main__':
 	
 	# header row
 	headerbox = Frame(root, bd=2, relief=RAISED);
+	icon_path = os.path.dirname(sys.argv[0]) + "/iphone_icon.png"
 								
-	im = Image.open("iphone_icon.png")
+	im = Image.open(icon_path)
 	photo = ImageTk.PhotoImage(im)	
 	w = Label(headerbox, image=photo)
 	w.photo = photo
 	w.pack(side=LEFT)	
 	
-	im = Image.open("iphone_icon.png")
+	im = Image.open(icon_path)
 	photo = ImageTk.PhotoImage(im)	
 	w = Label(headerbox, image=photo)
 	w.photo = photo
@@ -871,9 +872,9 @@ if __name__ == '__main__':
 			
 				#if binary plist:
 				if (filemagic.partition("/")[2] == "binary_plist"):	
-					manifest_tempfile = "out.plist" #default name from perl script plutil.pl
+					manifest_tempfile = os.path.dirname(sys.argv[0]) + "/out.plist" #default name from perl script plutil.pl
 					#os.system("plutil -convert xml1 -o temp01 " + item_realpath)
-					command = "perl plutil.pl \"%s\" "%item_realpath
+					command = "perl \"" + os.path.dirname(sys.argv[0]) + "/plutil.pl\" \"%s\" "%item_realpath
 					log("Executing: %s"%command)
 					os.system(command)
 					
@@ -1001,9 +1002,9 @@ if __name__ == '__main__':
 				
 		#if binary plist:
 		if (filemagic.partition("/")[2] == "binary_plist"):	
-			manifest_tempfile = "out.plist" #default name from perl script plutil.pl
+			manifest_tempfile = os.path.dirname(sys.argv[0]) + "/out.plist" #default name from perl script plutil.pl
 			#os.system("plutil -convert xml1 -o temp01 " + item_realpath)
-			command = "perl plutil.pl \"%s\""%item_realpath
+			command = "perl \"" + os.path.dirname(sys.argv[0]) + "/plutil.pl\" \"%s\" "%item_realpath
 			log("Executing: %s"%command)
 			os.system(command)
 			
