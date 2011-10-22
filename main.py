@@ -252,7 +252,7 @@ def writeTXT():
 		tkMessageBox.showwarning("Done", "Text saved\n")
 		outfile.close()
 	else:
-		tkMessageBox.showwarning("Error", "Text NON saved\n")
+		tkMessageBox.showwarning("Error", "Text NOT saved\n")
 
 
 # Called when the "convert from unix timestamp" button is clicked  ------------------------------------
@@ -465,7 +465,11 @@ if __name__ == '__main__':
 			#print(fileinfo['properties'])
 
 	database.commit() 
-		
+	
+	# print banner
+	
+	banner()
+	print("Working directory: %s"%backup_dir)
 	print("new items: %i" %items)
 	
 	# Builds user interface ----------------------------------------------------------------------------------
