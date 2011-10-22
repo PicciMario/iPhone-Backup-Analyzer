@@ -910,7 +910,7 @@ if __name__ == '__main__':
 		#clears textarea
 		clearmaintext()
 		
-		# managing standard files
+		# managing "standard" files
 		if (item_type == "X"):	
 			item_realpath = backup_path + item_text
 			maintext("Selected: " + item_realpath)
@@ -953,6 +953,10 @@ if __name__ == '__main__':
 						maintext(line)
 					fh.close()				
 					os.remove(manifest_tempfile)
+			
+			else:
+				log("...troubles while opening file %s (does not exist)"%item_realpath)
+			
 			return
 
 		maintext("Selected: " + item_text + " (id " + str(item_id) + ")")
@@ -1113,7 +1117,8 @@ if __name__ == '__main__':
 				tempdb.close()		
 				
 			except:
-				print("Unexpected error:", sys.exc_info())
+				maintext("\n\nSorry, I'm unable to open this database file. It appears to be an issue of some databases in iOS5.")
+				maintext("\nUnexpected error: %s"%sys.exc_info()[1])
 				tempdb.close()
 			
 		# if unknown "data", dump hex
