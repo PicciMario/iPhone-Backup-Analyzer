@@ -68,8 +68,8 @@ import decodeManifestPlist
 # GLOBALS -------------------------------------------------------------------------------------------
 
 # version
-version = "1.0 RC"
-creation_date = "10/2011"
+version = "1.1"
+creation_date = "Oct. 2011"
 
 # set this path from command line
 backup_path = "Backup2/" 
@@ -92,6 +92,10 @@ smallglobalfont = ('Times', 8, 'normal')
 globalfont=normalglobalfont
 
 # iOS version
+# 4 - iOS 4
+# 5 - iOS 5
+#   - does not decode manifest.mbdx (which doesn't exist anymore)
+#   - instead find real file name by SHA1ing the string "domain-filename"  
 iOSVersion = 5
 
 # FUNCTIONS -------------------------------------------------------------------------------------------
@@ -275,19 +279,25 @@ def clearTimeBox(event):
 
 if __name__ == '__main__':
 
-	# input parameters
+	def banner():
+		print("\niPBA - iPhone backup analyzer v. %s (%s)"%(version, creation_date))
+		print("Released by <mario.piccinelli@gmail.com> under MIT licence")
+
+	# usage
 	def usage():
-		print("\niPBA - iPhone backup analyzer")
+		banner()
 		print("")
 		print(" -h              : this help")
 		print(" -d <dir>        : backup dir")
 		print(" -s              : adapt main UI for small monitors (such as 7')")
 		print(" -4              : iOS 4 backup data (default is iOS 5)")
 
+	# input parameters
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "hd:s4")
 	except getopt.GetoptError as err:
-		print(str(err))
+		usage()
+		print("\n%s\n"%str(err))
 		sys.exit(2)
 	
 	for o, a in opts:
@@ -315,7 +325,8 @@ if __name__ == '__main__':
 		usage()
 		print("\nManifest.mbdb not found in path \"%s\". Are you sure this is a correct iOS backup dir?\n"%(backup_path))
 		sys.exit(1)
-		
+	
+	# decode mbdx file (only iOS 4)
 	if (iOSVersion == 4):
 		mbdxPath = backup_path + "Manifest.mbdx"
 		if (os.path.exists(mbdxPath)):
@@ -397,22 +408,22 @@ if __name__ == '__main__':
 
 		# Insert record in database
 		query = "INSERT INTO indice(type, permissions, userid, groupid, filelen, mtime, atime, ctime, fileid, domain_type, domain, file_path, file_name, link_target, datahash, flag) VALUES(";
-		query += "'%s'," % type
-		query += "'%s'," % mbdbdecoding.modestr(fileinfo['mode']&0x0FFF)
-		query += "'%08x'," % fileinfo['userid']
-		query += "'%08x'," % fileinfo['groupid']
-		query += "%i," % fileinfo['filelen']
-		query += "%i," % fileinfo['mtime']
-		query += "%i," % fileinfo['atime']
-		query += "%i," % fileinfo['ctime']
-		query += "'%s'," % fileinfo['fileID']
-		query += "'%s'," % domaintype.replace("'", "''")
-		query += "'%s'," % domain.replace("'", "''")
-		query += "'%s'," % filepath.replace("'", "''")
-		query += "'%s'," % filename.replace("'", "''")
-		query += "'%s'," % fileinfo['linktarget']
-		query += "'%s'," % hex2nums(fileinfo['datahash']).replace("'", "''")
-		query += "'%s'" % fileinfo['flag']
+		query += "'%s'," 	% type
+		query += "'%s'," 	% mbdbdecoding.modestr(fileinfo['mode']&0x0FFF)
+		query += "'%08x'," 	% fileinfo['userid']
+		query += "'%08x'," 	% fileinfo['groupid']
+		query += "%i," 		% fileinfo['filelen']
+		query += "%i," 		% fileinfo['mtime']
+		query += "%i," 		% fileinfo['atime']
+		query += "%i," 		% fileinfo['ctime']
+		query += "'%s'," 	% fileinfo['fileID']
+		query += "'%s'," 	% domaintype.replace("'", "''")
+		query += "'%s'," 	% domain.replace("'", "''")
+		query += "'%s'," 	% filepath.replace("'", "''")
+		query += "'%s'," 	% filename.replace("'", "''")
+		query += "'%s'," 	% fileinfo['linktarget']
+		query += "'%s'," 	% hex2nums(fileinfo['datahash']).replace("'", "''")
+		query += "'%s'" 	% fileinfo['flag']
 		query += ");"
 		
 		#print(query)
