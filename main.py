@@ -471,7 +471,6 @@ if __name__ == '__main__':
 	banner()
 	print("\nWorking directory: %s"%backup_path)
 	print("Read elements: %i" %items)
-	print("")
 	
 	# Builds user interface ----------------------------------------------------------------------------------
 	
@@ -696,47 +695,70 @@ if __name__ == '__main__':
 	# Windows menu
 	winmenu = Menu(menubar, tearoff=0)
 	
-	import smswindow
-	winmenu.add_command(
-		label="SMS browser", 
-		command=lambda:smswindow.sms_window(
-			backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")
+	print("\nLoading plugins...")
+	
+	print("Loading SMS Browser plugin")
+	try:
+		import smswindow
+		winmenu.add_command(
+			label="SMS browser", 
+			command=lambda:smswindow.sms_window(
+				backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")
+			)
 		)
-	)
+	except:
+		print(" - Unable to load SMS browser plugin")
 
-	import contactwindow
-	winmenu.add_command(
-		label="Contacts browser", 
-		command=lambda:contactwindow.contact_window(
-			backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain"), 
-			backup_path + realFileName(filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")
+	print("Loading Contact Browser plugin")
+	try:
+		import contactwindow
+		winmenu.add_command(
+			label="Contacts browser", 
+			command=lambda:contactwindow.contact_window(
+				backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain"), 
+				backup_path + realFileName(filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")
+			)
 		)
-	)
+	except:
+		print(" - Unable to load Contact Browser plugin")
 	
-	import safbookmark
-	winmenu.add_command(
-		label="Safari Bookmarks", 
-		command=lambda:safbookmark.safbookmark_window(
-			backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")
+	print("Loading Safari Bookmarks plugin")
+	try:
+		import safbookmark
+		winmenu.add_command(
+			label="Safari Bookmarks", 
+			command=lambda:safbookmark.safbookmark_window(
+				backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")
+			)
 		)
-	)
-	
-	import celllocation
-	winmenu.add_command(
-		label="Cell Locations", 
-		command=lambda:celllocation.cell_window(
-			backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")
+	except:
+		print(" - Unable to load Safari Bookmarks plugin")
+			
+	print("Loading Cell Locations plugin")
+	try:
+		import celllocation
+		winmenu.add_command(
+			label="Cell Locations", 
+			command=lambda:celllocation.cell_window(
+				backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")
+			)
 		)
-	)	
+	except:
+		print(" - Unable to load Call History plugin")
 	
-	import callhistory
-	winmenu.add_command(
-		label="Call history", 
-		command=lambda:callhistory.calls_window(
-			backup_path + realFileName(filename="call_history.db", domaintype="WirelessDomain")
-		)
-	)		
+	print("Loading Call History plugin")
+	try:
+		import callhistory
+		winmenu.add_command(
+			label="Call history", 
+			command=lambda:callhistory.calls_window(
+				backup_path + realFileName(filename="call_history.db", domaintype="WirelessDomain")
+			)
+		)	
+	except:
+		print(" - Unable to load Call History plugin")	
 	
+	print("Loading Safari History plugin (still experimental!!)")
 	import safhistory
 	winmenu.add_command(
 		label="Safari history", 
@@ -744,6 +766,8 @@ if __name__ == '__main__':
 			backup_path + realFileName(filename="History.plist", domaintype="HomeDomain")
 		)
 	)			
+	
+	print("Loading complete")
 	
 	menubar.add_cascade(label="Windows", menu=winmenu)
 	
@@ -771,10 +795,12 @@ if __name__ == '__main__':
 	cursor.execute("SELECT DISTINCT(domain_type) FROM indice");
 	domain_types = cursor.fetchall()
 	
+	print("\nBuilding UI..")
+	
 	for domain_type_u in domain_types:
 		domain_type = str(domain_type_u[0])
 		domain_type_index = tree.insert('', 'end', text=domain_type, tag='base')
-		print("Extracting elements for domain family: %s" %domain_type)
+		print("Listing elements for domain family: %s" %domain_type)
 		
 		query = "SELECT DISTINCT(domain) FROM indice WHERE domain_type = \"%s\" ORDER BY domain" % domain_type
 		cursor.execute(query);
@@ -807,7 +833,7 @@ if __name__ == '__main__':
 					file_type = str(file[3])
 					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type, file_dim, file_id), tag='base')
 			
-	print("Extraction complete.\n")
+	print("Construction complete.\n")
 
 	# called when an element is clicked in the tables tree frame ------------------------------------------------
 	
