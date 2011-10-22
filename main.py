@@ -675,22 +675,53 @@ if __name__ == '__main__':
 	winmenu = Menu(menubar, tearoff=0)
 	
 	import smswindow
-	winmenu.add_command(label="SMS browser", command=lambda:smswindow.sms_window(backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")))
+	winmenu.add_command(
+		label="SMS browser", 
+		command=lambda:smswindow.sms_window(
+			backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")
+		)
+	)
 
 	import contactwindow
-	winmenu.add_command(label="Contacts browser", command=lambda:contactwindow.contact_window(backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain"), backup_path + realFileName(filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")))
+	winmenu.add_command(
+		label="Contacts browser", 
+		command=lambda:contactwindow.contact_window(
+			backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain"), 
+			backup_path + realFileName(filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")
+		)
+	)
 	
 	import safbookmark
-	winmenu.add_command(label="Safari Bookmarks", command=lambda:safbookmark.safbookmark_window(backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")))
+	winmenu.add_command(
+		label="Safari Bookmarks", 
+		command=lambda:safbookmark.safbookmark_window(
+			backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")
+		)
+	)
 	
 	import celllocation
-	winmenu.add_command(label="Cell Locations", command=lambda:celllocation.cell_window(backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")))	
+	winmenu.add_command(
+		label="Cell Locations", 
+		command=lambda:celllocation.cell_window(
+			backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")
+		)
+	)	
 	
 	import callhistory
-	winmenu.add_command(label="Call history", command=lambda:callhistory.calls_window(backup_path + realFileName(filename="call_history.db", domaintype="WirelessDomain")))		
+	winmenu.add_command(
+		label="Call history", 
+		command=lambda:callhistory.calls_window(
+			backup_path + realFileName(filename="call_history.db", domaintype="WirelessDomain")
+		)
+	)		
 	
 	import safhistory
-	winmenu.add_command(label="Safari history", command=lambda:safhistory.history_window(backup_path + realFileName(filename="History.plist", domaintype="HomeDomain")))			
+	winmenu.add_command(
+		label="Safari history", 
+		command=lambda:safhistory.history_window(
+			backup_path + realFileName(filename="History.plist", domaintype="HomeDomain")
+		)
+	)			
 	
 	menubar.add_cascade(label="Windows", menu=winmenu)
 	
