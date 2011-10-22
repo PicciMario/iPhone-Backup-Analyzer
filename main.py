@@ -317,6 +317,12 @@ if __name__ == '__main__':
 		if o in ("-4"):
 			iOSVersion = 4
 
+	# chech existence of backup dir
+	if (not os.path.isdir(backup_path)):
+		usage()
+		print("\nThe provided backup dir \"%s\" is not a valid folder.\n"%backup_path)
+		sys.exit(1)
+
 	# decode Manifest files
 	mbdbPath = backup_path + "Manifest.mbdb"
 	if (os.path.exists(mbdbPath)):
@@ -1153,11 +1159,11 @@ if __name__ == '__main__':
 	timebox.bind("<Key>", clearTimeBox)
 	
 	log("Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
-	log("Version: " + version)
+	log("Version: %s (%s)"%(version, creation_date))
 	log("Working directory: %s"%backup_path)
 
 	maintext("Welcome to the iPhone Backup browser by mario.piccinelli@gmail.com")
-	maintext("\nVersion: " + version)
+	maintext("\nVersion: %s (%s)"%(version, creation_date))
 	maintext("\nWorking directory: %s"%backup_path)
 	
 	deviceinfo = decodeManifestPlist.deviceInfo(backup_path + "Info.plist")
