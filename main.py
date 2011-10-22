@@ -469,8 +469,9 @@ if __name__ == '__main__':
 	# print banner
 	
 	banner()
-	print("Working directory: %s"%backup_dir)
-	print("new items: %i" %items)
+	print("\nWorking directory: %s"%backup_path)
+	print("Read elements: %i" %items)
+	print("")
 	
 	# Builds user interface ----------------------------------------------------------------------------------
 	
@@ -773,7 +774,7 @@ if __name__ == '__main__':
 	for domain_type_u in domain_types:
 		domain_type = str(domain_type_u[0])
 		domain_type_index = tree.insert('', 'end', text=domain_type, tag='base')
-		print("Extracting: %s" %domain_type)
+		print("Extracting elements for domain family: %s" %domain_type)
 		
 		query = "SELECT DISTINCT(domain) FROM indice WHERE domain_type = \"%s\" ORDER BY domain" % domain_type
 		cursor.execute(query);
@@ -806,6 +807,7 @@ if __name__ == '__main__':
 					file_type = str(file[3])
 					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type, file_dim, file_id), tag='base')
 			
+	print("Extraction complete.\n")
 
 	# called when an element is clicked in the tables tree frame ------------------------------------------------
 	
