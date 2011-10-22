@@ -38,7 +38,7 @@ import Tkinter, ttk
 import tkFileDialog, tkMessageBox
 # datetime used to convert unix timestamps
 from datetime import datetime
-# hashlib used to build md5s of files
+# hashlib used to build md5s ans sha1s of files
 import hashlib
 # binascci used to try to convert binary data in ASCII
 import binascii
@@ -69,7 +69,7 @@ import decodeManifestPlist
 
 # version
 version = "1.0 RC"
-creation_date = "03/2011"
+creation_date = "10/2011"
 
 # set this path from command line
 backup_path = "Backup2/" 
@@ -90,6 +90,9 @@ smallmonitor = 0
 normalglobalfont = ('Times', 12, 'normal')
 smallglobalfont = ('Times', 8, 'normal')
 globalfont=normalglobalfont
+
+# iOS version
+iOSVersion = 5
 
 # FUNCTIONS -------------------------------------------------------------------------------------------
 
@@ -274,13 +277,15 @@ if __name__ == '__main__':
 
 	# input parameters
 	def usage():
-		print("iPBA - iPhone backup analyzer.")
+		print("\niPBA - iPhone backup analyzer")
+		print("")
 		print(" -h              : this help")
-		print(" -d <dir>        : backup dir (default: " + backup_path + ")")
-		print("-s               : adapt main UI for small monitors (such as 7')")
+		print(" -d <dir>        : backup dir")
+		print(" -s              : adapt main UI for small monitors (such as 7')")
+		print(" -4              : iOS 4 backup data (default is iOS 5)")
 
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hd:s")
+		opts, args = getopt.getopt(sys.argv[1:], "hd:s4")
 	except getopt.GetoptError as err:
 		print(str(err))
 		sys.exit(2)
@@ -298,10 +303,27 @@ if __name__ == '__main__':
 		if o in ("-s"):
 			smallmonitor = 1
 			globalfont=smallglobalfont
+		
+		if o in ("-4"):
+			iOSVersion = 4
 
 	# decode Manifest files
-	mbdb = mbdbdecoding.process_mbdb_file(backup_path + "Manifest.mbdb")
-	mbdx = mbdbdecoding.process_mbdx_file(backup_path + "Manifest.mbdx")
+	mbdbPath = backup_path + "Manifest.mbdb"
+	if (os.path.exists(mbdbPath)):
+		mbdb = mbdbdecoding.process_mbdb_file(mbdbPath)
+	else:
+		usage()
+		print("\nManifest.mbdb not found in path \"%s\". Are you sure this is a correct iOS backup dir?\n"%(backup_path))
+		sys.exit(1)
+		
+	if (iOSVersion == 4):
+		mbdxPath = backup_path + "Manifest.mbdx"
+		if (os.path.exists(mbdxPath)):
+			mbdx = mbdbdecoding.process_mbdx_file(mbdxPath)
+		else:
+			usage()
+			print("\nManifest.mbdx not found in path \"%s\". Are you sure this is a correct iOS backup dir, and are you sure this is an iOS 4 backup?\n"%(backup_path))
+			sys.exit(1)
 	
 	# prepares DB
 	# database = sqlite3.connect('MyDatabase.db') # Create a database file
@@ -343,12 +365,22 @@ if __name__ == '__main__':
 	
 	# populates database by parsing manifest file
 	for offset, fileinfo in mbdb.items():
-		if offset in mbdx:
-			fileinfo['fileID'] = mbdx[offset]
-		else:
-			fileinfo['fileID'] = "<nofileID>"
-			print >> sys.stderr, "No fileID found for %s" % fileinfo_str(fileinfo)
 		
+		# iOS 4 (get file ID from mbdx file)
+		if (iOSVersion == 4):
+		
+			if offset in mbdx:
+				fileinfo['fileID'] = mbdx[offset]
+			else:
+				fileinfo['fileID'] = "<nofileID>"
+				print >> sys.stderr, "No fileID found for %s" % fileinfo_str(fileinfo)
+		
+		# iOS 5 (no MBDX file, use SHA1 of complete file name)
+		elif (iOSVersion == 5):
+			fileID = hashlib.sha1()
+			fileID.update("%s-%s"%(fileinfo['domain'], fileinfo['filename']) )
+			fileinfo['fileID'] = fileID.hexdigest()	
+	
 		# decoding element type (symlink, file, directory)
 		if (fileinfo['mode'] & 0xE000) == 0xA000: type = 'l' # symlink
 		elif (fileinfo['mode'] & 0xE000) == 0x8000: type = '-' # file
@@ -655,7 +687,10 @@ if __name__ == '__main__':
 	winmenu.add_command(label="Cell Locations", command=lambda:celllocation.cell_window(backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")))	
 	
 	import callhistory
-	winmenu.add_command(label="Call history", command=lambda:callhistory.calls_window(backup_path + realFileName(filename="call_history.db", domaintype="WirelessDomain")))			
+	winmenu.add_command(label="Call history", command=lambda:callhistory.calls_window(backup_path + realFileName(filename="call_history.db", domaintype="WirelessDomain")))		
+	
+	import safhistory
+	winmenu.add_command(label="Safari history", command=lambda:safhistory.history_window(backup_path + realFileName(filename="History.plist", domaintype="HomeDomain")))			
 	
 	menubar.add_cascade(label="Windows", menu=winmenu)
 	

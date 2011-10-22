@@ -149,7 +149,7 @@ def sms_window(filenamenew):
 
 	# scrollbars for tree
 	mvsb = ttk.Scrollbar(smswindow, orient="vertical")
-	mvsb.grid(column=1, row=1, sticky='ns')
+	mvsb.grid(column=1, row=1, sticky='ns', rowspan=2)
 	mvsb['command'] = groupstree.yview
 
 	# scrollbars for main textarea
