@@ -680,11 +680,34 @@ if __name__ == '__main__':
 	# Places menu
 	placesmenu = Menu(menubar, tearoff=0)
 
-	placesmenu.add_command(label="Address Book", command=lambda:placesMenu(filename="AddressBook.sqlitedb"))
-	placesmenu.add_command(label="Address Book Images", command=lambda:placesMenu(filename="AddressBookImages.sqlitedb"))
-	placesmenu.add_command(label="Calendar", command=lambda:placesMenu(filename="Calendar.sqlitedb"))
-	placesmenu.add_command(label="Notes", command=lambda:placesMenu(filename="notes.sqlite"))
-	placesmenu.add_command(label="SMS", command=lambda:placesMenu(filename="sms.db"))
+	placesmenu.add_command(
+		label="Address Book", 
+		command=lambda:placesMenu(filename="AddressBook.sqlitedb")
+	)
+	placesmenu.add_command(
+		label="Address Book Images", 
+		command=lambda:placesMenu(filename="AddressBookImages.sqlitedb")
+	)
+	placesmenu.add_command(
+		label="Calendar", 
+		command=lambda:placesMenu(filename="Calendar.sqlitedb")
+	)
+	placesmenu.add_command(
+		label="Notes", 
+		command=lambda:placesMenu(filename="notes.sqlite")
+	)
+	placesmenu.add_command(
+		label="SMS", 
+		command=lambda:placesMenu(filename="sms.db")
+	)
+	placesmenu.add_command(
+		label="Safari Bookmarks", 
+		command=lambda:placesMenu(filename="Bookmarks.db")
+	)
+	placesmenu.add_command(
+		label="Safari History", 
+		command=lambda:placesMenu(filename="History.plist")
+	)
 
 	placesmenu.add_separator()
 	placesmenu.add_command(label="Write txt", command=writeTXT)
