@@ -781,7 +781,7 @@ if __name__ == '__main__':
 	except:
 		print(" - Unable to load Call History plugin")	
 	
-	print("Loading Safari History plugin (still experimental!!)")
+	print("Loading Safari History plugin")
 	import safhistory
 	winmenu.add_command(
 		label="Safari history", 
