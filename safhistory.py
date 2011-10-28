@@ -21,18 +21,51 @@ import os
 from string import *
 from PIL import Image, ImageTk
 import StringIO
+import webbrowser
 
 # GLOBALS -----------------------------------------------------------------------------------------
 
 historytree = None
 historywindow = None
 filename = ""
+titlefootertext = None
+urlfootertext = None
+
+# Called when the user clicks on the main tree list -----------------------------------------------
+
+def OnClick(event):
+	global historytree
+	global titlefootertext, urlfootertext
+	
+	if (len(historytree.selection()) == 0): return;
+	
+	nodetitle = historytree.set(historytree.selection(), "title")
+	titlefootertext.set(nodetitle)
+
+	nodeurl = historytree.set(historytree.selection(), "url")
+	nodeurlmaxlen = 100
+	if (len(nodeurl) > nodeurlmaxlen):
+		nodeurl = "%s [...]"%nodeurl[0:nodeurlmaxlen]
+	urlfootertext.set(nodeurl)
+
+# Called when the user double clicks on the main tree list -------------------------------------
+
+def OnDoubleClick(event):
+	global historytree
+	global titlefootertext, urlfootertext
+	
+	if (len(historytree.selection()) == 0): return;
+
+	nodeurl = historytree.set(historytree.selection(), "url")
+	webbrowser.open(nodeurl)
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 	
 def history_window(filenamenew):
 	global filename
 	global historytree, textarea, historywindow
+	global titlefootertext, urlfootertext
+	
 	filename = filenamenew
 	
 	#print("Filename: %s"%filename)
@@ -134,10 +167,6 @@ def history_window(filenamenew):
 			bookmark['date'] = elementDict['lastVisitedDate'].firstChild.toxml()
 		
 		bookmarks.append(bookmark)
-	
-	
-	for bookmark in bookmarks:
-		print bookmark
 
 	# tree
 	historytree = ttk.Treeview(historywindow, columns=("title", "url"),
@@ -153,14 +182,29 @@ def history_window(filenamenew):
 	
 	historytree.grid(column = 0, row = 1, sticky="ewns")
 	
-	# textarea
-	#textarea = Text(historywindow, bd=2, relief=SUNKEN)
-	#textarea.grid(column = 1, row = 1, sticky="nsew")
+	# details box
+	detailsbox = Frame(historywindow, bd=2, relief=RAISED);
+	detailsbox.grid(column = 0, row = 2, sticky="ew", padx=5, pady=5)
+	detailsbox.grid_columnconfigure(1, weight=1)
 	
+	titlefooterlabel = Label(detailsbox, text = 'Title:', relief = RIDGE, width=10)
+	titlefooterlabel.grid(column = 0, row = 0, sticky="ew", padx=2, pady=2)	
+	titlefootertext = StringVar()
+	titlefooter = Label(detailsbox, textvariable = titlefootertext, relief = RIDGE, anchor = 'w')
+	titlefooter.grid(column = 1, row = 0, sticky="ew", padx=2, pady=2)
+	titlefootertext.set("mille")
+
+	urlfooterlabel = Label(detailsbox, text = 'URL:', relief = RIDGE, width=10)
+	urlfooterlabel.grid(column = 0, row = 1, sticky="ew", padx=2, pady=2)	
+	urlfootertext = StringVar()
+	urlfooter = Label(detailsbox, textvariable = urlfootertext, relief = RIDGE, anchor = 'w')
+	urlfooter.grid(column = 1, row = 1, sticky="ew", padx=2, pady=2)
+	urlfootertext.set("mille")
+		
 	# footer label
 	footerlabel = StringVar()
 	contactsfooter = Label(historywindow, textvariable = footerlabel, relief = RIDGE)
-	contactsfooter.grid(column = 0, row = 2, sticky="ew", padx=5, pady=5)
+	contactsfooter.grid(column = 0, row = 3, sticky="ew", padx=5, pady=5)
 	
 	# destroy window when closed
 	historywindow.protocol("WM_DELETE_WINDOW", historywindow.destroy)
@@ -181,3 +225,6 @@ def history_window(filenamenew):
 				bookmark['url']
 			)
 		)
+	
+	historytree.bind("<ButtonRelease-1>", OnClick)
+	historytree.bind("<Double-Button-1>", OnDoubleClick)
