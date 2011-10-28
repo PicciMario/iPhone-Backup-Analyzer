@@ -13,13 +13,15 @@
 
 # IMPORTS -----------------------------------------------------------------------------------------
 
+# graphics
 from Tkinter import *
-import sqlite3
 import ttk
+from PIL import Image, ImageTk
+# other imports
+import sqlite3
 from datetime import datetime
 import os
 from string import *
-from PIL import Image, ImageTk
 import StringIO
 import webbrowser
 
@@ -103,51 +105,14 @@ def history_window(filenamenew):
 		return
 	maindict = maindicts[0]
 	
-	# reads a DICT node and returns a python dictionary with key-value pairs
-	def readDict(dictNode):
-		ritorno = {}
-		
-		# check if it really is a dict node
-		if (dictNode.localName != "dict"):
-			print("Node under test is not a dict (it is more likely a \"%s\")."%node.localName)
-			return ritorno
-		
-		nodeKey = None
-		for node in dictNode.childNodes:
-			if (node.nodeType == node.TEXT_NODE): continue
-			
-			if (nodeKey == None):
-				nodeKeyElement = node.firstChild
-				if (nodeKeyElement == None):
-					nodeKey = "-"
-				else:
-					nodeKey = node.firstChild.toxml()
-			else:
-				ritorno[nodeKey] = node
-				nodeKey = None
-		
-		return ritorno
-
-	# reads an ARRAY node and returns a python list with elements
-	def readArray(arrayNode):
-		ritorno = []
-		
-		# check if it really is a dict node
-		if (arrayNode.localName != "array"):
-			print("Node under test is not an array (it is more likely a \"%s\")."%node.localName)
-			return ritorno
-		
-		for node in arrayNode.childNodes:
-			if (node.nodeType == node.TEXT_NODE): continue
-			ritorno.append(node)
-		
-		return ritorno
-
+	# read WebHistoryDates array of dicts (one dict for each bookmark)
+	from plistutils import readDict, readArray
 	outerDict = readDict(maindict)
 	bookmarksArray = readArray(outerDict['WebHistoryDates'])
 	
 	bookmarks = []
 	
+	# decode each bookmark dict
 	for element in bookmarksArray:
 		
 		bookmark = {}
