@@ -68,7 +68,7 @@ import decodeManifestPlist
 # GLOBALS -------------------------------------------------------------------------------------------
 
 # version
-version = "1.1"
+version = "1.2"
 creation_date = "Oct. 2011"
 
 # set this path from command line
