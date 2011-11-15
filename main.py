@@ -216,28 +216,32 @@ def realFileName(filename="", domaintype=""):
 fileNameForViewer = ""
 def openFile(event):
 	global fileNameForViewer
-	print os.name
-	print("Opening with viewer: %s"%fileNameForViewer)
+	
 	if (len(fileNameForViewer) > 0):
 	
-		# mac os specific
-		if sys.platform.startswith('darwin'):
-			log("Opening with Mac Os \"open\" the file: %s"%(fileNameForViewer))
-			subprocess.call(['open', fileNameForViewer], shell=False)
-		
-		# linux specific
-		elif sys.platform.startswith('linux'):
-			log("Opening with Linux \"gnome-open\" the file: %s"%(fileNameForViewer))
-			subprocess.call(['gnome-open', fileNameForViewer], shell=False)
-		
-		# windows specific
-		elif sys.platform.startswith('win'):
-			log("Opening with Windows \"start\" the file: %s"%(fileNameForViewer))
-			subprocess.call(['start', fileNameForViewer])
-		
-		# other
-		else:
-			log("This platform doesn't support this function.")
+		answer = tkMessageBox.askyesno("Caution", "Are you sure you want to open the selected file with an external viewer? This could modify the evidence!", icon="warning", default="no")
+
+		if (answer):
+			print("Opening with viewer: %s"%fileNameForViewer)
+			
+			# mac os specific
+			if sys.platform.startswith('darwin'):
+				log("Opening with Mac Os \"open\" the file: %s"%(fileNameForViewer))
+				subprocess.call(['open', fileNameForViewer], shell=False)
+			
+			# linux specific
+			elif sys.platform.startswith('linux'):
+				log("Opening with Linux \"gnome-open\" the file: %s"%(fileNameForViewer))
+				subprocess.call(['gnome-open', fileNameForViewer], shell=False)
+			
+			# windows specific
+			elif sys.platform.startswith('win'):
+				log("Opening with Windows \"start\" the file: %s"%(fileNameForViewer))
+				subprocess.call(['start', fileNameForViewer])
+			
+			# other
+			else:
+				log("This platform doesn't support this function.")
 
 # search function globals
 pattern = ""
