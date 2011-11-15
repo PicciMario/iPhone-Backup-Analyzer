@@ -219,10 +219,25 @@ def openFile(event):
 	print os.name
 	print("Opening with viewer: %s"%fileNameForViewer)
 	if (len(fileNameForViewer) > 0):
-		if os.name == 'nt':
-			subprocess.call(['start', fileNameForViewer])
-		else:
+	
+		# mac os specific
+		if sys.platform.startswith('darwin'):
+			log("Opening with Mac Os \"open\" the file: %s"%(fileNameForViewer))
 			subprocess.call(['open', fileNameForViewer], shell=False)
+		
+		# linux specific
+		elif sys.platform.startswith('linux'):
+			log("Opening with Linux \"gnome-open\" the file: %s"%(fileNameForViewer))
+			subprocess.call(['gnome-open', fileNameForViewer], shell=False)
+		
+		# windows specific
+		elif sys.platform.startswith('win'):
+			log("Opening with Windows \"start\" the file: %s"%(fileNameForViewer))
+			subprocess.call(['start', fileNameForViewer])
+		
+		# other
+		else:
+			log("This platform doesn't support this function.")
 
 # search function globals
 pattern = ""
