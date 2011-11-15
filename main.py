@@ -1116,11 +1116,13 @@ if __name__ == '__main__':
 		if (item_type == "l"):
 			maintext("\n\nThis item is a symbolic link to another file.")
 			maintext("\nLink Target: " + item_link_target)
+			fileNameForViewer = ""
 			return
 			
 		# treat directories
 		if (item_type == "d"):
 			maintext("\n\nThis item represents a directory.")
+			fileNameForViewer = ""
 			return
 		
 		# last modification date of the file in the backup directory
