@@ -55,6 +55,8 @@ import StringIO
 import base64
 # string functions
 import string
+# to open external file viewers
+import subprocess
 
 # APPLICATION FILES IMPORTS -------------------------------------------------------------------------
 
@@ -210,12 +212,17 @@ def realFileName(filename="", domaintype=""):
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
+# open selected file in OS viewer
 fileNameForViewer = ""
 def openFile(event):
 	global fileNameForViewer
+	print os.name
 	print("Opening with viewer: %s"%fileNameForViewer)
 	if (len(fileNameForViewer) > 0):
-		os.system("open " + fileNameForViewer)
+		if os.name == 'nt':
+			subprocess.call(['start', fileNameForViewer])
+		else:
+			subprocess.call(['open', fileNameForViewer], shell=False)
 
 # search function globals
 pattern = ""
