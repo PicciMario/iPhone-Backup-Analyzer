@@ -210,6 +210,13 @@ def realFileName(filename="", domaintype=""):
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
 
+fileNameForViewer = ""
+def openFile(event):
+	global fileNameForViewer
+	print("Opening with viewer: %s"%fileNameForViewer)
+	if (len(fileNameForViewer) > 0):
+		os.system("open " + fileNameForViewer)
+
 # search function globals
 pattern = ""
 searchindex = "1.0"
@@ -541,6 +548,10 @@ if __name__ == '__main__':
 	w = Button(buttonbox, text="Convert", width=10, default=ACTIVE, font=globalfont)
 	w.bind("<Button-1>", convertTimeStamp)
 	w.pack()
+	
+	w = Button(buttonbox, text="Open reader", width=10, default=ACTIVE, font=globalfont)
+	w.bind("<Button-1>", openFile)
+	w.pack()
 
 	# tables tree (in right column)
 	w = Label(buttonbox, text="Database tables", font=globalfont)
@@ -863,6 +874,7 @@ if __name__ == '__main__':
 	def TablesTreeClick(event):
 	
 		global rowsoffset, rowsnumber
+		
 		if (event != None): 
 			rowsoffset = 0
 			recordlabelupdate()
@@ -965,6 +977,8 @@ if __name__ == '__main__':
 	
 	def OnClick(event):
 	
+		global fileNameForViewer
+	
 		if (len(tree.selection()) == 0): return;
 		
 		# remove everything from tables tree
@@ -985,6 +999,7 @@ if __name__ == '__main__':
 		# managing "standard" files
 		if (item_type == "X"):	
 			item_realpath = backup_path + item_text
+			fileNameForViewer = item_realpath
 			maintext("Selected: " + item_realpath)
 			log("Opening file %s"%item_realpath)
 			
@@ -1089,6 +1104,7 @@ if __name__ == '__main__':
 		maintext("\n\nAnalize file: ")
 		
 		item_realpath = backup_path + item_filecode
+		fileNameForViewer = item_realpath
 		
 		log("Opening file %s (%s)"%(item_realpath, item_text))
 		
