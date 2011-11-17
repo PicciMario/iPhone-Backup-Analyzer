@@ -195,12 +195,14 @@ def searchIndexInTree(index, parent=""):
 	return
 	
 # returns the real file name for the searched element
-def realFileName(filename="", domaintype=""):
+def realFileName(filename="", domaintype="", path=""):
 	query = "SELECT fileid FROM indice WHERE 1=1"
 	if (filename != ""):
 		query = query + " AND file_name = \"%s\""%filename
 	if (domaintype != ""):
 		query = query + " AND domain_type = \"%s\""%domaintype
+	if (path != ""):
+		query = query + "AND file_path = \"%s\""%path
 
 	cursor.execute(query);
 	results = cursor.fetchall()
@@ -208,6 +210,7 @@ def realFileName(filename="", domaintype=""):
 	if (len(results) > 0):
 		return results[0][0]
 	else:
+		print("ERROR: could not find file")
 		return ""	
 	
 # Called when a button is clicked in the buttonbox (upper right) -----------------------------------------
@@ -823,7 +826,7 @@ if __name__ == '__main__':
 	winmenu.add_command(
 		label="Safari history", 
 		command=lambda:safhistory.history_window(
-			backup_path + realFileName(filename="History.plist", domaintype="HomeDomain")
+			backup_path + realFileName(filename="History.plist", domaintype="HomeDomain", path="Library/Safari")
 		)
 	)			
 	
