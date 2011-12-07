@@ -1047,7 +1047,7 @@ sub Convert {
 
     #print "plutil.pl $VERSION\n\n";
 
-    my ($filename) = @ARGV;
+    my ($filename) = @ARGV[0];
 
     if (-s $filename < 8) {
 	die "$filename is too short for a plist file";

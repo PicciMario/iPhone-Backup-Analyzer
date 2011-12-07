@@ -1053,7 +1053,7 @@ if __name__ == '__main__':
 					fh.close()
 			
 				#if binary plist:
-				if (filemagic.partition("/")[2] == "binary_plist"):	
+				if (filemagic.partition("/")[2] == "binary_plist"):
 					manifest_tempfile = os.path.dirname(sys.argv[0]) + "/out.plist" #default name from perl script plutil.pl
 					#os.system("plutil -convert xml1 -o temp01 " + item_realpath)
 					command = "perl \"" + os.path.dirname(sys.argv[0]) + "/plutil.pl\" \"%s\" "%item_realpath
