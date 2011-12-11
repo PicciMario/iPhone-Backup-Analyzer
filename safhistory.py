@@ -25,6 +25,8 @@ from string import *
 import StringIO
 import webbrowser
 
+import plistutils
+
 # GLOBALS -----------------------------------------------------------------------------------------
 
 historytree = None
@@ -89,14 +91,10 @@ def history_window(filenamenew):
 	contactstitle.grid(column = 0, row = 0, sticky="ew", padx=5, pady=5)
 
 	# convert binary plist file into plain plist file
-	history_tempfile = os.path.dirname(sys.argv[0]) + "/out.plist" #default name from perl script plutil.pl
-	command = "perl \"" + os.path.dirname(sys.argv[0]) + "/plutil.pl\" \"%s\" "%filename
-	os.system(command)
-	
-	# import main xml data from output file
-	from xml.dom.minidom import parse
-	historyxml = parse(history_tempfile)
-	os.remove(history_tempfile)
+	historyxml = plistutils.readPlistToXml(filename)
+	if (historyxml == None):
+		print("Error while parsing Safari History Data")
+		return
 	
 	# main dictionary (contains anything else)
 	maindicts = historyxml.getElementsByTagName('dict')

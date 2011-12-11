@@ -10,6 +10,9 @@
  converted into xml format
 
 '''
+
+import os, sys, subprocess
+
 # ------------------------------------------------------------------------------------------------------------------------
 
 # reads a DICT node and returns a python dictionary with key-value pairs
@@ -56,3 +59,64 @@ def readArray(arrayNode):
 
 # ------------------------------------------------------------------------------------------------------------------------
 
+# reads a binary plist file and returns the content in clear text format
+def readPlist(filename):
+	
+	retstring = ""
+	
+	tempfile = os.path.dirname(sys.argv[0]) + "/out.plist" #default name from perl script plutil.pl
+	command = "perl \"" + os.path.dirname(sys.argv[0]) + "/IPBAplutil.pl\" \"%s\" "%filename
+	
+	os.system(command)
+
+	try:
+		retval = os.system(command)	
+	except:
+		print "Unexpected error while running command: \"%s\""%command, sys.exc_info()[1]
+		return ""
+	
+	if (retval != 0):
+		print("Return value not clear. Unable to decode data.")
+		return ""
+
+	fh = open(tempfile, 'rb')
+	while 1:
+		line = fh.readline()
+		if not line: break;
+		retstring = retstring + line
+	fh.close()	
+				
+	os.remove(tempfile)
+	
+	return retstring
+
+# ------------------------------------------------------------------------------------------------------------------------
+
+# reads a binary plist file and returns the content in xml.dom.minidom object
+def readPlistToXml(filename):
+
+	tempfile = os.path.dirname(sys.argv[0]) + "/out.plist" #default name from perl script plutil.pl
+	command = "perl \"" + os.path.dirname(sys.argv[0]) + "/IPBAplutil.pl\" \"%s\" "%filename
+
+	try:
+		retval = os.system(command)	
+	except:
+		print "Unexpected error while running command: \"%s\""%command, sys.exc_info()[1]
+		return None
+	
+	if (retval != 0):
+		print("Return value not clear. Unable to decode data.")
+		return None
+	
+	from xml.dom.minidom import parse
+	try:
+		xmldata = parse(tempfile)
+	except:
+		print "Unexpected error while parsing XML data:", sys.exc_info()[1]
+		return None
+	
+	os.remove(tempfile)
+	
+	return xmldata	
+
+# ------------------------------------------------------------------------------------------------------------------------

@@ -66,6 +66,8 @@ import magic
 import mbdbdecoding
 # decodeManifestPlist.py - functions to decode Manifest.plist file
 import decodeManifestPlist
+# plistutils.py - generic functions to handle plist files
+import plistutils
 
 # GLOBALS -------------------------------------------------------------------------------------------
 
@@ -1053,22 +1055,9 @@ if __name__ == '__main__':
 					fh.close()
 			
 				#if binary plist:
-				if (filemagic.partition("/")[2] == "binary_plist"):
-					manifest_tempfile = os.path.dirname(sys.argv[0]) + "/out.plist" #default name from perl script plutil.pl
-					#os.system("plutil -convert xml1 -o temp01 " + item_realpath)
-					command = "perl \"" + os.path.dirname(sys.argv[0]) + "/plutil.pl\" \"%s\" "%item_realpath
-					log("Executing: %s"%command)
-					os.system(command)
-					
+				if (filemagic.partition("/")[2] == "binary_plist"):					
 					maintext("\n\nDecoding binary Plist file:\n\n")
-					
-					fh = open(manifest_tempfile, 'rb')
-					while 1:
-						line = fh.readline()
-						if not line: break;
-						maintext(line)
-					fh.close()				
-					os.remove(manifest_tempfile)
+					maintext(plistutils.readPlist(item_realpath))
 			
 			else:
 				log("...troubles while opening file %s (does not exist)"%item_realpath)
@@ -1190,22 +1179,9 @@ if __name__ == '__main__':
 				maintext("\nTag: %s, value: %s"%(decoded, value))
 				
 		#if binary plist:
-		if (filemagic.partition("/")[2] == "binary_plist"):	
-			manifest_tempfile = os.path.dirname(sys.argv[0]) + "/out.plist" #default name from perl script plutil.pl
-			#os.system("plutil -convert xml1 -o temp01 " + item_realpath)
-			command = "perl \"" + os.path.dirname(sys.argv[0]) + "/plutil.pl\" \"%s\" "%item_realpath
-			log("Executing: %s"%command)
-			os.system(command)
-			
+		if (filemagic.partition("/")[2] == "binary_plist"):			
 			maintext("\n\nDecoding binary Plist file:\n\n")
-			
-			fh = open(manifest_tempfile, 'rb')
-			while 1:
-				line = fh.readline()
-				if not line: break;
-				maintext(line)
-			fh.close()
-			os.remove(manifest_tempfile)	
+			maintext(plistutils.readPlist(item_realpath))
 		
 		#if sqlite, print tables list
 		if (filemagic.partition("/")[2] == "sqlite"):	
