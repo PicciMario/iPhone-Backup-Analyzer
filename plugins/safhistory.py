@@ -13,6 +13,9 @@
 
 # IMPORTS -----------------------------------------------------------------------------------------
 
+PLUGIN_NAME = "Safari History"
+import plugins_utils
+
 # graphics
 from Tkinter import *
 import ttk
@@ -24,7 +27,6 @@ import os
 from string import *
 import StringIO
 import webbrowser
-
 import plistutils
 
 # GLOBALS -----------------------------------------------------------------------------------------
@@ -65,14 +67,12 @@ def OnDoubleClick(event):
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 	
-def history_window(filenamenew):
+def main(cursor, backup_path):
 	global filename
 	global historytree, textarea, historywindow
 	global titlefootertext, urlfootertext
 	
-	filename = filenamenew
-	
-	#print("Filename: %s"%filename)
+	filename = backup_path + plugins_utils.realFileName(cursor, filename="History.plist", domaintype="HomeDomain", path="Library/Safari")
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for Safari History database: %s"%filename)

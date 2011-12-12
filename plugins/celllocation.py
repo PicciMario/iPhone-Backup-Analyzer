@@ -13,6 +13,9 @@
 
 # IMPORTS -----------------------------------------------------------------------------------------
 
+PLUGIN_NAME = "Cell Location"
+import plugins_utils
+
 from Tkinter import *
 import sqlite3
 import ttk
@@ -150,10 +153,11 @@ def OnClick(event):
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 	
-def cell_window(filenamenew):
+def main(cursor, backup_path):
 	global filename
 	global datetree, textarea, cellstree
-	filename = filenamenew
+	
+	filename = backup_path + plugins_utils.realFileName(cursor, filename="consolidated.db", domaintype="RootDomain")
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for Cell Location database")

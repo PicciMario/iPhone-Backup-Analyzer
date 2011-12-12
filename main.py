@@ -760,81 +760,49 @@ if __name__ == '__main__':
 	# Windows menu
 	winmenu = Menu(menubar, tearoff=0)
 	
-	print("\nLoading plugins...")
+	print("\n**** Loading plugins...")
 	
-	print("Loading SMS Browser plugin")
-	try:
-		import smswindow
-		winmenu.add_command(
-			label="SMS browser", 
-			command=lambda:smswindow.sms_window(
-				backup_path + realFileName(filename="sms.db", domaintype="HomeDomain")
-			)
-		)
-	except:
-		print(" - Unable to load SMS browser plugin")
+	pluginsdir = os.path.dirname(__file__) + "/plugins"
+	print("Loading plugins from dir: %s"%pluginsdir)
+	
+	for module in os.listdir(pluginsdir):
+		if module == '__init__.py' or module[-3:] != '.py' or module == 'plugins_utils.py':
+			continue
+		modname = "plugins." + module[:-3]
+		
+		# check whether module can be imported
+		try:
+			__import__(modname)
+		except:
+			print("Error while trying to load plugin file: %s"%modname)
+			print sys.exc_info()[0]
+			continue
+		
+		# check whether module has main() method
+		try:
+			getattr(sys.modules[modname], "main")
+		except:
+			print("Error: main() method not found in plugin %s"%modname)
+			continue	
+		
+		# check whether module has PLUGIN_NAME() method (optional)
+		try:
+			moddescr = getattr(sys.modules[modname], "PLUGIN_NAME")
+			print("Loaded plugin: %s - %s"%(modname, moddescr))
+		except:
+			print("Loaded plugin: %s - (name not available)"%modname)
+			#print("Error: %s"%sys.exc_info()[0])
+			moddescr = modname
 
-	print("Loading Contact Browser plugin")
-	try:
-		import contactwindow
+		string = "lambda: getattr(sys.modules[\"" + modname + "\"], 'main')(cursor, backup_path)"
+		function = eval(string)
+		
 		winmenu.add_command(
-			label="Contacts browser", 
-			command=lambda:contactwindow.contact_window(
-				backup_path + realFileName(filename="AddressBook.sqlitedb", domaintype="HomeDomain"), 
-				backup_path + realFileName(filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")
-			)
-		)
-	except:
-		print(" - Unable to load Contact Browser plugin")
+			label=moddescr, 
+			command=function
+		)		
 	
-	print("Loading Safari Bookmarks plugin")
-	try:
-		import safbookmark
-		winmenu.add_command(
-			label="Safari Bookmarks", 
-			command=lambda:safbookmark.safbookmark_window(
-				backup_path + realFileName(filename="Bookmarks.db", domaintype="HomeDomain")
-			)
-		)
-	except:
-		print(" - Unable to load Safari Bookmarks plugin")
-			
-	print("Loading Cell Locations plugin")
-	try:
-		import celllocation
-		winmenu.add_command(
-			label="Cell Locations", 
-			command=lambda:celllocation.cell_window(
-				backup_path + realFileName(filename="consolidated.db", domaintype="RootDomain")
-			)
-		)
-	except:
-		print(" - Unable to load Call History plugin")
-	
-	print("Loading Call History plugin")
-	try:
-		import callhistory
-		winmenu.add_command(
-			label="Call history", 
-			command=lambda:callhistory.calls_window(
-				backup_path + realFileName(filename="call_history.db", domaintype="WirelessDomain")
-			)
-		)	
-	except:
-		print(" - Unable to load Call History plugin")	
-	
-	print("Loading Safari History plugin")
-	import safhistory
-	winmenu.add_command(
-		label="Safari history", 
-		command=lambda:safhistory.history_window(
-			backup_path + realFileName(filename="History.plist", domaintype="HomeDomain", path="Library/Safari")
-		)
-	)			
-	
-	print("Loading complete")
-	
-	menubar.add_cascade(label="Windows", menu=winmenu)
+	menubar.add_cascade(label="Plugins", menu=winmenu)
 	
 	# ABOUT menu
 	helpmenu = Menu(menubar, tearoff=0)

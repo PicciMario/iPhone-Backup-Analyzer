@@ -13,6 +13,9 @@
 
 # IMPORTS -----------------------------------------------------------------------------------------
 
+PLUGIN_NAME = "Contacts Browser"
+import plugins_utils
+
 from Tkinter import *
 import sqlite3
 import ttk
@@ -197,13 +200,12 @@ def OnClick(event):
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 	
-def contact_window(filenamenew, thumbsfilenamenew = None):
+def main(cursor, backup_path):
 	global filename, thumbsfilename
 	global contactstree, textarea, contactswindow
-	filename = filenamenew
-	thumbsfilename = thumbsfilenamenew
 	
-	#print("Filename: %s"%filename)
+	filename = backup_path + plugins_utils.realFileName(cursor, filename="AddressBook.sqlitedb", domaintype="HomeDomain")
+	thumbsfilename = backup_path + plugins_utils.realFileName(cursor, filename="AddressBookImages.sqlitedb", domaintype="HomeDomain")
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for Contacts database: %s"%filename)

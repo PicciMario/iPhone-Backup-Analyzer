@@ -13,11 +13,14 @@
 
 # IMPORTS -----------------------------------------------------------------------------------------
 
+PLUGIN_NAME = "SMS Browser"
+import plugins_utils
+
 from Tkinter import *
-import sqlite3
 import ttk
 from datetime import datetime
 import os
+import sqlite3
 
 # GLOBALS -----------------------------------------------------------------------------------------
 
@@ -105,11 +108,12 @@ def OnClick(event):
 	tempdb.close()
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
-	
-def sms_window(filenamenew):
+
+def main(cursor, backup_path):
 	global filename
 	global groupstree, textarea
-	filename = filenamenew
+	
+	filename = backup_path + plugins_utils.realFileName(cursor, filename="sms.db", domaintype="HomeDomain")
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for SMS database")

@@ -13,6 +13,9 @@
 
 # IMPORTS -----------------------------------------------------------------------------------------
 
+PLUGIN_NAME = "Safari Bookmarks"
+import plugins_utils
+
 from Tkinter import *
 import sqlite3
 import ttk
@@ -113,12 +116,12 @@ def OnClick(event):
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 	
-def safbookmark_window(filenamenew):
+def main(cursor, backup_path):
 	global filename
 	global bookmarkstree, textarea
 	global namelabel, urllabel, url
 	
-	filename = filenamenew
+	filename = backup_path + plugins_utils.realFileName(cursor, filename="Bookmarks.db", domaintype="HomeDomain")
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for Safari Bookmarks database")

@@ -13,6 +13,9 @@
 
 # IMPORTS -----------------------------------------------------------------------------------------
 
+PLUGIN_NAME = "Call History"
+import plugins_utils
+
 from Tkinter import *
 import sqlite3
 import ttk
@@ -36,10 +39,11 @@ def autoscroll(sbar, first, last):
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 	
-def calls_window(filenamenew):
+def main(cursor, backup_path):
 	global filename
 	global callstree, textarea
-	filename = filenamenew
+	
+	filename = backup_path + plugins_utils.realFileName(cursor, filename="call_history.db", domaintype="WirelessDomain")
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for SMS database")
