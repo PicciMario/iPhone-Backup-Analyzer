@@ -72,8 +72,8 @@ import plistutils
 # GLOBALS -------------------------------------------------------------------------------------------
 
 # version
-version = "1.2"
-creation_date = "Oct. 2011"
+version = "1.3"
+creation_date = "Dec. 2011"
 
 # set this path from command line
 backup_path = "Backup2/" 
@@ -514,13 +514,14 @@ if __name__ == '__main__':
 	
 	# root window
 	root = Tkinter.Tk()
+	root.configure(background='#4d66fa')
 	root.geometry("%dx%d%+d%+d" % (1200, 700, 0, 0))
 	root.grid_columnconfigure(2, weight=1)
 	root.grid_rowconfigure(1, weight=1)
 
 	# left column
-	leftcol = Frame(root, relief=RAISED);
-	leftcol.grid(column = 0, row = 1, sticky="nsew")
+	leftcol = Frame(root, relief=RAISED, bd=2, bg='lightblue');
+	leftcol.grid(column = 0, row = 1, sticky="nsew", padx=5, pady=5)
 	leftcol.grid_columnconfigure(0, weight=1)
 	leftcol.grid_rowconfigure(3, weight=1)
 	
@@ -529,7 +530,7 @@ if __name__ == '__main__':
 	hsb = ttk.Scrollbar(leftcol, orient="horizontal")
 	  
 	# main tree view definition
-	w = Label(leftcol, text="Backup content:", font=globalfont)
+	w = Label(leftcol, text="Backup content:", font=globalfont, bg='lightblue')
 	w.grid(column=0, row=2, sticky='ew')
 	tree = ttk.Treeview(leftcol, columns=("type", "size", "id"),
 	    displaycolumns=("size"), yscrollcommand=lambda f, l: autoscroll(vsb, f, l),
@@ -546,46 +547,91 @@ if __name__ == '__main__':
 	
 	vsb['command'] = tree.yview
 	hsb['command'] = tree.xview
-	tree.grid(column=0, row=3, sticky='nswe')
+	tree.grid(column=0, row=3, sticky='nswe', padx=3, pady=3)
 	vsb.grid(column=1, row=3, sticky='ns')
 	hsb.grid(column=0, row=4, sticky='ew')
 	
 	# device info box
-	w = Label(leftcol, text="Device data:", font=globalfont)
+	w = Label(leftcol, text="Device data:", font=globalfont, bg='lightblue')
 	w.grid(column=0, row=0, sticky='ew')
-	infobox = Text(leftcol, relief="sunken", borderwidth=2, height=10, width=20, font=globalfont)
-	infobox.grid(column=0, row=1, sticky='ew')
+	infobox = Text(
+		leftcol, 
+		relief="sunken", 
+		borderwidth=2, 
+		height=10, 
+		width=20, 
+		font=globalfont, 
+		highlightbackground='lightblue'
+	)
+	infobox.grid(column=0, row=1, sticky='ew', padx=3, pady=3)
 	
 	# right column
-	buttonbox = Frame(root, bd=2, relief=RAISED);
+	buttonbox = Frame(root, bd=2, relief=RAISED, bg='lightblue');
 	buttonbox.grid(column = 4, row = 1, sticky="ns", padx=5, pady=5)
 	
-	w = Label(buttonbox, text="Text search", font=globalfont)
+	w = Label(buttonbox, text="Text search", font=globalfont, bg='lightblue')
 	w.pack()
 	
-	searchbox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2, font=globalfont)
+	searchbox = Text(
+		buttonbox, 
+		width=20, 
+		height=1, 
+		relief="sunken", 
+		borderwidth=2, 
+		font=globalfont, 
+		highlightbackground='lightblue'
+	)
 	searchbox.pack()
 	
-	w = Button(buttonbox, text="Search", width=10, default=ACTIVE, font=globalfont)
+	w = Button(
+		buttonbox, 
+		text="Search", 
+		width=10, 
+		default=ACTIVE, 
+		font=globalfont, 
+		highlightbackground='lightblue'
+	)
 	w.bind("<Button-1>", buttonBoxPress)
 	w.pack()
 
-	w = Label(buttonbox, text="Timestamp translation", font=globalfont)
+	w = Label(buttonbox, text="Timestamp translation", font=globalfont, bg='lightblue')
 	w.pack()
 	
-	timebox = Text(buttonbox, width=20, height=1, relief="sunken", borderwidth=2, font=globalfont)
+	timebox = Text(
+		buttonbox, 
+		width=20, 
+		height=1, 
+		relief="sunken", 
+		borderwidth=2, 
+		font=globalfont,
+		highlightbackground='lightblue'
+	)
 	timebox.pack()
 	
-	w = Button(buttonbox, text="Convert", width=10, default=ACTIVE, font=globalfont)
+	w = Button(
+		buttonbox, 
+		text="Convert", 
+		width=10, 
+		default=ACTIVE, 
+		font=globalfont, 
+		highlightbackground='lightblue'
+	)
 	w.bind("<Button-1>", convertTimeStamp)
 	w.pack()
 	
-	w = Button(buttonbox, text="Open reader", width=10, default=ACTIVE, font=globalfont)
+	w = Button(
+		buttonbox, 
+		text="Open reader", 
+		width=10, 
+		default=ACTIVE, 
+		font=globalfont, 
+		highlightbackground='lightblue'
+	)
 	w.bind("<Button-1>", openFile)
 	w.pack()
 
 	# tables tree (in right column)
-	w = Label(buttonbox, text="Database tables", font=globalfont)
+	w = Label(buttonbox, text="Database tables", font=globalfont, bg='lightblue')
 	w.pack()
 	
 	tablestree = ttk.Treeview(buttonbox, columns=("filename", "tablename"), displaycolumns=())			
@@ -595,29 +641,35 @@ if __name__ == '__main__':
 		tablestree.column("#0", width=150)
 	else:
 		tablestree.column("#0", width=200)
-	tablestree.pack(fill=BOTH, expand=1)
+	
+	tablestree.pack(fill=BOTH, expand=1, padx=3, pady=3)
 	
 	# log row
 	logbox = Text(root, relief="sunken", borderwidth=2, height=3, bg='lightgray', font=globalfont)
 	logbox.grid(row=4, columnspan=6, sticky='ew')
 	
 	# header row
-	headerbox = Frame(root, bd=2, relief=RAISED);
+	headerbox = Frame(root, bd=2, relief=RAISED, bg='lightblue');
 	icon_path = os.path.dirname(sys.argv[0]) + "/iphone_icon.png"
 								
 	im = Image.open(icon_path)
 	photo = ImageTk.PhotoImage(im)	
-	w = Label(headerbox, image=photo)
+	w = Label(headerbox, image=photo, bg='lightblue')
 	w.photo = photo
 	w.pack(side=LEFT)	
 	
 	im = Image.open(icon_path)
 	photo = ImageTk.PhotoImage(im)	
-	w = Label(headerbox, image=photo)
+	w = Label(headerbox, image=photo, bg='lightblue')
 	w.photo = photo
 	w.pack(side=RIGHT)
 	
-	w = Label(headerbox, text="iPBA - iPhone Backup Analyzer\nVersion: %s (%s)"%(version, creation_date), font=globalfont)
+	w = Label(
+		headerbox, 
+		text="iPBA - iPhone Backup Analyzer\nVersion: %s (%s)"%(version, creation_date), 
+		font=globalfont, 
+		bg='lightblue'
+	)
 	w.pack()
 	
 	headerbox.grid(column=0, row=0, sticky='ew', columnspan=6, padx=5, pady=5)
@@ -630,7 +682,7 @@ if __name__ == '__main__':
 
 	# main textarea
 	textarea = Text(centercolumn, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
-	    bd=2, relief=SUNKEN, font=globalfont)
+	    bd=2, relief=SUNKEN, font=globalfont, highlightbackground='lightblue')
 	textarea.grid(column=0, row=0, sticky="nsew")
 
 	# scrollbars for main textarea
