@@ -645,7 +645,15 @@ if __name__ == '__main__':
 	tablestree.pack(fill=BOTH, expand=1, padx=3, pady=3)
 	
 	# log row
-	logbox = Text(root, relief="sunken", borderwidth=2, height=3, bg='lightgray', font=globalfont)
+	logbox = Text(
+		root, 
+		relief="sunken", 
+		borderwidth=2, 
+		height=3, 
+		bg='lightblue', 
+		font=globalfont,
+		highlightbackground='#4d66fa'
+	)
 	logbox.grid(row=4, columnspan=6, sticky='ew')
 	
 	# header row
@@ -681,8 +689,14 @@ if __name__ == '__main__':
 	centercolumn.grid_rowconfigure(0, weight=1)
 
 	# main textarea
-	textarea = Text(centercolumn, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
-	    bd=2, relief=SUNKEN, font=globalfont, highlightbackground='lightblue')
+	textarea = Text(
+		centercolumn, 
+		yscrollcommand=lambda f, l: autoscroll(tvsb, f, l),
+	    bd=2, 
+	    relief=SUNKEN, 
+	    font=globalfont, 
+	    highlightbackground='lightblue'
+	)
 	textarea.grid(column=0, row=0, sticky="nsew")
 
 	# scrollbars for main textarea
@@ -691,7 +705,7 @@ if __name__ == '__main__':
 	tvsb['command'] = textarea.yview
 	
 	# block for selecting limit for browsing table fields
-	tableblock = Frame(centercolumn, bd=2, relief=RAISED);
+	tableblock = Frame(centercolumn, bd=2, relief=RAISED, bg='#4d66fa');
 	tableblock.grid(column = 0, row = 1, sticky="nsew")	
 	tableblock.grid_columnconfigure(1, weight=1)
 
@@ -712,16 +726,30 @@ if __name__ == '__main__':
 		recordlabelupdate()
 		TablesTreeClick(None)
 
-	fieldless = Button(tableblock, text="<", width=10, default=ACTIVE, font=globalfont)
+	fieldless = Button(
+		tableblock, 
+		text="<", 
+		width=10, 
+		default=ACTIVE, 
+		font=globalfont,
+		highlightbackground='#4d66fa'
+	)
 	fieldless.bind("<Button-1>", recordlessbutton)
 	fieldless.grid(column=0, row=0, sticky="nsew")
 
 	fieldlabeltext = StringVar()
 	fieldlabel = Label(tableblock, textvariable = fieldlabeltext, relief = RIDGE, font=globalfont)
-	fieldlabel.grid(column=1, row=0, sticky="nsew")
+	fieldlabel.grid(column=1, row=0, sticky="nsew", padx=3, pady=3)
 	recordlabelupdate()
 
-	fieldplus = Button(tableblock, text=">", width=10, default=ACTIVE, font=globalfont)
+	fieldplus = Button(
+		tableblock, 
+		text=">", 
+		width=10, 
+		default=ACTIVE, 
+		font=globalfont,
+		highlightbackground='#4d66fa'
+	)
 	fieldplus.bind("<Button-1>", recordplusbutton)
 	fieldplus.grid(column=2, row=0, sticky="nsew")
 
