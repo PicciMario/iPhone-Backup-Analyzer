@@ -24,13 +24,14 @@ Binary plist files are translated on runtime into their XML counterpart by the M
 
 User is presented with the list of tables in SQLite databases, and can immediately see the content of each and the structure of the fields.
 
-Built separate windows to show:
+The software provides a plugin system to create views showing specific data from the backup. Currently available views:
 
-* text messages by thread
-* contacts by groups
+* Call history
+* Cell GPS location (only for iOS ver <= 4.3)
+* Contacts
 * Safari bookmarks
-
-More views will be written to see calendar, notes, ....
+* Safari history
+* SMS browser
 
 # Requires:
 
