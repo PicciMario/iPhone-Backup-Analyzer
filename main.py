@@ -553,7 +553,7 @@ if __name__ == '__main__':
 	
 	# device info box
 	w = Label(leftcol, text="Device data:", font=globalfont, bg='lightblue')
-	w.grid(column=0, row=0, sticky='ew')
+	w.grid(column=0, row=0, sticky='ew', columnspan=2)
 	infobox = Text(
 		leftcol, 
 		relief="sunken", 
@@ -563,7 +563,7 @@ if __name__ == '__main__':
 		font=globalfont, 
 		highlightbackground='lightblue'
 	)
-	infobox.grid(column=0, row=1, sticky='ew', padx=3, pady=3)
+	infobox.grid(column=0, row=1, sticky='ew', padx=3, pady=3, columnspan=2)
 	
 	# right column
 	buttonbox = Frame(root, bd=2, relief=RAISED, bg='lightblue');
@@ -682,9 +682,21 @@ if __name__ == '__main__':
 	
 	headerbox.grid(column=0, row=0, sticky='ew', columnspan=6, padx=5, pady=5)
 
-	# center column
-	centercolumn = Frame(root, bd=2, relief=RAISED);
-	centercolumn.grid(column = 2, row = 1, sticky="nsew")
+	# notebook (alternative to the definition of a simple centercolumn)
+	
+	nbstyle = ttk.Style()
+	nbstyle.configure("My.TNotebook", padding=0)
+	
+	notebook = ttk.Notebook(root, style="My.TNotebook")
+	centercolumn = ttk.Frame(notebook); # first page, which would get widgets gridded into it
+	previewcolumn = ttk.Frame(notebook); # second page
+	notebook.add(centercolumn, text='Description')
+	notebook.add(previewcolumn, text='Preview')
+	notebook.grid(column = 2, row = 1, sticky="nsew")
+
+	# center column (substituted by notebook)
+	#centercolumn = Frame(root, bd=2, relief=RAISED);
+	#centercolumn.grid(column = 2, row = 1, sticky="nsew")
 	centercolumn.grid_columnconfigure(0, weight=1)
 	centercolumn.grid_rowconfigure(0, weight=1)
 
@@ -1031,6 +1043,7 @@ if __name__ == '__main__':
 									photoImages.append(tkim)
 									maintext("\n ")
 									textarea.image_create(END, image=tkim)
+									
 								else:
 									maintext("\n\n")	
 									maintext(dump(value, 16, 1000))
@@ -1054,9 +1067,12 @@ if __name__ == '__main__':
 
 	# Called when an element is clicked in the main tree frame ---------------------------------------------------
 	
+	old_label_image = None
+	
 	def OnClick(event):
 	
 		global fileNameForViewer
+		global old_label_image
 	
 		if (len(tree.selection()) == 0): return;
 		
@@ -1211,12 +1227,44 @@ if __name__ == '__main__':
 		
 		#if image file:
 		if (filemagic.partition("/")[0] == "image"):		
-			im = Image.open(item_realpath)
+			try:
+				im = Image.open(item_realpath)
+					
+				#tkim = ImageTk.PhotoImage(im)
+				#photoImages.append(tkim)
+				maintext("\n\nImage preview available. \n ")
+				#textarea.image_create(END, image=tkim)
 				
-			tkim = ImageTk.PhotoImage(im)
-			photoImages.append(tkim)
-			maintext("\n\nImage data: \n ")
-			textarea.image_create(END, image=tkim)
+				# put image in the "preview" tab
+				
+				colwidth = 600
+				imwidth = im.size[0]
+				dimratio1 = (colwidth + 0.0) / (imwidth + 0.0)
+				
+				colheight = 500
+				imheight = im.size[1]
+				dimratio2 = (colheight + 0.0) / (imheight + 0.0)
+				
+				if (dimratio1 >= dimratio2):
+					dimratio = dimratio2
+				else:
+					dimratio = dimratio1
+				
+				newwidth = int(im.size[0] * dimratio)
+				newheight = int(im.size[1] * dimratio)
+
+				im2 = im.resize((newwidth,newheight), Image.ANTIALIAS)
+				tkim2 = ImageTk.PhotoImage(im2)
+				photoImages.append(tkim2)
+				
+				label_image = Label(previewcolumn, image=tkim2)
+				label_image.place(x=0,y=0)#,width=newwidth,height=newheight)
+				if old_label_image is not None:
+					old_label_image.destroy()
+				old_label_image = label_image
+				
+			except:
+				print("Warning: error while trying to analyze image file \"%s\""%item_realpath)
 			
 		#decode EXIF (only JPG)
 		if (filemagic == "image/jpeg"):
