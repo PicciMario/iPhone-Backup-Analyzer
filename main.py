@@ -1228,11 +1228,13 @@ if __name__ == '__main__':
 		#if image file:
 		if (filemagic.partition("/")[0] == "image"):		
 			try:
+				del photoImages[:]
+				
 				im = Image.open(item_realpath)
 					
 				#tkim = ImageTk.PhotoImage(im)
 				#photoImages.append(tkim)
-				maintext("\n\nImage preview available. \n ")
+				maintext("\n\nImage preview available.")
 				#textarea.image_create(END, image=tkim)
 				
 				# put image in the "preview" tab
@@ -1249,6 +1251,9 @@ if __name__ == '__main__':
 					dimratio = dimratio2
 				else:
 					dimratio = dimratio1
+				
+				if (dimratio >= 1):
+					dimratio = 1
 				
 				newwidth = int(im.size[0] * dimratio)
 				newheight = int(im.size[1] * dimratio)
