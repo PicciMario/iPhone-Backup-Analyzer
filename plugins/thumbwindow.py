@@ -26,6 +26,7 @@ thumbstree = None
 textarea = None
 filename = ""
 photoImages = []
+photoImagesList = []
 
 def autoscroll(sbar, first, last):
     """Hide and show scrollbar as needed."""
@@ -94,6 +95,7 @@ def OnClick(event):
 def main(cursor, backup_path):
 	global filename
 	global thumbstree, textarea
+	global photoImagesList
 	
 	filename = backup_path + plugins_utils.realFileName(cursor, filename="120x120.ithmb")
 	
@@ -120,7 +122,7 @@ def main(cursor, backup_path):
 	thumbstree.heading("#0", text="ID", anchor='w')
 	#thumbstree.heading("pos", text="Address", anchor='w')
 	
-	thumbstree.column("#0", width=100)
+	thumbstree.column("#0", width=200)
 	#thumbstree.column("pos", width=200)
 	
 	thumbstree.grid(column = 0, row = 1, sticky="ns", rowspan=2)
@@ -160,8 +162,19 @@ def main(cursor, backup_path):
 	numframes = len(wholefile) / framelen
 	print("Number of frames found: ", numframes)
 	
+	framelen_image = 120*120*2
+	framelen_padding = 28
+	framelen = framelen_image + framelen_padding
+	
+	del photoImagesList[:]
+	
 	for i in range(numframes) :
-		thumbstree.insert('', 'end', text=i)
+			
+		string = wholefile[framelen*i:framelen*(i+1)-1]
+		im = Image.frombuffer('RGB', (120, 120), string, 'raw', 'BGR;15', 0, 1)
+		tkim = ImageTk.PhotoImage(im)
+		photoImagesList.append(tkim)
+		thumbstree.insert('', 'end', text=i, image=tkim)
 		
 		
 	thumbstree.bind("<ButtonRelease-1>", OnClick)
