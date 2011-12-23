@@ -10,7 +10,7 @@
 
 # IMPORTS -----------------------------------------------------------------------------------------
 
-PLUGIN_NAME = "Thumbnails browser"
+PLUGIN_NAME = "Thumbnails browser 158x158"
 import plugins_utils
 
 from Tkinter import *
@@ -21,6 +21,14 @@ import sqlite3
 from PIL import Image, ImageTk
 
 # GLOBALS -----------------------------------------------------------------------------------------
+
+thumbs_filename = "158x158.ithmb"
+
+frame_width = 160
+frame_height = 158
+
+framelen_image = frame_width * frame_height *2
+framelen_padding = 28
 
 thumbstree = None
 textarea = None
@@ -58,6 +66,9 @@ def OnClick(event):
 	global filename
 	global thumbstree, textarea, prevarea
 	global photoImages
+	global frame_width, frame_height
+	global framelen_image, framelen_padding, thumbs_filename
+	global frame_width, frame_height
 	
 	if (len(thumbstree.selection()) == 0): return;
 	index = int(thumbstree.item(thumbstree.selection(), "text"))
@@ -68,13 +79,11 @@ def OnClick(event):
 	string = f.read()
 	f.close()
 
-	framelen_image = 120*120*2
-	framelen_padding = 28
 	framelen = framelen_image + framelen_padding
 		
 	string = string[framelen*index:framelen*(index+1)-1]
 	padding = string[framelen_image + 1:]
-	im = Image.frombuffer('RGB', (120, 120), string, 'raw', 'BGR;15', 0, 1)
+	im = Image.frombuffer('RGB', (frame_width, frame_height), string, 'raw', 'BGR;15', 0, 1)
 	
 	textarea.insert(END, "Extracted thumbnail\n\n")
 	textarea.insert(END, "Thumbnail number %s\n"%index)
@@ -106,8 +115,9 @@ def main(cursor, backup_path):
 	global filename
 	global thumbstree, textarea, prevarea
 	global photoImagesList
+	global framelen_image, framelen_padding, thumbs_filename
 	
-	filename = backup_path + plugins_utils.realFileName(cursor, filename="120x120.ithmb")
+	filename = backup_path + plugins_utils.realFileName(cursor, filename=thumbs_filename)
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for thumbnails file")
@@ -122,7 +132,7 @@ def main(cursor, backup_path):
 	thumbswindow.grid_rowconfigure(1, weight=1)
 	
 	# header label
-	thumbstitle = Label(thumbswindow, text = "Thumbnails data from: " + filename, relief = RIDGE, width=100, height=2, wraplength=800, justify=LEFT)
+	thumbstitle = Label(thumbswindow, text = "Thumbnails data from: %s (%s)"%(filename, thumbs_filename), relief = RIDGE, width=100, height=2, wraplength=800, justify=LEFT)
 	thumbstitle.grid(column = 0, row = 0, sticky="ew", columnspan=6, padx=5, pady=5)
 
 	# tree
@@ -142,7 +152,7 @@ def main(cursor, backup_path):
 	#uppertextarea.grid(column = 2, row = 1, sticky="nsew")
 	
 	# textarea
-	textarea = Text(thumbswindow, bd=2, relief=SUNKEN, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l), width=50)
+	textarea = Text(thumbswindow, bd=2, relief=SUNKEN, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l), width=60)
 	textarea.grid(column = 2, row = 1, rowspan=2, sticky="nsew")
 
 	# preview area
@@ -172,20 +182,17 @@ def main(cursor, backup_path):
 	wholefile = f.read()
 	f.close()
 	
-	framelen = 120*120*2 + 28
-	numframes = len(wholefile) / framelen
-	print("Number of frames found: ", numframes)
-	
-	framelen_image = 120*120*2
-	framelen_padding = 28
 	framelen = framelen_image + framelen_padding
+	
+	numframes = len(wholefile) / framelen
+	#print("Number of frames found: ", numframes)
 	
 	del photoImagesList[:]
 	
 	for i in range(numframes) :
 			
 		string = wholefile[framelen*i:framelen*(i+1)-1]
-		im = Image.frombuffer('RGB', (120, 120), string, 'raw', 'BGR;15', 0, 1)
+		im = Image.frombuffer('RGB', (frame_width, frame_height), string, 'raw', 'BGR;15', 0, 1)
 		im = im.resize((15,15), Image.ANTIALIAS)
 		tkim = ImageTk.PhotoImage(im)
 		photoImagesList.append(tkim)
