@@ -197,6 +197,15 @@ def main(cursor, backup_path):
 		tkim = ImageTk.PhotoImage(im)
 		photoImagesList.append(tkim)
 		thumbstree.insert('', 'end', text=i, image=tkim)
-		
+
+	textarea.insert(END, "Thumbnail file viewer\n")
+	textarea.insert(END, "\n")
+	textarea.insert(END, "Thumbnail file name: %s\n"%thumbs_filename)
+	textarea.insert(END, "Thumbnail file real name: %s\n"%filename)
+	textarea.insert(END, "\n")
+	textarea.insert(END, "Thumbnail width: %i\n"%frame_width)
+	textarea.insert(END, "Thumbnail height: %i\n"%frame_height)
+	textarea.insert(END, "Thumbnail size in bytes: %i + %i padding for each\n"%(frame_width * frame_height *2
+, framelen_padding))		
 		
 	thumbstree.bind("<ButtonRelease-1>", OnClick)
