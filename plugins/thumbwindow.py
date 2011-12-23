@@ -24,6 +24,7 @@ from PIL import Image, ImageTk
 
 thumbstree = None
 textarea = None
+prevarea = None
 filename = ""
 photoImages = []
 photoImagesList = []
@@ -55,7 +56,7 @@ def dump(src, length=8, limit=10000):
 
 def OnClick(event):
 	global filename
-	global thumbstree, textarea
+	global thumbstree, textarea, prevarea
 	global photoImages
 	
 	if (len(thumbstree.selection()) == 0): return;
@@ -82,19 +83,28 @@ def OnClick(event):
 	textarea.insert(END, "\n")
 	textarea.insert(END, "Padding data:\n")
 	textarea.insert(END, "%s\n"%dump(padding))
-	
+	textarea.insert(END, "Real size image:\n")	
 	textarea.insert(END, "\n")
 	
 	del photoImages[:]
 	tkim = ImageTk.PhotoImage(im)
 	photoImages.append(tkim)
 	textarea.image_create(END, image=tkim)
+	
+	# scaled image in preview area
+	prevarea.delete(1.0, END)
+	im = im.resize((300,300), Image.ANTIALIAS)
+	tkim2 = ImageTk.PhotoImage(im)
+	photoImages.append(tkim2)
+	prevarea.insert(END, "Preview:\n")	
+	prevarea.insert(END, "\n")
+	prevarea.image_create(END, image=tkim2)
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 
 def main(cursor, backup_path):
 	global filename
-	global thumbstree, textarea
+	global thumbstree, textarea, prevarea
 	global photoImagesList
 	
 	filename = backup_path + plugins_utils.realFileName(cursor, filename="120x120.ithmb")
@@ -112,8 +122,8 @@ def main(cursor, backup_path):
 	thumbswindow.grid_rowconfigure(1, weight=1)
 	
 	# header label
-	thumbstitle = Label(thumbswindow, text = "Thumbnails data from: " + filename, relief = RIDGE)
-	thumbstitle.grid(column = 0, row = 0, sticky="ew", columnspan=4, padx=5, pady=5)
+	thumbstitle = Label(thumbswindow, text = "Thumbnails data from: " + filename, relief = RIDGE, width=100, height=2, wraplength=800, justify=LEFT)
+	thumbstitle.grid(column = 0, row = 0, sticky="ew", columnspan=6, padx=5, pady=5)
 
 	# tree
 	thumbstree = ttk.Treeview(thumbswindow, columns=(),
@@ -122,7 +132,7 @@ def main(cursor, backup_path):
 	thumbstree.heading("#0", text="ID", anchor='w')
 	#thumbstree.heading("pos", text="Address", anchor='w')
 	
-	thumbstree.column("#0", width=200)
+	thumbstree.column("#0", width=130)
 	#thumbstree.column("pos", width=200)
 	
 	thumbstree.grid(column = 0, row = 1, sticky="ns", rowspan=2)
@@ -132,9 +142,13 @@ def main(cursor, backup_path):
 	#uppertextarea.grid(column = 2, row = 1, sticky="nsew")
 	
 	# textarea
-	textarea = Text(thumbswindow, bd=2, relief=SUNKEN, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l))
+	textarea = Text(thumbswindow, bd=2, relief=SUNKEN, yscrollcommand=lambda f, l: autoscroll(tvsb, f, l), width=50)
 	textarea.grid(column = 2, row = 1, rowspan=2, sticky="nsew")
 
+	# preview area
+	prevarea = Text(thumbswindow, bd=2, relief=SUNKEN, width=50)
+	prevarea.grid(column = 5, row = 1, rowspan=2, sticky="nsew")
+	
 	# scrollbars for tree
 	mvsb = ttk.Scrollbar(thumbswindow, orient="vertical")
 	mvsb.grid(column=1, row=1, sticky='ns', rowspan=2)
@@ -148,7 +162,7 @@ def main(cursor, backup_path):
 	# footer label
 	footerlabel = StringVar()
 	thumbsfooter = Label(thumbswindow, textvariable = footerlabel, relief = RIDGE)
-	thumbsfooter.grid(column = 0, row = 3, sticky="ew", columnspan=4, padx=5, pady=5)
+	thumbsfooter.grid(column = 0, row = 3, sticky="ew", columnspan=6, padx=5, pady=5)
 	
 	# destroy window when closed
 	thumbswindow.protocol("WM_DELETE_WINDOW", thumbswindow.destroy)
@@ -172,6 +186,7 @@ def main(cursor, backup_path):
 			
 		string = wholefile[framelen*i:framelen*(i+1)-1]
 		im = Image.frombuffer('RGB', (120, 120), string, 'raw', 'BGR;15', 0, 1)
+		im = im.resize((15,15), Image.ANTIALIAS)
 		tkim = ImageTk.PhotoImage(im)
 		photoImagesList.append(tkim)
 		thumbstree.insert('', 'end', text=i, image=tkim)
