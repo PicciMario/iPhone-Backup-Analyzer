@@ -133,7 +133,15 @@ def main(cursor, backup_path):
 	thumbswindow.grid_rowconfigure(1, weight=1)
 	
 	# header label
-	thumbstitle = Label(thumbswindow, text = "Thumbnails data from: %s (%s)"%(filename, thumbs_filename), relief = RIDGE, width=100, height=2, wraplength=800, justify=LEFT)
+	thumbstitle = Label(
+		thumbswindow, 
+		text = "Thumbnails data from: %s (%s)"%(filename, thumbs_filename), 
+		relief = RIDGE, 
+		width=100, 
+		height=2, 
+		wraplength=800, 
+		justify=LEFT
+	)
 	thumbstitle.grid(column = 0, row = 0, sticky="ew", columnspan=6, padx=5, pady=5)
 
 	# tree

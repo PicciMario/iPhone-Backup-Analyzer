@@ -14,17 +14,16 @@ PLUGIN_NAME = "YouTube Browser"
 import plugins_utils
 
 from Tkinter import *
-#import sqlite3
 import ttk
-#from datetime import datetime
 import os
-from string import *
-#from PIL import Image, ImageTk
+#from string import *
 import StringIO
-#import getopt
 import urllib
 import xml.dom.minidom
 import webbrowser
+import cStringIO
+from PIL import Image as PILImage
+import ImageTk
 
 # GLOBALS -----------------------------------------------------------------------------------------
 
@@ -49,6 +48,8 @@ def cleanSpace(string):
 	return string
 	
 def printYoutubeData(code, textarea):
+	
+	global photoImages
 	
 	#textarea.insert(END, "Retrieving video info from YouTube Server...\n\n")
 	
@@ -84,8 +85,42 @@ def printYoutubeData(code, textarea):
 				element = ""
 			
 			textarea.insert(END, "%s: %s\n"%(tag_desc, element))
+		
+		# print video preview (if any)
+		
+		# media group
+		mediagroup = entry.getElementsByTagName('media:group')
+		
+		if (len(mediagroup) > 0):
+			mediagroup = mediagroup[0]		
+			thumbnails = mediagroup.getElementsByTagName('media:thumbnail')
 			
-		textarea.insert(END, "\n(Video data retrieved online from YouTube server.)")
+			if (len(thumbnails) > 0):
+				textarea.insert(END, "\n")
+				textarea.insert(END, "Found %i preview thumbnails"%len(thumbnails))
+			
+				for thumbnail in thumbnails:
+					thumburl = thumbnail.getAttribute("url")
+					
+					web_sock = urllib.urlopen(thumbnail.getAttribute("url"))
+					imgdata = cStringIO.StringIO(web_sock.read())
+					im = PILImage.open(imgdata)
+				
+					tkim = ImageTk.PhotoImage(im)
+					photoImages.append(tkim)
+					textarea.image_create(END, image=tkim)
+
+					# decode file name without extension from url
+					# - 0.jpg is the big preview, after that we put a couple of newlines
+					# - 1.jpg, 2.jpg, .... are smaller previews, we print them inline with spaces
+					base = os.path.basename(thumburl)
+					base_number = os.path.splitext(base)[0]
+					if (base_number == "0"):
+						textarea.insert(END, "\n\n")
+					else:
+						textarea.insert(END, " ")
+				
+		textarea.insert(END, "\n\n(Video data retrieved online from YouTube server.)")
 	
 	except xml.parsers.expat.ExpatError:
 		textarea.insert(END, "Unable to retrieve video data from YouTube server. Probably the video has been removed from YouTube.")
@@ -119,6 +154,7 @@ def OnClick(event):
 	
 	textarea.delete(1.0, END)
 	url_counter = 0
+	del photoImages[:]
 	
 	if (code == "H"):
 		textarea.insert(END, "YouTube History Data\n\n")
@@ -169,7 +205,15 @@ def main(cursor, backup_path):
 	youtubewindow.grid_rowconfigure(1, weight=1)
 	
 	# header label
-	youtubetitle = Label(youtubewindow, text = "YouTube data from: " + filename, relief = RIDGE)
+	youtubetitle = Label(
+		youtubewindow, 
+		text = "YouTube data from: %s (%s) "%(filename, "com.apple.youtube.dp.list"), 
+		relief = RIDGE,
+		width=100, 
+		height=3, 
+		wraplength=800, 
+		justify=LEFT
+	)
 	youtubetitle.grid(column = 0, row = 0, sticky="ew", columnspan=2, padx=5, pady=5)
 
 	# tree
