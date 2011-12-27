@@ -120,7 +120,8 @@ def main(cursor, backup_path):
 	filename = backup_path + plugins_utils.realFileName(cursor, filename=thumbs_filename)
 	
 	if (not os.path.isfile(filename)):
-		print("Invalid file name for thumbnails file")
+		import tkMessageBox
+		tkMessageBox.showwarning("File not found", "Seems like this backup doesn't contain \"%s\" thumbnail data. Each iDevice has its set of thumbnails, maybe the device you are working on doesn't have this kind of thumbnails."%thumbs_filename)
 		return	
 	
 	# main window

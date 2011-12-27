@@ -688,10 +688,14 @@ if __name__ == '__main__':
 	nbstyle.configure("My.TNotebook", padding=0)
 	
 	notebook = ttk.Notebook(root, style="My.TNotebook")
-	centercolumn = ttk.Frame(notebook); # first page, which would get widgets gridded into it
-	previewcolumn = ttk.Frame(notebook); # second page
+	# main text area
+	centercolumn = ttk.Frame(notebook);
 	notebook.add(centercolumn, text='Description')
+	# preview for images
+	previewcolumn = ttk.Frame(notebook);
 	notebook.add(previewcolumn, text='Preview')
+	notebook.hide(previewcolumn)
+	
 	notebook.grid(column = 2, row = 1, sticky="nsew")
 
 	# center column (substituted by notebook)
@@ -1080,6 +1084,9 @@ if __name__ == '__main__':
 		for item in tablestree.get_children():
 			tablestree.delete(item)
 		
+		# clear notebook "preview" pane
+		notebook.hide(previewcolumn)
+		
 		item = tree.selection()[0]
 		item_text = tree.item(item, "text")
 		item_type = tree.set(item, "type")
@@ -1267,6 +1274,8 @@ if __name__ == '__main__':
 				if old_label_image is not None:
 					old_label_image.destroy()
 				old_label_image = label_image
+				
+				notebook.add(previewcolumn)
 				
 			except:
 				print("Warning: error while trying to analyze image file \"%s\""%item_realpath)
