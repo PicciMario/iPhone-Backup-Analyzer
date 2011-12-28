@@ -803,10 +803,18 @@ if __name__ == '__main__':
 		tree.selection_set(nodeFound)
 		OnClick("") #triggers refresh of main text area
 	
-	def base64dec():
+	def base64dec():	
+		enctext = textarea.get(SEL_FIRST, SEL_LAST)
+		
+		clearenctext = ""
+		for char in enctext:
+			if char in string.whitespace:
+				continue
+			else:
+				clearenctext = clearenctext + char
+		
 		try:
-			enctext = textarea.get(SEL_FIRST, SEL_LAST)
-			dectext = base64.b64decode(enctext)		
+			dectext = base64.b64decode(clearenctext)		
 			decstring = ''.join(ch for ch in dectext if ch in string.printable)
 			tkMessageBox.showinfo("Decoded Base64 data", decstring)
 		except:
@@ -890,8 +898,8 @@ if __name__ == '__main__':
 			#print("Error: %s"%sys.exc_info()[0])
 			moddescr = modname
 
-		string = "lambda: getattr(sys.modules[\"" + modname + "\"], 'main')(cursor, backup_path)"
-		function = eval(string)
+		action = "lambda: getattr(sys.modules[\"" + modname + "\"], 'main')(cursor, backup_path)"
+		function = eval(action)
 		
 		winmenu.add_command(
 			label=moddescr, 
