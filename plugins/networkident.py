@@ -47,6 +47,15 @@ def parseipv4(id_string):
 			mac = parts[1]
 	return [ip, mac]
 
+def autoscroll(sbar, first, last):
+    """Hide and show scrollbar as needed."""
+    #first, last = float(first), float(last)
+    #if first <= 0 and last >= 1:
+    #    sbar.grid_remove()
+    #else:
+    #    sbar.grid()
+    sbar.set(first, last)
+
 # Called when the user clicks on the main tree list -----------------------------------------------
 
 def OnClick(event):
@@ -155,11 +164,15 @@ def main(cursor, backup_path):
 		wraplength=800, 
 		justify=LEFT
 	)
-	netidenttitle.grid(column = 0, row = 0, sticky="ew", columnspan=2, padx=5, pady=5)
+	netidenttitle.grid(column = 0, row = 0, sticky="ew", columnspan=4, padx=5, pady=5)
 
 	# tree
-	netidenttree = ttk.Treeview(netidentwindow, columns=("id", "timestamp", "node"),
-	    displaycolumns=("id", "timestamp"))
+	netidenttree = ttk.Treeview(
+		netidentwindow, 
+		columns=("id", "timestamp", "node"),
+	    displaycolumns=("id", "timestamp"),
+		yscrollcommand=lambda f, l: autoscroll(mvsb, f, l)
+	)
 	
 	netidenttree.heading("#0", text="", anchor='w')
 	netidenttree.heading("id", text="ID", anchor='w')
@@ -172,13 +185,28 @@ def main(cursor, backup_path):
 	netidenttree.grid(column = 0, row = 1, sticky="ns")
 	
 	# textarea
-	textarea = Text(netidentwindow, bd=2, relief=SUNKEN)
-	textarea.grid(column = 1, row = 1, sticky="nsew")
+	textarea = Text(
+		netidentwindow, 
+		bd=2, 
+		relief=SUNKEN,
+		yscrollcommand=lambda f, l: autoscroll(tvsb, f, l)
+	)
+	textarea.grid(column = 2, row = 1, sticky="nsew")
+
+	# scrollbars for tree
+	mvsb = ttk.Scrollbar(netidentwindow, orient="vertical")
+	mvsb.grid(column=1, row=1, sticky='ns')
+	mvsb['command'] = netidenttree.yview
+
+	# scrollbars for main textarea
+	tvsb = ttk.Scrollbar(netidentwindow, orient="vertical")
+	tvsb.grid(column=3, row=1, sticky='ns')
+	tvsb['command'] = textarea.yview
 	
 	# footer label
 	footerlabel = StringVar()
 	netidentfooter = Label(netidentwindow, textvariable = footerlabel, relief = RIDGE)
-	netidentfooter.grid(column = 0, row = 2, sticky="ew", columnspan=2, padx=5, pady=5)
+	netidentfooter.grid(column = 0, row = 2, sticky="ew", columnspan=4, padx=5, pady=5)
 	
 	# destroy window when closed
 	netidentwindow.protocol("WM_DELETE_WINDOW", netidentwindow.destroy)
