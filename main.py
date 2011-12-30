@@ -72,7 +72,7 @@ import plistutils
 # GLOBALS -------------------------------------------------------------------------------------------
 
 # version
-version = "1.3"
+version = "1.4"
 creation_date = "Dec. 2011"
 
 # set this path from command line
