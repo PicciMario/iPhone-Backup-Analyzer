@@ -109,46 +109,6 @@ def OnClick(event):
 		textarea.insert(END, "URL: %s\n"%(backforward_dict['-'].firstChild.toxml()))
 		
 		actual = actual + 1
-
-
-
-
-
-
-
-
-
-
-
-	# parse services dict
-	services = plistutils.readArray(sig_dict['Services'])
-	for service in services:
-		textarea.insert(END, "\n")
-		textarea.insert(END, "****** Service\n")
-		
-		service_dict = plistutils.readDict(service)
-		textarea.insert(END, "Service ID: %s\n"%service_dict['ServiceID'].firstChild.toxml())
-		
-		for key in service_dict.keys():
-		
-			if (service_dict[key].nodeName != 'dict'):
-				continue
-		
-			textarea.insert(END, "%s data\n"%key)
-			single_service = plistutils.readDict(service_dict[key])
-			
-			for element_key in single_service.keys():
-				element = single_service[element_key]
-				
-				if (element.nodeName == 'string'):
-					textarea.insert(END, "- %s: %s\n"%(element_key, element.firstChild.toxml()))
-				elif (element.nodeName == 'array'):
-					textarea.insert(END, "- %s\n"%(element_key))
-					element_array = plistutils.readArray(element)
-					for element_array_single in element_array:
-						textarea.insert(END, "  - %s\n"%(element_array_single.firstChild.toxml()))
-				else:
-					textarea.insert(END, "- %s: %s\n"%(element_key, element))
 				
 # MAIN FUNCTION --------------------------------------------------------------------------------
 	
