@@ -64,8 +64,6 @@ import subprocess
 import magic
 # mbdbdecoding.py - functions to decode iPhone backup manifest files
 import mbdbdecoding
-# decodeManifestPlist.py - functions to decode Manifest.plist file
-import decodeManifestPlist
 # plistutils.py - generic functions to handle plist files
 import plistutils
 
