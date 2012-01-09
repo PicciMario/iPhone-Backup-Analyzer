@@ -552,13 +552,13 @@ if __name__ == '__main__':
 	hsb.grid(column=0, row=4, sticky='ew')
 	
 	# device info box
-	w = Label(leftcol, text="Device data:", font=globalfont, bg='lightblue')
+	w = Label(leftcol, text="Backup info:", font=globalfont, bg='lightblue')
 	w.grid(column=0, row=0, sticky='ew', columnspan=2)
 	infobox = Text(
 		leftcol, 
 		relief="sunken", 
 		borderwidth=2, 
-		height=10, 
+		height=15, 
 		width=20, 
 		font=globalfont, 
 		highlightbackground='lightblue'
@@ -1362,9 +1362,13 @@ if __name__ == '__main__':
 	maintext("\nVersion: %s (%s)"%(version, creation_date))
 	maintext("\nWorking directory: %s"%backup_path)
 	
-	deviceinfo = decodeManifestPlist.deviceInfo(backup_path + "Info.plist")
+	# Populating Device Info Box
+	
+	deviceinfo = plistutils.deviceInfo(backup_path + "Info.plist")
 	for element in deviceinfo.keys():
 		infobox.insert(INSERT, "%s: %s\n"%(element, deviceinfo[element]))
+
+
 
 	root.focus_set()
 	

@@ -120,3 +120,38 @@ def readPlistToXml(filename):
 	return xmldata	
 
 # ------------------------------------------------------------------------------------------------------------------------
+
+# read backup properties from passed file (Info.plist)
+
+def deviceInfo(filename):
+
+	from xml.dom.minidom import parse
+	manifest = parse(filename)
+	# <plist>
+	document = manifest.getElementsByTagName("plist")
+	# main <dict>
+	basedict = document[0].childNodes[1]
+	
+	data = readDict(basedict)
+
+	proplist = (
+		"Device Name",
+		"Display Name",
+		"GUID",
+		"ICCID",
+		"IMEI",
+		"Last Backup Date",
+		"Product Type",
+		"Product Version",
+		"Serial Number",
+		"iTunes Version",
+		"Unique Identifier"		
+	)	
+	
+	properties = {}
+	
+	for key in data.keys():
+		if (key in proplist):
+			properties[key] = data[key].firstChild.toxml()
+
+	return properties

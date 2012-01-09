@@ -68,8 +68,42 @@ def decodeManifestPlist(filename):
 	return xmlDecode
 
 # returns device info from passed filename (Info.plist)
+from xml.dom.minidom import *
+import plistutils
 
 def deviceInfo(filename):
+
+	manifest = parse(filename)
+	# <plist>
+	document = manifest.getElementsByTagName("plist")
+	# main <dict>
+	basedict = document[0].childNodes[1]
+	
+	data = plistutils.readDict(basedict)
+
+	proplist = (
+		"Device Name",
+		"Display Name",
+		"GUID",
+		"ICCID",
+		"IMEI",
+		"Last Backup Date",
+		"Product Type",
+		"Product Version",
+		"Serial Number",
+		"iTunes Version",
+		"Unique Identifier"		
+	)	
+	
+	properties = {}
+	
+	for key in data.keys():
+		if (key in proplist):
+			properties[key] = data[key].firstChild.toxml()
+
+	return properties
+
+def deviceInfo_old(filename):
 
 	manifest = parse(filename)
 	# <plist>
@@ -97,7 +131,8 @@ def deviceInfo(filename):
 			"Product Type",
 			"Product Version",
 			"Serial Number",
-			"iTunes Version"		
+			"iTunes Version",
+			"Unique Identifier"		
 		)
 		
 		if (selectednode.nodeName == "key"):
