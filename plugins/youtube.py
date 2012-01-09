@@ -165,13 +165,17 @@ def OnClick(event):
 	elif (code == "L"):
 		textarea.insert(END, "YouTube Data about last use\n\n")
 		textarea.insert(END, "Last search term: \"%s\"\n"%lastSearch)
-		textarea.insert(END, "Last video viewed: \"%s\"\n"%lastViewedVideo)
 		
-		url = "http://www.youtube.com/watch?v=" + lastViewedVideo
-		insert_url(url)
-		
-		textarea.insert(END, "\n\n")
-		printYoutubeData(lastViewedVideo, textarea)
+		if (lastViewedVideo != None):
+			textarea.insert(END, "Last video viewed: \"%s\"\n"%lastViewedVideo)
+			
+			url = "http://www.youtube.com/watch?v=" + lastViewedVideo
+			insert_url(url)
+			
+			textarea.insert(END, "\n\n")
+			printYoutubeData(lastViewedVideo, textarea)
+		else:
+			textarea.insert(END, "Last video viewed: Not available\n")
 	
 	else:
 		textarea.insert(END, "YouTube Video Data\n\n")
@@ -266,10 +270,26 @@ def main(cursor, backup_path):
 	
 	# read data from main dict 
 	outerDict = plugins_utils.readDict(maindict)
-	bookmarksArray = plugins_utils.readArray(outerDict['Bookmarks'])
-	historyArray = plugins_utils.readArray(outerDict['History'])
-	lastSearch = outerDict['lastSearch'].firstChild.toxml()
-	lastViewedVideo = outerDict['lastViewedVideo'].firstChild.toxml()
+	
+	if ("Bookmarks" in outerDict.keys()):
+		bookmarksArray = plugins_utils.readArray(outerDict['Bookmarks'])
+	else:
+		bookmarksArray = []
+	
+	if ("History" in outerDict.keys()):
+		historyArray = plugins_utils.readArray(outerDict['History'])
+	else:
+		historyArray = []
+	
+	if ("lastSearch" in outerDict.keys()):	
+		lastSearch = outerDict['lastSearch'].firstChild.toxml()
+	else:
+		lastSearch = "Not available"
+
+	if ("lastViewedVideo" in outerDict.keys()):
+		lastViewedVideo = outerDict['lastViewedVideo'].firstChild.toxml()
+	else:
+		lastViewedVideo = None
 	
 	# footer statistics
 	footerlabel.set("Found %i history elements and %i bookmarks."%(len(historyArray), len(bookmarksArray)))
