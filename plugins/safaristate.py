@@ -71,7 +71,10 @@ def OnClick(event):
 	textarea.insert(END, "Safari tab data\n")
 	textarea.insert(END, "\n")	
 	
-	title_string = sig_dict['SafariStateDocumentTitle'].firstChild.toxml()
+	if ("SafariStateDocumentTitle" in sig_dict.keys()):
+		title_string = sig_dict['SafariStateDocumentTitle'].firstChild.toxml()
+	else:
+		title_string = ""
 	textarea.insert(END, "Page title: %s\n"%title_string)
 
 	url_string = sig_dict['SafariStateDocumentURL'].firstChild.toxml()
