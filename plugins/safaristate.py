@@ -230,6 +230,7 @@ def main(cursor, backup_path):
 		title = ""
 		if ('SafariStateDocumentTitle' in safstatedoc_dict.keys()):
 			if (safstatedoc_dict['SafariStateDocumentTitle'] != None):
+				print safstatedoc_dict['SafariStateDocumentTitle']
 				title = safstatedoc_dict['SafariStateDocumentTitle'].firstChild.toxml()		
 			
 		timestamp_val = float(safstatedoc_dict['SafariStateDocumentLastViewedTime'].firstChild.toxml())
