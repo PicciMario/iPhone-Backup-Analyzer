@@ -225,7 +225,10 @@ def main(cursor, backup_path):
 	for safstatedoc in safstatedocs_array:
 		safstatedoc_dict = plistutils.readDict(safstatedoc)
 
-		title = safstatedoc_dict['SafariStateDocumentTitle'].firstChild.toxml()		
+		if ('SafariStateDocumentTitle' in safstatedoc_dict.keys()):
+			title = safstatedoc_dict['SafariStateDocumentTitle'].firstChild.toxml()		
+		else:
+			title = ""
 		timestamp_val = float(safstatedoc_dict['SafariStateDocumentLastViewedTime'].firstChild.toxml())
 		timestamp_val = timestamp_val + 978307200 #JAN 1 1970
 		timestamp = datetime.datetime.fromtimestamp(timestamp_val)
