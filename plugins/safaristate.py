@@ -71,12 +71,11 @@ def OnClick(event):
 	textarea.insert(END, "Safari tab data\n")
 	textarea.insert(END, "\n")	
 	
-	title_string = ""
-	if ("SafariStateDocumentTitle" in sig_dict.keys()):
-		if (sig_dict['SafariStateDocumentTitle'] != None):
-			title_string = sig_dict['SafariStateDocumentTitle'].firstChild.toxml()
-	else:
+	try:
+		title_string = sig_dict['SafariStateDocumentTitle'].firstChild.toxml()
+	except:
 		title_string = ""
+	
 	textarea.insert(END, "Page title: %s\n"%title_string)
 
 	url_string = sig_dict['SafariStateDocumentURL'].firstChild.toxml()
@@ -227,12 +226,11 @@ def main(cursor, backup_path):
 	for safstatedoc in safstatedocs_array:
 		safstatedoc_dict = plistutils.readDict(safstatedoc)
 
-		title = ""
-		if ('SafariStateDocumentTitle' in safstatedoc_dict.keys()):
-			if (safstatedoc_dict['SafariStateDocumentTitle'] != None):
-				print safstatedoc_dict['SafariStateDocumentTitle']
-				title = safstatedoc_dict['SafariStateDocumentTitle'].firstChild.toxml()		
-			
+		try:
+			title = safstatedoc_dict['SafariStateDocumentTitle'].firstChild.toxml()		
+		except:
+			title = ""
+				
 		timestamp_val = float(safstatedoc_dict['SafariStateDocumentLastViewedTime'].firstChild.toxml())
 		timestamp_val = timestamp_val + 978307200 #JAN 1 1970
 		timestamp = datetime.datetime.fromtimestamp(timestamp_val)
