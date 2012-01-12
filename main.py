@@ -656,7 +656,7 @@ if __name__ == '__main__':
 	
 	# header row
 	headerbox = Frame(root, bd=2, relief=RAISED, bg='lightblue');
-	icon_path = os.path.dirname(sys.argv[0]) + "/iphone_icon.png"
+	icon_path = os.path.join(os.path.dirname(__file__), "iphone_icon.png")
 								
 	im = Image.open(icon_path)
 	photo = ImageTk.PhotoImage(im)	
@@ -864,7 +864,7 @@ if __name__ == '__main__':
 	
 	print("\n**** Loading plugins...")
 	
-	pluginsdir = os.path.dirname(__file__) + "/plugins"
+	pluginsdir = os.path.join(os.path.dirname(__file__), "plugins")
 	print("Loading plugins from dir: %s"%pluginsdir)
 	
 	for module in os.listdir(pluginsdir):
