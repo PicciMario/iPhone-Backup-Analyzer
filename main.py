@@ -959,7 +959,7 @@ if __name__ == '__main__':
 				files = cursor.fetchall()
 				
 				for file in files:
-					file_name = str(file[0])
+					file_name = str(file[0].encode("utf-8"))
 					if (file[1]) < 1024:
 						file_dim = str(file[1]) + " b"
 					else:
