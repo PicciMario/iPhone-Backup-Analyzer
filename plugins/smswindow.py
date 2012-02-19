@@ -44,13 +44,65 @@ def OnClick(event):
 	global groupstree, textarea
 	if (len(groupstree.selection()) == 0): return;
 	msg_group = int(groupstree.item(groupstree.selection(), "text"))
+	msg_address = groupstree.set(groupstree.selection(), "address")
+	
+	messages = []
 	
 	tempdb = sqlite3.connect(filename)
-	tempcur = tempdb.cursor() 
-	query = "SELECT text, date, flags, message.ROWID FROM message INNER JOIN msg_group ON msg_group.rowid = message.group_id WHERE msg_group.rowid = %i ORDER BY date "%msg_group
+	tempcur = tempdb.cursor()
+	 
+	query = "SELECT text, date, flags, message.ROWID FROM message INNER JOIN msg_group ON msg_group.rowid = message.group_id WHERE msg_group.rowid = %i ORDER BY date "%(msg_group)
 	tempcur.execute(query)
-	messages = tempcur.fetchall()
+	for newElem in tempcur.fetchall():
+		
+		try:
+			text = str(newElem[0])
+		except:
+			text = newElem[0].encode("utf8", "replace")
+		
+		flag = int(newElem[2])
+		if (flag == 2):
+			status = "Received"
+		elif (flag == 3):
+			status = "Sent"
+		else:
+			status = "(status %i unknown)"%flag
+		
+		newMess = [
+			text,
+			int(newElem[1]),
+			status,
+			int(newElem[3])	
+		]
+		
+		messages.append(newMess)
 	
+	query2 = "SELECT text, date, madrid_flags, ROWID FROM message WHERE is_madrid = 1 AND madrid_handle = \"%s\" ORDER BY ROWID "%(msg_address)
+	tempcur.execute(query2)
+	for newElem in tempcur.fetchall():
+		
+		try:
+			text = str(newElem[0])
+		except:
+			text = newElem[0].encode("utf8", "replace")
+		
+		flag = int(newElem[2])
+		if (flag == 12289):
+			status = "Received (by Madrid)"
+		elif (flag == 36869):
+			status = "Sent (by Madrid)"
+		else:
+			status = "(status %i unknown)"%flag
+		
+		newMess = [
+			text,
+			int(newElem[1]) + 978307200,
+			status,
+			int(newElem[3])	
+		]
+		
+		messages.append(newMess)
+		
 	textarea.delete(1.0, END)
 	
 	curday = 0
@@ -58,12 +110,13 @@ def OnClick(event):
 	curyear = 0
 	
 	for message in messages:
-		text = message[0]
-		date = int(message[1])
-		flag = int(message[2])
-		messageid = int(message[3])
 		
-		convdate = datetime.fromtimestamp(int(date))
+		text = message[0]
+		date = message[1]
+		status = message[2]
+		messageid = message[3]
+		
+		convdate = datetime.fromtimestamp(date)
 		newday = convdate.day
 		newmonth = convdate.month
 		newyear = convdate.year
@@ -81,12 +134,6 @@ def OnClick(event):
 			textarea.insert(END, "\n******** %s ********\n"%convdate.date())
 		else:
 			textarea.insert(END, "-------\n")
-		
-		# tests the field "flag" whether the message was sent or received		
-		if (flag == 2):
-			status = "Received"
-		else:
-			status = "Sent"
 		
 		# prints message date and text
 		textarea.insert(END, "%s in date: %s\n"%(status,convdate))
