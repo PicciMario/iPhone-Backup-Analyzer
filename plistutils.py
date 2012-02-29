@@ -126,7 +126,12 @@ def readPlistToXml(filename):
 def deviceInfo(filename):
 
 	from xml.dom.minidom import parse
-	manifest = parse(filename)
+	try:
+		manifest = parse(filename)
+	except:
+		print("There was an error while parsing Manifest.plist.")
+		return {}
+
 	# <plist>
 	document = manifest.getElementsByTagName("plist")
 	# main <dict>
