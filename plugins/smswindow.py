@@ -160,7 +160,7 @@ def main(cursor, backup_path):
 	global filename
 	global groupstree, textarea
 	
-	filename = backup_path + plugins_utils.realFileName(cursor, filename="sms.db", domaintype="HomeDomain")
+	filename = os.path.join(backup_path, plugins_utils.realFileName(cursor, filename="sms.db", domaintype="HomeDomain"))
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for SMS database")

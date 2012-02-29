@@ -140,7 +140,7 @@ def main(cursor, backup_path):
 	global netidenttree, textarea, netidentwindow
 	global dict_nodes
 	
-	filename = backup_path + plugins_utils.realFileName(cursor, filename="com.apple.network.identification.plist", domaintype="SystemPreferencesDomain")
+	filename = os.path.join(backup_path, plugins_utils.realFileName(cursor, filename="com.apple.network.identification.plist", domaintype="SystemPreferencesDomain"))
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for network identification data: %s"%filename)

@@ -24,6 +24,9 @@ import webbrowser
 import cStringIO
 from PIL import Image as PILImage
 import ImageTk
+import socket
+
+socket.setdefaulttimeout(10)
 
 # GLOBALS -----------------------------------------------------------------------------------------
 
@@ -194,7 +197,7 @@ def main(cursor, backup_path):
 	global youtubetree, textarea, youtubewindow
 	global bookmarksArray, historyArray, lastSearch, lastViewedVideo
 	
-	filename = backup_path + plugins_utils.realFileName(cursor, filename="com.apple.youtube.dp.plist", domaintype="HomeDomain")
+	filename = os.path.join(backup_path, plugins_utils.realFileName(cursor, filename="com.apple.youtube.dp.plist", domaintype="HomeDomain"))
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for Contacts database: %s"%filename)

@@ -70,11 +70,11 @@ import plistutils
 # GLOBALS -------------------------------------------------------------------------------------------
 
 # version
-version = "1.4"
-creation_date = "Dec. 2011"
+version = "1.5"
+creation_date = "Feb. 2012"
 
 # set this path from command line
-backup_path = "Backup2/" 
+backup_path = "" 
 
 # saves references to images in textarea
 # (to keep them alive after callback end)
@@ -353,6 +353,12 @@ if __name__ == '__main__':
 		if o in ("-4"):
 			iOSVersion = 4
 
+	# show window to select directory
+	root = Tk()
+	root.withdraw()
+	if (len(backup_path) == 0):
+		backup_path = tkFileDialog.askdirectory(mustexist=True, title="Select backup path")
+
 	# chech existence of backup dir
 	if (not os.path.isdir(backup_path)):
 		usage()
@@ -360,7 +366,7 @@ if __name__ == '__main__':
 		sys.exit(1)
 
 	# decode Manifest files
-	mbdbPath = backup_path + "Manifest.mbdb"
+	mbdbPath = os.path.join(backup_path, "Manifest.mbdb")
 	if (os.path.exists(mbdbPath)):
 		mbdb = mbdbdecoding.process_mbdb_file(mbdbPath)
 	else:
@@ -370,7 +376,7 @@ if __name__ == '__main__':
 	
 	# decode mbdx file (only iOS 4)
 	if (iOSVersion == 4):
-		mbdxPath = backup_path + "Manifest.mbdx"
+		mbdxPath = os.path.join(backup_path, "Manifest.mbdx")
 		if (os.path.exists(mbdxPath)):
 			mbdx = mbdbdecoding.process_mbdx_file(mbdxPath)
 		else:
@@ -657,18 +663,18 @@ if __name__ == '__main__':
 	# header row
 	headerbox = Frame(root, bd=2, relief=RAISED, bg='lightblue');
 	icon_path = os.path.join(os.path.dirname(__file__), "iphone_icon.png")
-								
-	im = Image.open(icon_path)
-	photo = ImageTk.PhotoImage(im)	
-	w = Label(headerbox, image=photo, bg='lightblue')
-	w.photo = photo
-	w.pack(side=LEFT)	
+
+	#im = Image.open(icon_path)
+	#photo = ImageTk.PhotoImage(im)	
+	#w = Label(headerbox, image=photo, bg='lightblue')
+	#w.photo = photo
+	#w.pack(side=LEFT)	
 	
-	im = Image.open(icon_path)
-	photo = ImageTk.PhotoImage(im)	
-	w = Label(headerbox, image=photo, bg='lightblue')
-	w.photo = photo
-	w.pack(side=RIGHT)
+	#im = Image.open(icon_path)
+	#photo = ImageTk.PhotoImage(im)	
+	#w = Label(headerbox, image=photo, bg='lightblue')
+	#w.photo = photo
+	#w.pack(side=RIGHT)
 	
 	w = Label(
 		headerbox, 
@@ -1106,7 +1112,7 @@ if __name__ == '__main__':
 		
 		# managing "standard" files
 		if (item_type == "X"):	
-			item_realpath = backup_path + item_text
+			item_realpath = os.path.join(backup_path, item_text)
 			fileNameForViewer = item_realpath
 			maintext("Selected: " + item_realpath)
 			log("Opening file %s"%item_realpath)
@@ -1195,12 +1201,12 @@ if __name__ == '__main__':
 			return
 		
 		# last modification date of the file in the backup directory
-		last_mod_time = time.strftime("%m/%d/%Y %I:%M:%S %p",time.localtime(os.path.getmtime(backup_path + item_filecode)))
+		last_mod_time = time.strftime("%m/%d/%Y %I:%M:%S %p",time.localtime(os.path.getmtime(os.path.join(backup_path, item_filecode))))
 		maintext("\n\nLast modification time (in backup dir): %s"%last_mod_time)
 		
 		maintext("\n\nAnalize file: ")
 		
-		item_realpath = backup_path + item_filecode
+		item_realpath = os.path.join(backup_path, item_filecode)
 		fileNameForViewer = item_realpath
 		
 		log("Opening file %s (%s)"%(item_realpath, item_text))
@@ -1362,13 +1368,14 @@ if __name__ == '__main__':
 	
 	# Populating Device Info Box
 	
-	deviceinfo = plistutils.deviceInfo(backup_path + "Info.plist")
+	deviceinfo = plistutils.deviceInfo(os.path.join(backup_path, "Info.plist"))
 	for element in deviceinfo.keys():
 		infobox.insert(INSERT, "%s: %s\n"%(element, deviceinfo[element]))
 
 
-
 	root.focus_set()
+	
+	root.protocol("WM_DELETE_WINDOW", lambda:sys.exit(0))
 	
 	root.mainloop()
 	

@@ -72,7 +72,7 @@ def main(cursor, backup_path):
 	global historytree, textarea, historywindow
 	global titlefootertext, urlfootertext
 	
-	filename = backup_path + plugins_utils.realFileName(cursor, filename="History.plist", domaintype="HomeDomain", path="Library/Safari")
+	filename = os.path.join(backup_path, plugins_utils.realFileName(cursor, filename="History.plist", domaintype="HomeDomain", path="Library/Safari"))
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for Safari History database: %s"%filename)

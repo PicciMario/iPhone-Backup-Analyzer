@@ -121,7 +121,7 @@ def main(cursor, backup_path):
 	global bookmarkstree, textarea
 	global namelabel, urllabel, url
 	
-	filename = backup_path + plugins_utils.realFileName(cursor, filename="Bookmarks.db", domaintype="HomeDomain")
+	filename = os.path.join(backup_path, plugins_utils.realFileName(cursor, filename="Bookmarks.db", domaintype="HomeDomain"))
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for Safari Bookmarks database")

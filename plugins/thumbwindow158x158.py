@@ -117,7 +117,7 @@ def main(cursor, backup_path):
 	global photoImagesList
 	global framelen_image, framelen_padding, thumbs_filename
 	
-	filename = backup_path + plugins_utils.realFileName(cursor, filename=thumbs_filename)
+	filename = os.path.join(backup_path, plugins_utils.realFileName(cursor, filename=thumbs_filename))
 	
 	if (not os.path.isfile(filename)):
 		import tkMessageBox

@@ -121,7 +121,7 @@ def main(cursor, backup_path):
 	global safstatetree, textarea, safstatewindow
 	global dict_nodes
 	
-	filename = backup_path + plugins_utils.realFileName(cursor, filename="SuspendState.plist", domaintype="HomeDomain")
+	filename = os.path.join(backup_path, plugins_utils.realFileName(cursor, filename="SuspendState.plist", domaintype="HomeDomain"))
 	
 	if (not os.path.isfile(filename)):
 		print("Invalid file name for Safari state data: %s"%filename)
