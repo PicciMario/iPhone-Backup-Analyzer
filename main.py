@@ -315,6 +315,11 @@ def clearTimeBox(event):
 
 if __name__ == '__main__':
 
+	# we have to create immediately the root window, to be able to use tkFileDialog
+	# for now we withdraw it.. we will show it again at the end of the UI building
+	root = Tkinter.Tk()
+	root.withdraw()
+
 	def banner():
 		print("\niPBA - iPhone backup analyzer v. %s (%s)"%(version, creation_date))
 		print("Released by <mario.piccinelli@gmail.com> under MIT licence")
@@ -354,8 +359,6 @@ if __name__ == '__main__':
 			iOSVersion = 4
 
 	# show window to select directory
-	root = Tk()
-	root.withdraw()
 	if (len(backup_path) == 0):
 		backup_path = tkFileDialog.askdirectory(mustexist=True, title="Select backup path")
 
@@ -517,7 +520,7 @@ if __name__ == '__main__':
 	# Builds user interface ----------------------------------------------------------------------------------
 	
 	# root window
-	root = Tkinter.Tk()
+	#root = Tkinter.Tk()
 	root.configure(background='#4d66fa')
 	root.geometry("%dx%d%+d%+d" % (1200, 700, 0, 0))
 	root.grid_columnconfigure(2, weight=1)
@@ -664,17 +667,17 @@ if __name__ == '__main__':
 	headerbox = Frame(root, bd=2, relief=RAISED, bg='lightblue');
 	icon_path = os.path.join(os.path.dirname(__file__), "iphone_icon.png")
 
-	#im = Image.open(icon_path)
-	#photo = ImageTk.PhotoImage(im)	
-	#w = Label(headerbox, image=photo, bg='lightblue')
-	#w.photo = photo
-	#w.pack(side=LEFT)	
+	im = Image.open(icon_path)
+	photo = ImageTk.PhotoImage(im)	
+	w = Label(headerbox, image=photo, bg='lightblue')
+	w.photo = photo
+	w.pack(side=LEFT)	
 	
-	#im = Image.open(icon_path)
-	#photo = ImageTk.PhotoImage(im)	
-	#w = Label(headerbox, image=photo, bg='lightblue')
-	#w.photo = photo
-	#w.pack(side=RIGHT)
+	im = Image.open(icon_path)
+	photo = ImageTk.PhotoImage(im)	
+	w = Label(headerbox, image=photo, bg='lightblue')
+	w.photo = photo
+	w.pack(side=RIGHT)
 	
 	w = Label(
 		headerbox, 
@@ -975,6 +978,10 @@ if __name__ == '__main__':
 					tree.insert(path_index, 'end', text=substWith(file_name, "."), values=(file_type, file_dim, file_id), tag='base')
 			
 	print("Construction complete.\n")
+	
+	# Now that the UI has been build, we cancel the "withdraw" operation done before
+	# and show the main window
+	root.deiconify()
 
 	# called when an element is clicked in the tables tree frame ------------------------------------------------
 	
@@ -1291,6 +1298,7 @@ if __name__ == '__main__':
 				
 			except:
 				print("Warning: error while trying to analyze image file \"%s\""%item_realpath)
+				print sys.exc_info()
 			
 		#decode EXIF (only JPG)
 		if (filemagic == "image/jpeg"):
