@@ -444,9 +444,9 @@ if __name__ == '__main__':
 			fileinfo['fileID'] = fileID.hexdigest()	
 	
 		# decoding element type (symlink, file, directory)
-		if (fileinfo['mode'] & 0xE000) == 0xA000: type = 'l' # symlink
-		elif (fileinfo['mode'] & 0xE000) == 0x8000: type = '-' # file
-		elif (fileinfo['mode'] & 0xE000) == 0x4000: type = 'd' # dir
+		if (fileinfo['mode'] & 0xE000) == 0xA000: obj_type = 'l' # symlink
+		elif (fileinfo['mode'] & 0xE000) == 0x8000: obj_type = '-' # file
+		elif (fileinfo['mode'] & 0xE000) == 0x4000: obj_type = 'd' # dir
 		
 		# separates domain type (AppDomain, HomeDomain, ...) from domain name
 		[domaintype, sep, domain] = fileinfo['domain'].partition('-');
@@ -459,7 +459,7 @@ if __name__ == '__main__':
 
 		# Insert record in database
 		query = "INSERT INTO indice(type, permissions, userid, groupid, filelen, mtime, atime, ctime, fileid, domain_type, domain, file_path, file_name, link_target, datahash, flag) VALUES(";
-		query += "'%s'," 	% type
+		query += "'%s'," 	% obj_type
 		query += "'%s'," 	% mbdbdecoding.modestr(fileinfo['mode']&0x0FFF)
 		query += "'%08x'," 	% fileinfo['userid']
 		query += "'%08x'," 	% fileinfo['groupid']
@@ -702,7 +702,21 @@ if __name__ == '__main__':
 	previewcolumn = ttk.Frame(notebook);
 	notebook.add(previewcolumn, text='Preview')
 	notebook.hide(previewcolumn)
-	
+	# exif tab for images
+	exifcolumn = ttk.Frame(notebook);
+	exifcolumn_label = Text(
+		exifcolumn, 
+	    bd=2, 
+	    relief=SUNKEN, 
+	    font=globalfont, 
+	    highlightbackground='lightblue'
+	)
+	exifcolumn_label.grid(column=0, row=0, sticky="nsew")
+	exifcolumn.grid_columnconfigure(0, weight=1)
+	exifcolumn.grid_rowconfigure(0, weight=1)
+	notebook.add(exifcolumn, text='EXIF data')
+	notebook.hide(exifcolumn)
+		
 	notebook.grid(column = 2, row = 1, sticky="nsew")
 
 	# center column (substituted by notebook)
@@ -1103,8 +1117,9 @@ if __name__ == '__main__':
 		for item in tablestree.get_children():
 			tablestree.delete(item)
 		
-		# clear notebook "preview" pane
+		# clear notebook additional panes
 		notebook.hide(previewcolumn)
+		notebook.hide(exifcolumn)
 		
 		item = tree.selection()[0]
 		item_text = tree.item(item, "text")
@@ -1302,11 +1317,24 @@ if __name__ == '__main__':
 			
 		#decode EXIF (only JPG)
 		if (filemagic == "image/jpeg"):
-			maintext("\n\nJPG EXIF tags:")
 			exifs = im._getexif()
-			for tag, value in exifs.items():
-				decoded = TAGS.get(tag, tag)
-				maintext("\nTag: %s, value: %s"%(decoded, value))
+			
+			if (len(exifs) > 0):
+				maintext("\nJPG EXIF tags available.")
+				exifcolumn_label.delete(1.0, END)
+				exifcolumn_label.insert(END, "JPG EXIF tags for file \"%s\":"%item_text)
+				exifcolumn_label.insert(END, "\n")
+				for tag, value in exifs.items():
+					decoded = TAGS.get(tag, tag)
+					if (type(value) == type((1,2))):
+						value = "%.3f (%i / %i)"%(float(value[0]) / float(value[1]), value[0], value[1])
+					exifcolumn_label.insert(END, "\nTag: %s, value: %s"%(decoded, value))
+				notebook.add(exifcolumn)
+			
+			#maintext("\n\nJPG EXIF tags:")
+			#for tag, value in exifs.items():
+			#	decoded = TAGS.get(tag, tag)
+			#	maintext("\nTag: %s, value: %s"%(decoded, value))
 				
 		#if binary plist:
 		if (filemagic.partition("/")[2] == "binary_plist"):			
