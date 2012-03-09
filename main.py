@@ -1319,7 +1319,7 @@ if __name__ == '__main__':
 		if (filemagic == "image/jpeg"):
 			exifs = im._getexif()
 			
-			if (len(exifs) > 0):
+			if (exifs != None):
 				maintext("\nJPG EXIF tags available.")
 				exifcolumn_label.delete(1.0, END)
 				exifcolumn_label.insert(END, "JPG EXIF tags for file \"%s\":"%item_text)
