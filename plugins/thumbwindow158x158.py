@@ -16,7 +16,7 @@ import plugins_utils
 from Tkinter import *
 import ttk
 from datetime import datetime
-import os
+import os, sys, getopt
 import sqlite3
 from PIL import Image, ImageTk
 
@@ -36,6 +36,8 @@ prevarea = None
 filename = ""
 photoImages = []
 photoImagesList = []
+
+thumbswindow = None
 
 def autoscroll(sbar, first, last):
     """Hide and show scrollbar as needed."""
@@ -111,13 +113,16 @@ def OnClick(event):
 
 # MAIN FUNCTION --------------------------------------------------------------------------------
 
-def main(cursor, backup_path):
+def main(cursor, backup_path, commandLineFilename = None):
 	global filename
-	global thumbstree, textarea, prevarea
+	global thumbstree, textarea, prevarea, thumbswindow
 	global photoImagesList
 	global framelen_image, framelen_padding, thumbs_filename
 	
-	filename = os.path.join(backup_path, plugins_utils.realFileName(cursor, filename=thumbs_filename))
+	if (commandLineFilename):
+		filename = commandLineFilename
+	else:	
+		filename = os.path.join(backup_path, plugins_utils.realFileName(cursor, filename=thumbs_filename))
 	
 	if (not os.path.isfile(filename)):
 		import tkMessageBox
@@ -210,3 +215,34 @@ def main(cursor, backup_path):
 , framelen_padding))		
 		
 	thumbstree.bind("<ButtonRelease-1>", OnClick)
+
+# STANDALONE FUNCTION ---------------------------------------------------------------------------
+
+if __name__ == '__main__':
+	# input parameters
+	def usage():
+		print("iPhone Backup Decoder - Thumbnails window 158x158.")
+		print(" -h              : this help")
+		print(" -f <filename>   : filename")
+
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "hf:")
+	except getopt.GetoptError as err:
+		print(str(err))
+		sys.exit(2)
+	
+	file = ""
+	
+	for o, a in opts:
+		if o in ("-h"):
+			usage()
+			sys.exit(0)
+		if o in ("-f"):
+			file = a
+	
+	if (len(file) == 0):
+		usage()
+		sys.exit(0)
+	else:
+		main(None, None, file)
+		thumbswindow.mainloop()
